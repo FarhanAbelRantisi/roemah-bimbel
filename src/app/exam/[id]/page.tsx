@@ -922,7 +922,7 @@ export default function ExamPage() {
         </div>
 
         {/* Sidebar */}
-        <aside className="w-full landscape:w-64 lg:w-72 bg-white border-b landscape:border-b-0 lg:border-b-0 landscape:border-l lg:border-l border-gray-200 p-4 lg:p-5 landscape:overflow-y-auto lg:overflow-y-auto flex flex-col gap-4 lg:gap-5 order-1 landscape:order-2 lg:order-2 shrink-0">
+        <aside className="w-full landscape:w-48 lg:w-72 bg-white border-b landscape:border-b-0 lg:border-b-0 landscape:border-l lg:border-l border-gray-200 p-4 lg:p-5 landscape:overflow-y-auto lg:overflow-y-auto flex flex-col gap-4 lg:gap-5 order-1 landscape:order-2 lg:order-2 shrink-0">
           {/* Timer */}
           <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-200">
             <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Time Remaining</p>
