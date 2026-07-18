@@ -228,10 +228,10 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
               key={tab}
               onClick={() => setMainTab(tab)}
               className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${mainTab === tab
-                  ? tab === "SKD" ? "bg-blue-600 text-white" :
-                    tab === "PSIKOTEST" ? "bg-purple-600 text-white" :
-                      "bg-orange-500 text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                ? tab === "SKD" ? "bg-blue-600 text-white" :
+                  tab === "PSIKOTEST" ? "bg-purple-600 text-white" :
+                    "bg-orange-500 text-white"
+                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
                 }`}
             >
               {tab}
@@ -256,8 +256,8 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
             return (
               <button key={sub.value} onClick={() => setSkdSub(sub.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${skdSub === sub.value
-                    ? "bg-blue-100 text-blue-700 border border-blue-200"
-                    : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
+                  ? "bg-blue-100 text-blue-700 border border-blue-200"
+                  : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}>
                 {sub.label}
                 <span className="ml-1 opacity-60">({count})</span>
@@ -279,8 +279,8 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                 key={sub}
                 onClick={() => setPsikotestSub(sub)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${psikotestSub === sub
-                    ? "bg-purple-100 text-purple-700 border border-purple-200"
-                    : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
+                  ? "bg-purple-100 text-purple-700 border border-purple-200"
+                  : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
               >
                 {sub === "SEMUA" ? "Semua" : sub.charAt(0) + sub.slice(1).toLowerCase()}
@@ -303,8 +303,8 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                 key={sub}
                 onClick={() => setAkademikSub(sub)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${akademikSub === sub
-                    ? "bg-orange-100 text-orange-700 border border-orange-200"
-                    : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
+                  ? "bg-orange-100 text-orange-700 border border-orange-200"
+                  : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
               >
                 {AKADEMIK_LABELS[sub]}
@@ -349,7 +349,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
               <div>
                 <div className="flex items-center gap-4 mb-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${exam.examType === "SKD" ? "bg-blue-50" :
-                      exam.examType === "PSIKOTEST" ? "bg-purple-50" : "bg-orange-50"
+                    exam.examType === "PSIKOTEST" ? "bg-purple-50" : "bg-orange-50"
                     }`}>
                     {exam.examType === "SKD" ? "📝" : exam.examType === "PSIKOTEST" ? "🧠" : "🎓"}
                   </div>
@@ -358,8 +358,8 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                     {/* Sub-label */}
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${exam.examType === "SKD" ? "bg-blue-50 text-blue-600" :
-                          exam.examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
-                            "bg-orange-50 text-orange-600"
+                        exam.examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
+                          "bg-orange-50 text-orange-600"
                         }`}>
                         {exam.examType}
                       </span>
@@ -419,8 +419,8 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                   <button
                     onClick={() => handleStartTest(exam)}
                     className={`block w-full text-center text-white text-sm font-semibold py-3 rounded-xl transition-colors ${exam.examType === "SKD" ? "bg-blue-600 hover:bg-blue-700" :
-                        exam.examType === "PSIKOTEST" ? "bg-purple-600 hover:bg-purple-700" :
-                          "bg-orange-500 hover:bg-orange-600"
+                      exam.examType === "PSIKOTEST" ? "bg-purple-600 hover:bg-purple-700" :
+                        "bg-orange-500 hover:bg-orange-600"
                       }`}
                   >
                     {userSession ? "Start Test →" : "Login untuk Mulai"}
@@ -435,7 +435,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
       {exams.length > 0 && (
         <div className="mt-10 bg-blue-600 rounded-2xl p-8 flex items-center justify-between">
           <div>
-            <h3 className="text-white text-xl font-bold mb-1">Master Your Future with Guided Learning.</h3>
+            <h3 className="text-white text-xl font-bold mb-1">Kuasai Masa Depan Anda dengan Pembelajaran Terbimbing.</h3>
             <p className="text-blue-100 text-sm">Bergabung dengan ribuan siswa dan raih hasil terbaikmu.</p>
           </div>
           <Link href="/#contact"
