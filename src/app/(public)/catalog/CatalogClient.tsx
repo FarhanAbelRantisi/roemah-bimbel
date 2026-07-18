@@ -228,7 +228,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
       </div>
 
       {/* Main Tabs */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {(["SKD", "PSIKOTEST", "AKADEMIK"] as MainTab[]).map((tab) => {
           const count =
             tab === "SKD" ? skdExams.length :
@@ -238,7 +238,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
             <button
               key={tab}
               onClick={() => setMainTab(tab)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${mainTab === tab
+              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${mainTab === tab
                 ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
                 }`}
@@ -251,7 +251,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
       </div>
 
       {mainTab === "SKD" && (
-        <div className="flex gap-2 mb-6 flex-wrap">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {[
             { value: "SEMUA", label: "Semua" },
             { value: "GABUNGAN", label: "Gabungan" },
@@ -264,7 +264,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                 : skdExams.filter((e) => e.skdCategory === sub.value).length;
             return (
               <button key={sub.value} onClick={() => setSkdSub(sub.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${skdSub === sub.value
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${skdSub === sub.value
                   ? "bg-blue-50 text-blue-500 border border-blue-200"
                   : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}>
@@ -278,7 +278,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
 
       {/* Sub-tabs Psikotest */}
       {mainTab === "PSIKOTEST" && (
-        <div className="flex gap-2 mb-6 flex-wrap">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {PSIKOTEST_SUBS.map((sub) => {
             const count = sub === "SEMUA"
               ? psikotestExams.length
@@ -287,7 +287,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
               <button
                 key={sub}
                 onClick={() => setPsikotestSub(sub)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${psikotestSub === sub
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${psikotestSub === sub
                   ? "bg-blue-50 text-blue-500 border border-blue-200"
                   : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
@@ -302,7 +302,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
 
       {/* Sub-tabs Akademik */}
       {mainTab === "AKADEMIK" && (
-        <div className="flex gap-2 mb-6 flex-wrap">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {AKADEMIK_SUBS.map((sub) => {
             const count = sub === "SEMUA"
               ? akademikExams.length
@@ -311,7 +311,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
               <button
                 key={sub}
                 onClick={() => setAkademikSub(sub)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${akademikSub === sub
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${akademikSub === sub
                   ? "bg-blue-50 text-blue-500 border border-blue-200"
                   : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
@@ -342,25 +342,28 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
             <div key={exam.id}
               className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow relative flex flex-col">
 
-              {/* Badge */}
-              <div className="absolute top-4 right-4 flex gap-2">
-                {isDone && (
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700">
-                    ✓ Selesai
+              {/* Header Card (Icon + Badges) */}
+              <div className="flex justify-between items-start gap-4 mb-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-blue-50">
+                  <IconFileText />
+                </div>
+                {/* Badge */}
+                <div className="flex flex-wrap justify-end gap-2">
+                  {isDone && (
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700 shrink-0">
+                      ✓ Selesai
+                    </span>
+                  )}
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ${exam.isPremium ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 border border-gray-200"
+                    }`}>
+                    {exam.isPremium ? "Premier" : "Free"}
                   </span>
-                )}
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${exam.isPremium ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 border border-gray-200"
-                  }`}>
-                  {exam.isPremium ? "Premier" : "Free"}
-                </span>
+                </div>
               </div>
 
               <div>
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-blue-50">
-                    <IconFileText />
-                  </div>
-                  <div className="flex-1 pr-24">
+                <div className="mb-4">
+                  <div className="flex-1">
                     <h2 className="text-lg font-bold text-gray-900">{exam.title}</h2>
                     {/* Sub-label */}
                     <div className="flex items-center gap-2 mt-0.5">
@@ -434,13 +437,13 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
       </div>
 
       {exams.length > 0 && (
-        <div className="mt-10 bg-blue-500 rounded-2xl p-8 flex items-center justify-between">
+        <div className="mt-10 bg-blue-500 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h3 className="text-white text-xl font-bold mb-1">Kuasai Masa Depan Anda dengan Pembelajaran Terbimbing.</h3>
             <p className="text-blue-100 text-sm">Bergabung dengan ribuan siswa dan raih hasil terbaikmu.</p>
           </div>
           <Link href="/#contact"
-            className="bg-white text-blue-500 text-sm font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors shrink-0 ml-6">
+            className="w-full md:w-auto text-center bg-white text-blue-500 text-sm font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors shrink-0">
             Explore Membership
           </Link>
         </div>

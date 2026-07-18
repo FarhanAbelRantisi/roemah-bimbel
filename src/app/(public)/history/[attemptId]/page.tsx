@@ -354,7 +354,7 @@ export default function HistoryDetailPage() {
       </div>
 
       {/* Tab filter */}
-      <div className="flex flex-wrap gap-2 mb-3">
+      <div className="flex gap-2 mb-3 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {tabOptions.map((tab) => {
           const count = tab === "ALL" ? attempt.answers.length :
             examType === "SKD"
@@ -362,7 +362,7 @@ export default function HistoryDetailPage() {
               : attempt.answers.filter((a) => a.question.subCategory === tab).length;
           return (
             <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
                 activeTab === tab ? "bg-blue-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
               }`}>
               {tab === "ALL" ? "Semua" : tab}
@@ -373,7 +373,7 @@ export default function HistoryDetailPage() {
       </div>
 
       {/* Filter status */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {[
           { value: "all", label: "Semua" },
           { value: "correct", label: "✓ Benar" },
@@ -381,7 +381,7 @@ export default function HistoryDetailPage() {
           { value: "empty", label: "— Kosong" },
         ].map((f) => (
           <button key={f.value} onClick={() => setFilter(f.value as typeof filter)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
               filter === f.value ? "bg-gray-800 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}>
             {f.label}

@@ -517,11 +517,11 @@ export default function HomePage() {
             Pesan & Ucapan dari Siswa
           </p>
           <ScrollAnimate direction="up" delay={0.3}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 pb-6">
+            <div className="flex sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 pb-6 overflow-x-auto snap-x snap-mandatory px-4 sm:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {testiChats.map((src, i) => (
                 <div
                   key={i}
-                  className={`relative w-full rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 ${i % 2 !== 0 ? "md:translate-y-6" : ""}`}
+                  className={`relative shrink-0 w-[75%] sm:w-auto rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 snap-center ${i % 2 !== 0 ? "md:translate-y-6" : ""}`}
                 >
                   <Image
                     src={src}
