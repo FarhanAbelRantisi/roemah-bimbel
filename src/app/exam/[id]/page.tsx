@@ -765,9 +765,9 @@ export default function ExamPage() {
         </div>
       </header>
 
-      <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-57px)] min-h-[calc(100vh-57px)]">
+      <div className="flex flex-col landscape:flex-row lg:flex-row h-auto landscape:h-[calc(100vh-57px)] lg:h-[calc(100vh-57px)] min-h-[calc(100vh-57px)]">
         {/* Main Content */}
-        <div className="flex-1 lg:overflow-y-auto p-4 md:p-8 order-2 lg:order-1">
+        <div className="flex-1 landscape:overflow-y-auto lg:overflow-y-auto p-4 md:p-8 order-2 landscape:order-1 lg:order-1">
           {/* Question Header */}
           <div className="mb-6">
             <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1">
@@ -922,7 +922,7 @@ export default function ExamPage() {
         </div>
 
         {/* Sidebar */}
-        <aside className="w-full lg:w-72 bg-white border-b lg:border-b-0 lg:border-l border-gray-200 p-4 lg:p-5 lg:overflow-y-auto flex flex-col gap-4 lg:gap-5 order-1 lg:order-2">
+        <aside className="w-full landscape:w-64 lg:w-72 bg-white border-b landscape:border-b-0 lg:border-b-0 landscape:border-l lg:border-l border-gray-200 p-4 lg:p-5 landscape:overflow-y-auto lg:overflow-y-auto flex flex-col gap-4 lg:gap-5 order-1 landscape:order-2 lg:order-2 shrink-0">
           {/* Timer */}
           <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-200">
             <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Time Remaining</p>
@@ -938,7 +938,7 @@ export default function ExamPage() {
               <span className="text-xs text-gray-400">{shuffledAnswers.length} Total</span>
             </div>
 
-            <div className="grid grid-cols-6 sm:grid-cols-10 lg:grid-cols-5 gap-1.5 max-h-32 lg:max-h-none overflow-y-auto lg:overflow-y-visible pr-2 lg:pr-0">
+            <div className="grid grid-cols-6 sm:grid-cols-10 landscape:grid-cols-4 lg:grid-cols-5 gap-1.5 max-h-32 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-2 landscape:pr-0 lg:pr-0">
               {shuffledAnswers.map((ans, idx) => {
                 const s = getStatus(ans, idx);
                 return (
