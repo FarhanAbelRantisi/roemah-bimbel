@@ -80,9 +80,9 @@ export default function ResultPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 ${
-            examType === "SKD" ? (passed ? "bg-green-100" : "bg-red-100") : "bg-blue-50"
+            examType === "SKD" && passed ? "bg-green-100" : "bg-blue-50"
           }`}>
-            {examType === "SKD" ? (passed ? <IconTrophy /> : <IconFileText className="w-9 h-9 text-red-500" />) : <IconFileText />}
+            {examType === "SKD" && passed ? <IconTrophy /> : <IconFileText />}
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Hasil Ujian</h1>
           <p className="text-gray-500 text-sm mt-1">{result.exam.title}</p>
