@@ -731,8 +731,8 @@ export default function ExamPage() {
         </div>
       )}
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-end sticky top-0 z-50">
-        <div className="flex items-center gap-4">
+      <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex flex-wrap items-center justify-between lg:justify-end gap-3 sticky top-0 z-50">
+        <div className="flex flex-wrap items-center gap-3 md:gap-4 w-full lg:w-auto justify-between lg:justify-end">
           {/* Indikator pelanggaran */}
           {tabWarning > 0 && (
             <div className="flex items-center gap-1.5 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg">
@@ -765,9 +765,9 @@ export default function ExamPage() {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-57px)]">
+      <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-57px)] min-h-[calc(100vh-57px)]">
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 lg:overflow-y-auto p-4 md:p-8 order-2 lg:order-1">
           {/* Question Header */}
           <div className="mb-6">
             <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1">
@@ -892,7 +892,7 @@ export default function ExamPage() {
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <button
               onClick={() => setCurrentIdx((i) => Math.max(0, i - 1))}
               disabled={currentIdx === 0}
@@ -922,7 +922,7 @@ export default function ExamPage() {
         </div>
 
         {/* Sidebar */}
-        <aside className="w-72 bg-white border-l border-gray-200 p-5 overflow-y-auto flex flex-col gap-5">
+        <aside className="w-full lg:w-72 bg-white border-b lg:border-b-0 lg:border-l border-gray-200 p-4 lg:p-5 lg:overflow-y-auto flex flex-col gap-4 lg:gap-5 order-1 lg:order-2">
           {/* Timer */}
           <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-200">
             <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Time Remaining</p>
@@ -938,7 +938,7 @@ export default function ExamPage() {
               <span className="text-xs text-gray-400">{shuffledAnswers.length} Total</span>
             </div>
 
-            <div className="grid grid-cols-5 gap-1.5">
+            <div className="grid grid-cols-6 sm:grid-cols-10 lg:grid-cols-5 gap-1.5 max-h-32 lg:max-h-none overflow-y-auto lg:overflow-y-visible pr-2 lg:pr-0">
               {shuffledAnswers.map((ans, idx) => {
                 const s = getStatus(ans, idx);
                 return (

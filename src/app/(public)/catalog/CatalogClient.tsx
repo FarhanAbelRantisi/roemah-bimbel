@@ -342,12 +342,11 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
             <div key={exam.id}
               className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow relative flex flex-col">
 
-              {/* Header Card (Icon + Badges) */}
-              <div className="flex justify-between items-start gap-4 mb-4">
+              {/* Mobile Header (Icon + Badges) - Hidden on md and up */}
+              <div className="flex md:hidden justify-between items-start gap-4 mb-4">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-blue-50">
                   <IconFileText />
                 </div>
-                {/* Badge */}
                 <div className="flex flex-wrap justify-end gap-2">
                   {isDone && (
                     <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700 shrink-0">
@@ -361,9 +360,27 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                 </div>
               </div>
 
+              {/* Desktop Badges - Hidden on mobile, absolute positioned */}
+              <div className="hidden md:flex absolute top-6 right-6 gap-2">
+                {isDone && (
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700">
+                    ✓ Selesai
+                  </span>
+                )}
+                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${exam.isPremium ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 border border-gray-200"
+                  }`}>
+                  {exam.isPremium ? "Premier" : "Free"}
+                </span>
+              </div>
+
               <div>
-                <div className="mb-4">
-                  <div className="flex-1">
+                <div className="flex items-start md:items-center gap-0 md:gap-4 mb-4">
+                  {/* Desktop Icon - Hidden on mobile */}
+                  <div className="hidden md:flex w-12 h-12 rounded-xl items-center justify-center shrink-0 bg-blue-50">
+                    <IconFileText />
+                  </div>
+                  
+                  <div className="flex-1 md:pr-24">
                     <h2 className="text-lg font-bold text-gray-900">{exam.title}</h2>
                     {/* Sub-label */}
                     <div className="flex items-center gap-2 mt-0.5">
