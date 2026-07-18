@@ -938,7 +938,7 @@ export default function ExamPage() {
               <span className="text-xs text-gray-400">{shuffledAnswers.length} Total</span>
             </div>
 
-            <div className="grid grid-cols-6 sm:grid-cols-10 landscape:grid-cols-4 lg:grid-cols-5 gap-1.5 max-h-32 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-2 landscape:pr-0 lg:pr-0">
+            <div className="grid grid-cols-6 sm:grid-cols-10 landscape:grid-cols-3 lg:grid-cols-5 gap-1.5 max-h-32 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-2 landscape:pr-0 lg:pr-0">
               {shuffledAnswers.map((ans, idx) => {
                 const s = getStatus(ans, idx);
                 return (
