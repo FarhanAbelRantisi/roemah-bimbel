@@ -4,6 +4,10 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+const IconClipboard = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-gray-400"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z"/></svg>
+);
+
 type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK";
 
 interface Attempt {
@@ -139,21 +143,21 @@ export default function HistoryPage() {
           <h1 className="text-3xl font-bold text-gray-900">Riwayat Ujian</h1>
           <p className="text-gray-500 text-sm mt-1">Semua ujian yang telah kamu selesaikan</p>
         </div>
-        <Link href="/catalog" className="text-sm text-blue-600 font-medium hover:underline">
+        <Link href="/catalog" className="text-sm text-blue-500 font-medium hover:underline">
           ← Kembali ke Katalog
         </Link>
       </div>
 
       {loading ? (
         <div className="text-center py-20">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
         </div>
       ) : attempts.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
-          <p className="text-4xl mb-4">📋</p>
+          <IconClipboard />
           <p className="text-lg font-medium">Belum ada riwayat ujian</p>
           <Link href="/catalog"
-            className="inline-block mt-4 bg-blue-600 text-white text-sm font-medium px-6 py-2.5 rounded-xl hover:bg-blue-700 transition-colors">
+            className="inline-block mt-4 bg-blue-500 text-white text-sm font-medium px-6 py-2.5 rounded-xl hover:bg-blue-600 transition-colors">
             Lihat Katalog
           </Link>
         </div>
@@ -178,9 +182,9 @@ export default function HistoryPage() {
 
                       {/* Badge examType */}
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        examType === "SKD" ? "bg-blue-50 text-blue-600" :
-                        examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
-                        "bg-orange-50 text-orange-600"
+                        examType === "SKD" ? "bg-blue-50 text-blue-500" :
+                        examType === "PSIKOTEST" ? "bg-blue-50 text-blue-500" :
+                        "bg-blue-50 text-blue-500"
                       }`}>
                         {examType}
                         {examType === "SKD" && attempt.exam.skdCategory &&
@@ -214,10 +218,9 @@ export default function HistoryPage() {
                   {scoreGrid.map((item) => (
                     <div key={item.label} className={`rounded-xl p-3 text-center ${
                       item.isTotal
-                        ? (passed === false ? "bg-blue-600 text-white" :
-                          passed === true ? "bg-green-600 text-white" :
-                          examType === "PSIKOTEST" ? "bg-purple-600 text-white" :
-                          "bg-orange-500 text-white")
+                        ? (passed === false ? "bg-red-500 text-white" :
+                          passed === true ? "bg-green-500 text-white" :
+                          "bg-blue-500 text-white")
                         : "bg-gray-50 border border-gray-100"
                     }`}>
                       <p className={`text-xs mb-0.5 ${item.isTotal ? "text-white/80" : "text-gray-500"}`}>
@@ -236,7 +239,7 @@ export default function HistoryPage() {
                 {/* Detail link */}
                 <div className="border-t border-gray-100 pt-4 mt-4">
                   <Link href={`/history/${attempt.id}`}
-                    className="inline-flex items-center gap-2 text-sm text-blue-600 font-medium hover:underline">
+                    className="inline-flex items-center gap-2 text-sm text-blue-500 font-medium hover:underline">
                     Lihat Detail Jawaban →
                   </Link>
                 </div>

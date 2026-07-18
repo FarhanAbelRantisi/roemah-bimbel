@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma";
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
+const IconNewspaper = ({ className = "mx-auto mb-4 text-blue-500" }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+);
+
 async function getNews() {
   try {
     return await prisma.news.findMany({
@@ -31,7 +35,7 @@ export default async function NewsPage() {
     <div className="max-w-6xl mx-auto px-6 py-10">
       {/* Header */}
       <div className="mb-10">
-        <p className="text-blue-600 font-semibold text-sm uppercase tracking-widest mb-2">
+        <p className="text-blue-500 font-semibold text-sm uppercase tracking-widest mb-2">
           Berita & Informasi
         </p>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -44,7 +48,7 @@ export default async function NewsPage() {
 
       {newsList.length === 0 && (
         <div className="text-center py-20 text-gray-400">
-          <p className="text-4xl mb-4">📰</p>
+          <IconNewspaper className="mx-auto mb-4 text-gray-400" />
           <p className="text-lg font-medium">Belum ada berita</p>
         </div>
       )}
@@ -72,11 +76,11 @@ export default async function NewsPage() {
                     day: "numeric", month: "long", year: "numeric",
                   })}
                 </span>
-                <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-semibold">
+                <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-semibold">
                   Terbaru
                 </span>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-500 transition-colors">
                 {featured.title}
               </h2>
               <p className="text-gray-500 line-clamp-2">{featured.content}</p>
@@ -100,8 +104,8 @@ export default async function NewsPage() {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-44 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-4xl">
-                    📰
+                  <div className="w-full h-44 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+                    <IconNewspaper />
                   </div>
                 )}
                 <div className="p-5 flex-1 flex flex-col">
@@ -115,11 +119,11 @@ export default async function NewsPage() {
                       })}
                     </span>
                   </div>
-                  <h3 className="font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                  <h3 className="font-bold text-gray-900 mb-2 group-hover:text-blue-500 transition-colors line-clamp-2">
                     {news.title}
                   </h3>
                   <p className="text-sm text-gray-500 line-clamp-2 flex-1">{news.content}</p>
-                  <p className="text-blue-600 text-sm font-medium mt-3">Baca selengkapnya →</p>
+                  <p className="text-blue-500 text-sm font-medium mt-3">Baca selengkapnya →</p>
                 </div>
               </div>
             </Link>

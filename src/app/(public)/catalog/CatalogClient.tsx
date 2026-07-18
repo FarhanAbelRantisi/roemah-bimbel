@@ -3,6 +3,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+const IconClipboard = () => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z"/></svg>);
+const IconAlertTriangle = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-red-600"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>);
+const IconSmartphone = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>);
+const IconBan = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>);
+const IconClock = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>);
+const IconLock = ({ className = "shrink-0 mt-0.5 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
+const IconSave = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>);
+const IconInbox = () => (<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-gray-400"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>);
+
 interface Exam {
   id: string;
   title: string;
@@ -45,7 +54,7 @@ function ExamWarningModal({
         {/* Header */}
         <div className="bg-blue-600 rounded-t-2xl px-6 py-5 text-white">
           <div className="flex items-center gap-3 mb-1">
-            <span className="text-2xl">📋</span>
+            <IconClipboard />
             <h2 className="text-lg font-bold">Informasi Ujian</h2>
           </div>
           <p className="text-blue-100 text-sm">{exam.title}</p>
@@ -66,26 +75,26 @@ function ExamWarningModal({
 
           {/* Warning */}
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-5">
-            <p className="text-sm font-semibold text-red-700 mb-2">⚠️ Perhatian Penting</p>
+            <p className="text-sm font-semibold text-red-700 mb-2 flex items-center gap-1.5"><IconAlertTriangle /> Perhatian Penting</p>
             <ul className="text-sm text-red-600 flex flex-col gap-1.5">
               <li className="flex items-start gap-2">
-                <span className="shrink-0 mt-0.5">📵</span>
+                <IconSmartphone />
                 <span>Dilarang melakukan screenshot selama ujian berlangsung</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="shrink-0 mt-0.5">🚫</span>
+                <IconBan />
                 <span>Dilarang berpindah tab atau minimize browser</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="shrink-0 mt-0.5">⏱️</span>
+                <IconClock />
                 <span>Timer berjalan otomatis dan tidak bisa dijeda</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="shrink-0 mt-0.5">🔒</span>
+                <IconLock className="shrink-0 mt-0.5 text-red-600" />
                 <span>Ujian hanya dapat dikerjakan <strong>1 kali</strong></span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="shrink-0 mt-0.5">💾</span>
+                <IconSave />
                 <span>Jawaban tersimpan otomatis setiap memilih opsi</span>
               </li>
             </ul>
@@ -210,7 +219,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Katalog Ujian Tersedia</h1>
         {userSession && (
-          <Link href="/history" className="text-sm text-blue-600 font-medium hover:underline">
+          <Link href="/history" className="text-sm text-blue-500 font-medium hover:underline">
             Lihat Riwayat Ujian →
           </Link>
         )}
@@ -228,9 +237,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
               key={tab}
               onClick={() => setMainTab(tab)}
               className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${mainTab === tab
-                ? tab === "SKD" ? "bg-blue-600 text-white" :
-                  tab === "PSIKOTEST" ? "bg-purple-600 text-white" :
-                    "bg-orange-500 text-white"
+                ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
                 }`}
             >
@@ -256,7 +263,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
             return (
               <button key={sub.value} onClick={() => setSkdSub(sub.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${skdSub === sub.value
-                  ? "bg-blue-100 text-blue-700 border border-blue-200"
+                  ? "bg-blue-50 text-blue-600 border border-blue-200"
                   : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}>
                 {sub.label}
@@ -279,7 +286,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                 key={sub}
                 onClick={() => setPsikotestSub(sub)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${psikotestSub === sub
-                  ? "bg-purple-100 text-purple-700 border border-purple-200"
+                  ? "bg-blue-50 text-blue-600 border border-blue-200"
                   : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
               >
@@ -303,7 +310,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                 key={sub}
                 onClick={() => setAkademikSub(sub)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${akademikSub === sub
-                  ? "bg-orange-100 text-orange-700 border border-orange-200"
+                  ? "bg-blue-50 text-blue-600 border border-blue-200"
                   : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
               >
@@ -317,7 +324,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
 
       {currentExams.length === 0 && (
         <div className="text-center py-20 text-gray-400">
-          <p className="text-4xl mb-4">📭</p>
+          <IconInbox />
           <p className="text-lg font-medium">Belum ada ujian tersedia</p>
           <p className="text-sm mt-1">Pantau terus untuk ujian terbaru!</p>
         </div>
@@ -413,7 +420,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                   </span>
                 ) : isPremiumLocked ? (
                   <span className="block w-full text-center bg-yellow-50 border border-yellow-200 text-yellow-600 text-sm font-semibold py-3 rounded-xl cursor-not-allowed">
-                    🔒 Khusus Member Premium
+                    <IconLock className="w-5 h-5 text-gray-400 mr-2" /> Khusus Member Premium
                   </span>
                 ) : (
                   <button

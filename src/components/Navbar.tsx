@@ -38,12 +38,12 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-gray-100">
+    <nav className="sticky top-0 z-50 bg-[#0a1628]/90 backdrop-blur-md border-b border-white/10">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-blue-600">
-          <span className="bg-blue-600 text-white rounded-md px-2 py-1 text-sm">RB</span>
+        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-white">
+          <span className="bg-blue-500 text-white rounded-md px-2 py-1 text-sm">RB</span>
           Roemah Bimbel
         </Link>
 
@@ -58,8 +58,8 @@ export default function Navbar() {
                 onClick={isAbout ? handleAboutClick : undefined}
                 className={`text-sm font-medium transition-colors ${
                   pathname === link.href
-                    ? "text-blue-600"
-                    : "text-gray-600 hover:text-blue-600"
+                    ? "text-blue-400 font-semibold"
+                    : "text-gray-300 hover:text-white"
                 }`}
               >
                 {link.label}
@@ -73,8 +73,8 @@ export default function Navbar() {
               href="/history"
               className={`text-sm font-medium transition-colors ${
                 pathname === "/history"
-                  ? "text-blue-600"
-                  : "text-gray-600 hover:text-blue-600"
+                  ? "text-blue-400 font-semibold"
+                  : "text-gray-300 hover:text-white"
               }`}
             >
               Riwayat
@@ -85,21 +85,21 @@ export default function Navbar() {
         {/* Desktop Auth */}
         <div className="hidden md:flex items-center gap-3">
           {status === "loading" ? (
-            <div className="w-20 h-9 bg-gray-100 rounded-lg animate-pulse" />
+            <div className="w-20 h-9 bg-white/10 rounded-lg animate-pulse" />
           ) : session ? (
             <>
-              <span className="text-sm text-gray-600">{session.user?.name}</span>
+              <span className="text-sm text-gray-300">{session.user?.name}</span>
               {sessionUser?.role === "ADMIN" && (
                 <Link
                   href="/admin"
-                  className="border border-blue-200 text-blue-600 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                  className="border border-white/20 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
                 >
                   Admin Panel
                 </Link>
               )}
               <button
                 onClick={handleLogout}
-                className="border border-gray-200 text-gray-700 text-sm font-medium px-5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                className="border border-white/20 text-gray-300 text-sm font-medium px-5 py-2 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
               >
                 Logout
               </button>
@@ -107,7 +107,7 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="bg-blue-600 text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-blue-500 text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-blue-600 transition-colors"
             >
               Login
             </Link>
@@ -119,23 +119,23 @@ export default function Navbar() {
           {status !== "loading" && !session && (
             <Link
               href="/login"
-              className="bg-blue-600 text-white text-xs font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
             >
               Login
             </Link>
           )}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
             aria-label="Menu"
           >
             {menuOpen ? (
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M4 4L16 16M16 4L4 16" stroke="#374151" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M4 4L16 16M16 4L4 16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             ) : (
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M3 5H17M3 10H17M3 15H17" stroke="#374151" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M3 5H17M3 10H17M3 15H17" stroke="white" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             )}
           </button>
@@ -144,7 +144,7 @@ export default function Navbar() {
 
       {/* Mobile Dropdown Menu */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-6 py-4 flex flex-col gap-1 shadow-lg">
+        <div className="md:hidden bg-[#0a1628]/95 backdrop-blur-md border-t border-white/10 px-6 py-4 flex flex-col gap-1 shadow-lg">
           {/* Nav links */}
           {navLinks.map((link) => {
             const isAbout = link.href === "/about";
@@ -158,8 +158,8 @@ export default function Navbar() {
                 }}
                 className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   pathname === link.href
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-blue-500/20 text-blue-400"
+                    : "text-gray-300 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 {link.label}
@@ -174,26 +174,26 @@ export default function Navbar() {
               onClick={() => setMenuOpen(false)}
               className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 pathname === "/history"
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-blue-500/20 text-blue-400 font-semibold"
+                  : "text-gray-300 hover:bg-white/10 hover:text-white"
               }`}
             >
               Riwayat
             </Link>
           )}
 
-          <div className="border-t border-gray-100 my-2" />
+          <div className="border-t border-white/10 my-2" />
 
           {status === "loading" ? (
-            <div className="w-full h-9 bg-gray-100 rounded-lg animate-pulse" />
+            <div className="w-full h-9 bg-white/10 rounded-lg animate-pulse" />
           ) : session ? (
             <>
               <div className="flex items-center gap-3 px-3 py-2 mb-1">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600">
+                <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-bold text-blue-400">
                   {session.user?.name?.[0]?.toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">{session.user?.name}</p>
+                  <p className="text-sm font-semibold text-white">{session.user?.name}</p>
                   <p className="text-xs text-gray-400">{session.user?.email}</p>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function Navbar() {
                 <Link
                   href="/admin"
                   onClick={() => setMenuOpen(false)}
-                  className="px-3 py-2.5 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                  className="px-3 py-2.5 rounded-lg text-sm font-medium text-blue-500 hover:bg-blue-50 transition-colors"
                 >
                   🔧 Admin Panel
                 </Link>
@@ -210,7 +210,7 @@ export default function Navbar() {
 
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+                className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-white/10 transition-colors"
               >
                 🚪 Logout
               </button>
@@ -219,7 +219,7 @@ export default function Navbar() {
             <Link
               href="/register"
               onClick={() => setMenuOpen(false)}
-              className="px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              className="px-3 py-2.5 rounded-lg text-sm font-medium border border-white/20 text-gray-300 hover:bg-white/10 hover:text-white transition-colors mt-2"
             >
               Daftar Akun Baru
             </Link>
