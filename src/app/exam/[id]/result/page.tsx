@@ -3,6 +3,12 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
+const IconTrophy = () => (<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>);
+const IconFileText = ({ className = "w-9 h-9 text-blue-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>);
+const IconCheckCircle = ({ className = "w-4 h-4 inline-block mr-1.5 -mt-0.5" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>);
+const IconXCircle = ({ className = "w-4 h-4 inline-block mr-1.5 -mt-0.5" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>);
+const IconBarChart = () => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-2 w-5 h-5"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>);
+
 type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK";
 
 interface AttemptResult {
@@ -41,7 +47,7 @@ export default function ResultPage() {
   if (!result) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -74,16 +80,16 @@ export default function ResultPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 ${
-            examType === "SKD" ? (passed ? "bg-green-100" : "bg-red-100") : "bg-blue-100"
+            examType === "SKD" ? (passed ? "bg-green-100" : "bg-red-100") : "bg-blue-50"
           }`}>
-            {examType === "SKD" ? (passed ? "🏆" : "📚") : examType === "PSIKOTEST" ? "🧠" : "🎓"}
+            {examType === "SKD" ? (passed ? <IconTrophy /> : <IconFileText className="w-9 h-9 text-red-500" />) : <IconFileText />}
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Hasil Ujian</h1>
           <p className="text-gray-500 text-sm mt-1">{result.exam.title}</p>
           <span className={`inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full ${
-            examType === "SKD" ? "bg-blue-50 text-blue-600" :
-            examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
-            "bg-orange-50 text-orange-600"
+            examType === "SKD" ? "bg-blue-50 text-blue-500" :
+            examType === "PSIKOTEST" ? "bg-blue-50 text-blue-500" :
+            "bg-blue-50 text-blue-500"
           }`}>
             {examType}
             {examType === "SKD" && result.exam.skdCategory &&
@@ -97,14 +103,14 @@ export default function ResultPage() {
 
         {/* Total Score */}
         <div className={`rounded-2xl p-6 text-center mb-5 ${
-          examType === "SKD" ? (passed ? "bg-green-600" : "bg-blue-600") :
-          examType === "PSIKOTEST" ? "bg-purple-600" : "bg-orange-500"
+          examType === "SKD" ? (passed ? "bg-green-500" : "bg-blue-500") :
+          "bg-blue-500"
         }`}>
           <p className="text-white/80 text-sm uppercase tracking-wide mb-1">Total Skor</p>
           <p className="text-white text-6xl font-bold">{result.totalScore}</p>
           {examType === "SKD" && (
             <p className="text-sm mt-2 font-semibold text-white/80">
-              {passed ? "✅ Memenuhi Semua Passing Grade" : "❌ Belum Memenuhi Passing Grade"}
+              {passed ? <><IconCheckCircle /> Memenuhi Semua Passing Grade</> : <><IconXCircle /> Belum Memenuhi Passing Grade</>}
             </p>
           )}
         </div>
@@ -130,7 +136,7 @@ export default function ResultPage() {
                       <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
                         item.passed ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
                       }`}>
-                        {item.passed ? "✓ Lulus" : `Min. ${item.passing}`}
+                        {item.passed ? <><IconCheckCircle className="w-3 h-3 inline-block mr-1 -mt-0.5" />Lulus</> : `Min. ${item.passing}`}
                       </span>
                     </div>
                     <span className="text-gray-500">{item.score} / {item.max}</span>
@@ -251,8 +257,8 @@ export default function ResultPage() {
         {/* Buttons */}
         <div className="flex flex-col gap-3">
           <Link href={`/history/${attemptId}`}
-            className="w-full text-center bg-blue-600 text-white font-medium py-3 rounded-xl hover:bg-blue-700 transition-colors">
-            📊 Lihat Detail Jawaban
+            className="w-full text-center bg-blue-500 text-white font-medium py-3 rounded-xl hover:bg-blue-600 transition-colors">
+            <IconBarChart /> Lihat Detail Jawaban
           </Link>
           <div className="flex gap-3">
             <Link href="/catalog"

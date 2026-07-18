@@ -7,10 +7,12 @@ const IconClipboard = () => (<svg xmlns="http://www.w3.org/2000/svg" width="24" 
 const IconAlertTriangle = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-red-600"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>);
 const IconSmartphone = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>);
 const IconBan = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>);
-const IconClock = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>);
+const IconClock = ({ className = "shrink-0 mt-0.5 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>);
 const IconLock = ({ className = "shrink-0 mt-0.5 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
 const IconSave = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>);
 const IconInbox = () => (<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-gray-400"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>);
+const IconFileText = ({ className = "w-6 h-6 text-blue-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>);
+const IconMessageSquare = ({ className = "w-5 h-5 text-gray-400" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>);
 
 interface Exam {
   id: string;
@@ -52,7 +54,7 @@ function ExamWarningModal({
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
         {/* Header */}
-        <div className="bg-blue-600 rounded-t-2xl px-6 py-5 text-white">
+        <div className="bg-blue-500 rounded-t-2xl px-6 py-5 text-white">
           <div className="flex items-center gap-3 mb-1">
             <IconClipboard />
             <h2 className="text-lg font-bold">Informasi Ujian</h2>
@@ -106,7 +108,7 @@ function ExamWarningModal({
               type="checkbox"
               checked={checked}
               onChange={(e) => setChecked(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-blue-600"
+              className="mt-0.5 w-4 h-4 accent-blue-500"
             />
             <span className="text-sm text-gray-700">
               Saya telah membaca dan memahami seluruh ketentuan ujian di atas
@@ -124,7 +126,7 @@ function ExamWarningModal({
             <button
               onClick={onConfirm}
               disabled={!checked}
-              className="flex-1 bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 bg-blue-500 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Mulai Ujian →
             </button>
@@ -263,7 +265,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
             return (
               <button key={sub.value} onClick={() => setSkdSub(sub.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${skdSub === sub.value
-                  ? "bg-blue-50 text-blue-600 border border-blue-200"
+                  ? "bg-blue-50 text-blue-500 border border-blue-200"
                   : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}>
                 {sub.label}
@@ -286,7 +288,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                 key={sub}
                 onClick={() => setPsikotestSub(sub)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${psikotestSub === sub
-                  ? "bg-blue-50 text-blue-600 border border-blue-200"
+                  ? "bg-blue-50 text-blue-500 border border-blue-200"
                   : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
               >
@@ -310,7 +312,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                 key={sub}
                 onClick={() => setAkademikSub(sub)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${akademikSub === sub
-                  ? "bg-blue-50 text-blue-600 border border-blue-200"
+                  ? "bg-blue-50 text-blue-500 border border-blue-200"
                   : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
                   }`}
               >
@@ -347,7 +349,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                     ✓ Selesai
                   </span>
                 )}
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${exam.isPremium ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600 border border-gray-200"
+                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${exam.isPremium ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 border border-gray-200"
                   }`}>
                   {exam.isPremium ? "Premier" : "Free"}
                 </span>
@@ -355,19 +357,14 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
 
               <div>
                 <div className="flex items-center gap-4 mb-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${exam.examType === "SKD" ? "bg-blue-50" :
-                    exam.examType === "PSIKOTEST" ? "bg-purple-50" : "bg-orange-50"
-                    }`}>
-                    {exam.examType === "SKD" ? "📝" : exam.examType === "PSIKOTEST" ? "🧠" : "🎓"}
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-blue-50">
+                    <IconFileText />
                   </div>
                   <div className="flex-1 pr-24">
                     <h2 className="text-lg font-bold text-gray-900">{exam.title}</h2>
                     {/* Sub-label */}
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${exam.examType === "SKD" ? "bg-blue-50 text-blue-600" :
-                        exam.examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
-                          "bg-orange-50 text-orange-600"
-                        }`}>
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-500">
                         {exam.examType}
                       </span>
                       {exam.examType === "SKD" && (
@@ -396,14 +393,14 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
 
                 <div className="flex items-center gap-6 mb-5">
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400">🕐</span>
+                    <IconClock className="w-5 h-5 text-gray-400" />
                     <div>
                       <p className="font-semibold text-gray-900 text-sm">{exam.duration} mins</p>
                       <p className="text-xs text-gray-400">Duration</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400">💬</span>
+                    <IconMessageSquare />
                     <div>
                       <p className="font-semibold text-gray-900 text-sm">{exam._count.questions}</p>
                       <p className="text-xs text-gray-400">Questions Total</p>
@@ -425,10 +422,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                 ) : (
                   <button
                     onClick={() => handleStartTest(exam)}
-                    className={`block w-full text-center text-white text-sm font-semibold py-3 rounded-xl transition-colors ${exam.examType === "SKD" ? "bg-blue-600 hover:bg-blue-700" :
-                      exam.examType === "PSIKOTEST" ? "bg-purple-600 hover:bg-purple-700" :
-                        "bg-orange-500 hover:bg-orange-600"
-                      }`}
+                    className="block w-full text-center text-white text-sm font-semibold py-3 rounded-xl transition-colors bg-blue-500 hover:bg-blue-600"
                   >
                     {userSession ? "Start Test →" : "Login untuk Mulai"}
                   </button>
@@ -440,13 +434,13 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
       </div>
 
       {exams.length > 0 && (
-        <div className="mt-10 bg-blue-600 rounded-2xl p-8 flex items-center justify-between">
+        <div className="mt-10 bg-blue-500 rounded-2xl p-8 flex items-center justify-between">
           <div>
             <h3 className="text-white text-xl font-bold mb-1">Kuasai Masa Depan Anda dengan Pembelajaran Terbimbing.</h3>
             <p className="text-blue-100 text-sm">Bergabung dengan ribuan siswa dan raih hasil terbaikmu.</p>
           </div>
           <Link href="/#contact"
-            className="bg-white text-blue-600 text-sm font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors shrink-0 ml-6">
+            className="bg-white text-blue-500 text-sm font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors shrink-0 ml-6">
             Explore Membership
           </Link>
         </div>

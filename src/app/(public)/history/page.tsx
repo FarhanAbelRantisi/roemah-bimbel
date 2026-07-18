@@ -215,25 +215,40 @@ export default function HistoryPage() {
 
                 {/* Score Grid */}
                 <div className={`grid gap-3 ${scoreGrid.length === 4 ? "grid-cols-4" : "grid-cols-2"}`}>
-                  {scoreGrid.map((item) => (
-                    <div key={item.label} className={`rounded-xl p-3 text-center ${
-                      item.isTotal
-                        ? (passed === false ? "bg-red-500 text-white" :
-                          passed === true ? "bg-green-500 text-white" :
-                          "bg-blue-500 text-white")
-                        : "bg-gray-50 border border-gray-100"
-                    }`}>
-                      <p className={`text-xs mb-0.5 ${item.isTotal ? "text-white/80" : "text-gray-500"}`}>
-                        {item.label}
-                      </p>
-                      <p className={`text-lg font-bold ${item.isTotal ? "text-white" : "text-gray-900"}`}>
-                        {item.score}
-                      </p>
-                      <p className={`text-xs ${item.isTotal ? "text-white/60" : "text-gray-400"}`}>
-                        /{item.max}
-                      </p>
-                    </div>
-                  ))}
+                  {scoreGrid.map((item) => {
+                    const isFailedTotal = item.isTotal && passed === false;
+                    return (
+                      <div key={item.label} className={`rounded-xl p-3 text-center ${
+                        item.isTotal
+                          ? (isFailedTotal ? "bg-red-50 border border-red-100" :
+                            passed === true ? "bg-green-500 text-white" :
+                            "bg-blue-500 text-white")
+                          : "bg-gray-50 border border-gray-100"
+                      }`}>
+                        <p className={`text-xs mb-0.5 ${
+                          item.isTotal 
+                            ? (isFailedTotal ? "text-red-400" : "text-white/80") 
+                            : "text-gray-500"
+                        }`}>
+                          {item.label}
+                        </p>
+                        <p className={`text-lg font-bold ${
+                          item.isTotal 
+                            ? (isFailedTotal ? "text-red-600" : "text-white") 
+                            : "text-gray-900"
+                        }`}>
+                          {item.score}
+                        </p>
+                        <p className={`text-xs ${
+                          item.isTotal 
+                            ? (isFailedTotal ? "text-red-300" : "text-white/60") 
+                            : "text-gray-400"
+                        }`}>
+                          /{item.max}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Detail link */}

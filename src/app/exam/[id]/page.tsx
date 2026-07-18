@@ -3,6 +3,10 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
+const IconAlertTriangle = ({ className = "shrink-0 mt-0.5" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>);
+const IconLock = ({ className = "shrink-0 mt-0.5" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
+const IconFlag = ({ className = "w-4 h-4" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>);
+
 type Category = "TWK" | "TIU" | "TKP";
 type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK";
 
@@ -645,7 +649,7 @@ export default function ExamPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-500 text-sm">Mempersiapkan ujian...</p>
         </div>
       </div>
@@ -676,7 +680,7 @@ export default function ExamPage() {
             gap: "12px",
           }}
         >
-          <div style={{ fontSize: "48px" }}>🔒</div>
+          <IconLock className="w-16 h-16 text-white mb-4" />
           <p style={{ color: "white", fontWeight: "700", fontSize: "20px" }}>
             Ujian Terkunci
           </p>
@@ -688,7 +692,7 @@ export default function ExamPage() {
       {/* ===== ERROR TOAST ===== */}
       {errorMsg && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[999] bg-red-600 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in-down">
-          <span className="text-xl shrink-0">⚠️</span>
+          <IconAlertTriangle className="text-xl shrink-0" />
           <p className="text-sm font-medium">{errorMsg}</p>
           <button onClick={() => setErrorMsg("")} className="ml-2 font-bold opacity-70 hover:opacity-100 text-white p-1">
             ✕
@@ -700,7 +704,7 @@ export default function ExamPage() {
       {showWarning && tabWarning < MAX_VIOLATIONS && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[999] animate-bounce">
           <div className="bg-red-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md">
-            <span className="text-2xl shrink-0">🚨</span>
+            <IconAlertTriangle className="text-2xl shrink-0 text-yellow-500" />
             <div>
               <p className="font-bold text-sm">Pelanggaran Terdeteksi!</p>
               <p className="text-xs text-red-100 mt-0.5">{warningMsg}</p>
@@ -716,9 +720,7 @@ export default function ExamPage() {
       {showWarning && tabWarning >= MAX_VIOLATIONS && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[999]">
           <div className="bg-white rounded-2xl p-8 max-w-sm mx-4 text-center shadow-2xl">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
-              🚫
-            </div>
+            <IconAlertTriangle className="text-6xl text-red-500 mb-4 mx-auto" />
             <h2 className="text-xl font-bold text-gray-900 mb-2">Ujian Dihentikan</h2>
             <p className="text-gray-500 text-sm mb-4">{warningMsg}</p>
             <div className="flex items-center justify-center gap-2 text-red-500">
@@ -768,7 +770,7 @@ export default function ExamPage() {
         <div className="flex-1 overflow-y-auto p-8">
           {/* Question Header */}
           <div className="mb-6">
-            <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1">
+            <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1">
               Question {currentIdx + 1} of {shuffledAnswers.length}
             </p>
             <div className="flex items-center justify-between">
@@ -906,13 +908,13 @@ export default function ExamPage() {
                   : "bg-white border-gray-200 text-gray-600 hover:bg-orange-50"
                 }`}
             >
-              🚩 {currentAnswer.isFlagged ? "Flagged" : "Flag for Review"}
+              <IconFlag className="mr-1 w-4 h-4" /> {currentAnswer.isFlagged ? "Flagged" : "Flag for Review"}
             </button>
 
             <button
               onClick={() => setCurrentIdx((i) => Math.min(shuffledAnswers.length - 1, i + 1))}
               disabled={currentIdx === shuffledAnswers.length - 1}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Save & Next →
             </button>
@@ -944,9 +946,9 @@ export default function ExamPage() {
                     key={ans.questionId}
                     onClick={() => setCurrentIdx(idx)}
                     className={`w-full aspect-square rounded-lg text-xs font-semibold transition-colors ${s === "current"
-                        ? "bg-white border-2 border-blue-500 text-blue-600"
+                        ? "bg-white border-2 border-blue-500 text-blue-500"
                         : s === "answered"
-                          ? "bg-blue-600 text-white"
+                          ? "bg-blue-500 text-white"
                           : s === "flagged"
                             ? "bg-orange-400 text-white"
                             : "bg-gray-100 text-gray-500 hover:bg-gray-200"
@@ -962,7 +964,7 @@ export default function ExamPage() {
           {/* Legend */}
           <div className="flex flex-col gap-2">
             {[
-              { color: "bg-blue-600", label: "Answered" },
+              { color: "bg-blue-500", label: "Answered" },
               { color: "bg-orange-400", label: "Flagged" },
               { color: "bg-gray-100 border border-gray-200", label: "Unanswered" },
               { color: "bg-white border-2 border-blue-500", label: "Current" },
@@ -976,7 +978,7 @@ export default function ExamPage() {
 
           {/* User */}
           <div className="mt-auto flex items-center gap-3 pt-4 border-t border-gray-200">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600">
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-500">
               {session?.user?.name?.[0]?.toUpperCase()}
             </div>
             <div>
