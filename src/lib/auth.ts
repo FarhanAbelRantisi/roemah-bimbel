@@ -47,12 +47,46 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!user) return null;
 
+        // 1. Cek apakah akun sedang terkunci
+        if (user.lockedUntil && user.lockedUntil > new Date()) {
+          throw new Error("Akun Anda terkunci karena terlalu banyak percobaan salah. Coba lagi dalam 15 menit.");
+        }
+
         const isValid = await bcrypt.compare(
           credentials.password as string,
           user.password
         );
 
-        if (!isValid) return null;
+        if (!isValid) {
+          // 2. Jika salah, tambahkan hitungan gagal
+          const attempts = user.failedLoginAttempts + 1;
+          const updates: any = { failedLoginAttempts: attempts };
+          
+          if (attempts >= 5) {
+            // Kunci akun selama 15 menit
+            const lockTime = new Date();
+            lockTime.setMinutes(lockTime.getMinutes() + 15);
+            updates.lockedUntil = lockTime;
+          }
+          
+          await prisma.user.update({
+            where: { id: user.id },
+            data: updates,
+          });
+          
+          if (attempts >= 5) {
+            throw new Error("Akun dikunci karena salah password 5 kali. Coba lagi 15 menit.");
+          }
+          throw new Error(`Password salah. Sisa percobaan: ${5 - attempts}`);
+        }
+
+        // 3. Jika berhasil login, reset hitungan gagal
+        if (user.failedLoginAttempts > 0) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { failedLoginAttempts: 0, lockedUntil: null },
+          });
+        }
 
         return {
           id: user.id,

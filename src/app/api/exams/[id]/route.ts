@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    const role = (session?.user as any)?.role;
+
     const { id } = await params;
     const exam = await prisma.exam.findUnique({
       where: { id },
@@ -14,6 +18,14 @@ export async function GET(
       },
     });
     if (!exam) return NextResponse.json({ error: "Ujian tidak ditemukan" }, { status: 404 });
+
+    if (role !== "ADMIN") {
+      exam.questions = exam.questions.map((q: any) => {
+        const { correctOption, correctOption2, scoreA, scoreB, scoreC, scoreD, scoreE, ...safeQuestion } = q;
+        return safeQuestion as any;
+      });
+    }
+
     return NextResponse.json(exam);
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
@@ -25,6 +37,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session || (session.user as any)?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = await req.json();
 
@@ -94,7 +111,7 @@ export async function PATCH(
           _count: { id: true },
         });
         const countMap: Record<string, number> = {};
-        counts.forEach((c) => { countMap[c.category] = c._count.id; });
+        counts.forEach((c: any) => { countMap[c.category] = c._count.id; });
 
         if (examData.skdCategory) {
           // Sub-kategori: validasi hanya kategori tersebut
@@ -127,7 +144,7 @@ export async function PATCH(
             _count: { id: true },
           });
           const countMap: Record<string, number> = {};
-          counts.forEach((c) => { if (c.subCategory) countMap[c.subCategory] = c._count.id; });
+          counts.forEach((c: any) => { if (c.subCategory) countMap[c.subCategory] = c._count.id; });
 
           for (const [cat, required] of Object.entries(config)) {
             const actual = countMap[cat] ?? 0;
@@ -172,6 +189,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session || (session.user as any)?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
     await prisma.exam.delete({ where: { id } });
     return NextResponse.json({ message: "Ujian dihapus" });

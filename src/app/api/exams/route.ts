@@ -4,13 +4,19 @@ import { auth } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
+    const session = await auth();
+    const role = (session?.user as any)?.role;
+
     const { searchParams } = new URL(req.url);
     const onlyPublished = searchParams.get("published") === "true";
     const examType = searchParams.get("examType"); // filter opsional
 
+    // Jika bukan ADMIN, selalu paksa untuk hanya melihat ujian yang dipublish
+    const forcePublished = role !== "ADMIN" || onlyPublished;
+
     const exams = await prisma.exam.findMany({
       where: {
-        ...(onlyPublished ? { isPublished: true } : {}),
+        ...(forcePublished ? { isPublished: true } : {}),
         ...(examType ? { examType: examType as any } : {}),
       },
       orderBy: { createdAt: "desc" },
