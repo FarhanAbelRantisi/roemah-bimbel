@@ -1,0 +1,718 @@
+"use client";
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+
+interface Exam {
+  id: string;
+  title: string;
+  duration: number;
+  isPremium: boolean;
+  isPublished: boolean;
+  examType: "SKD" | "PSIKOTEST" | "AKADEMIK";
+  psikotestCategory?: string;
+  psikotestConfig?: string;
+  akademikCategory?: string;
+  akademikTotalSoal?: number;
+  _count: { questions: number };
+}
+
+export default function AdminExamsPage() {
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({
+    title: "",
+    duration: "",
+    isPremium: false,
+    examType: "SKD" as "SKD" | "PSIKOTEST" | "AKADEMIK",
+    skdCategory: "",
+    psikotestCategory: "",
+    psikotestSoalKecerdasan: "40",
+    psikotestSoalKecermatan: "30",
+    psikotestSoalKepribadian: "30",
+    akademikCategory: "",
+    akademikTotalSoal: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [editExam, setEditExam] = useState<Exam | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: "",
+    duration: "",
+    isPremium: false,
+    examType: "SKD" as "SKD" | "PSIKOTEST" | "AKADEMIK",
+    skdCategory: "",
+    psikotestCategory: "KECERDASAN",
+    psikotestSoalKecerdasan: "",
+    psikotestSoalKecermatan: "",
+    psikotestSoalKepribadian: "",
+    akademikCategory: "",
+    akademikTotalSoal: "",
+  });
+  const [editSaving, setEditSaving] = useState(false);
+
+  const fetchExams = useCallback(async () => {
+    const res = await fetch("/api/exams");
+    const data = await res.json();
+    setExams(Array.isArray(data) ? data : []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const load = async () => {
+      setLoading(true);
+      const res = await fetch("/api/exams");
+      const data = await res.json();
+
+      if (isMounted) {
+        setExams(Array.isArray(data) ? data : []);
+        setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const openEdit = (exam: Exam) => {
+    setEditExam(exam);
+
+    // Ambil data psikotest jika ada
+    let kecerdasan = "";
+    let kecermatan = "";
+    let kepribadian = "";
+    const psiCat = exam.psikotestCategory || "KECERDASAN";
+
+    if (exam.examType === "PSIKOTEST" && exam.psikotestConfig) {
+      try {
+        const config = JSON.parse(exam.psikotestConfig);
+        if (psiCat === "GABUNGAN") {
+          kecerdasan = String(config.KECERDASAN || "");
+          kecermatan = String(config.KECERMATAN || "");
+          kepribadian = String(config.KEPRIBADIAN || "");
+        } else {
+          kecerdasan = String(config[psiCat] || "");
+        }
+      } catch (e) {}
+    }
+
+    setEditForm({
+      title: exam.title,
+      duration: String(exam.duration),
+      isPremium: exam.isPremium,
+      examType: exam.examType,
+      psikotestCategory: psiCat,
+      skdCategory: "",
+      psikotestSoalKecerdasan: kecerdasan,
+      psikotestSoalKecermatan: kecermatan,
+      psikotestSoalKepribadian: kepribadian,
+      akademikCategory: exam.akademikCategory || "",
+      akademikTotalSoal: exam.akademikTotalSoal ? String(exam.akademikTotalSoal) : "",
+    });
+    
+    setEditModal(true);
+  };
+
+  const handleEdit = async () => {
+    if (!editExam || !editForm.title || !editForm.duration) return;
+    if (editForm.examType === "AKADEMIK" && !editForm.akademikCategory) {
+      alert("Pilih kategori akademik!");
+      return;
+    }
+    setEditSaving(true);
+
+    // Susun psikotestConfig untuk edit
+    let psikotestConfig: string | null = null;
+    if (editForm.examType === "PSIKOTEST") {
+      if (editForm.psikotestCategory === "GABUNGAN") {
+        psikotestConfig = JSON.stringify({
+          KECERDASAN: Number(editForm.psikotestSoalKecerdasan),
+          KECERMATAN: Number(editForm.psikotestSoalKecermatan),
+          KEPRIBADIAN: Number(editForm.psikotestSoalKepribadian),
+        });
+      } else {
+        psikotestConfig = JSON.stringify({
+          [editForm.psikotestCategory]: Number(editForm.psikotestSoalKecerdasan),
+        });
+      }
+    }
+
+    const res = await fetch(`/api/exams/${editExam.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: editForm.title,
+        duration: Number(editForm.duration),
+        isPremium: editForm.isPremium,
+        examType: editForm.examType,
+        psikotestCategory: editForm.examType === "PSIKOTEST" ? editForm.psikotestCategory : null,
+        psikotestConfig,
+        akademikCategory: editForm.examType === "AKADEMIK" ? editForm.akademikCategory : null,
+        akademikTotalSoal:
+          editForm.examType === "AKADEMIK" && editForm.akademikTotalSoal
+            ? Number(editForm.akademikTotalSoal)
+            : null,
+      }),
+    });
+
+    if (res.ok) {
+      await fetchExams();
+      setEditModal(false);
+    } else {
+      const data = await res.json();
+      alert(`Error: ${data.error}`);
+    }
+    setEditSaving(false);
+  };
+
+  const handleCreate = async () => {
+    if (!form.title || !form.duration) return;
+    if (form.examType === "AKADEMIK" && !form.akademikCategory) {
+      alert("Pilih kategori akademik!");
+      return;
+    }
+    setSaving(true);
+
+    // Susun psikotestConfig
+    let psikotestConfig: string | null = null;
+    if (form.examType === "PSIKOTEST") {
+      if (form.psikotestCategory === "GABUNGAN") {
+        psikotestConfig = JSON.stringify({
+          KECERDASAN: Number(form.psikotestSoalKecerdasan),
+          KECERMATAN: Number(form.psikotestSoalKecermatan),
+          KEPRIBADIAN: Number(form.psikotestSoalKepribadian),
+        });
+      } else {
+        psikotestConfig = JSON.stringify({
+          [form.psikotestCategory]: Number(form.psikotestSoalKecerdasan),
+        });
+      }
+    }
+
+    try {
+      const res = await fetch("/api/exams", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: form.title,
+          duration: Number(form.duration), // Pastikan durasi juga dikonversi ke Number
+          isPremium: form.isPremium,
+          examType: form.examType,
+          skdCategory: form.examType === "SKD" ? (form.skdCategory || null) : null,
+          psikotestCategory: form.examType === "PSIKOTEST" ? form.psikotestCategory : null,
+          psikotestConfig,
+          akademikCategory: form.examType === "AKADEMIK" ? form.akademikCategory : null,
+          akademikTotalSoal:
+            form.examType === "AKADEMIK" && form.akademikTotalSoal
+              ? Number(form.akademikTotalSoal)
+              : null,
+        }),
+      });
+
+      if (res.ok) {
+        await fetchExams();
+        setShowModal(false);
+      } else {
+        const data = await res.json();
+        alert(`Error: ${data.error}`);
+      }
+    } catch {
+      alert("Gagal terhubung ke server");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Yakin hapus ujian ini?")) return;
+    await fetch(`/api/exams/${id}`, { method: "DELETE" });
+    await fetchExams();
+  };
+
+  const handleTogglePublish = async (id: string, current: boolean) => {
+    const res = await fetch(`/api/exams/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isPublished: !current }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Tampilkan detail soal yang kurang
+      const details = data.details?.join("\n") ?? data.error;
+      alert(`❌ ${data.error}\n\n${details}`);
+      return;
+    }
+
+    await fetchExams();
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Kelola Ujian</h1>
+          <p className="text-gray-500 text-sm mt-1">Buat dan kelola paket ujian</p>
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          + Buat Ujian Baru
+        </button>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        {loading ? (
+          <div className="text-center py-12 text-gray-400">Memuat data...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[700px]">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="text-left px-6 py-3 text-gray-500 font-medium">Judul Ujian</th>
+                  <th className="text-left px-6 py-3 text-gray-500 font-medium">Durasi</th>
+                  <th className="text-left px-6 py-3 text-gray-500 font-medium">Soal</th>
+                  <th className="text-left px-6 py-3 text-gray-500 font-medium">Tipe</th>
+                  <th className="text-left px-6 py-3 text-gray-500 font-medium">Status</th>
+                  <th className="text-left px-6 py-3 text-gray-500 font-medium">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {exams.map((exam) => (
+                  <tr key={exam.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      <div className="flex items-center gap-2">
+                        {exam.title}
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                          exam.examType === "SKD" ? "bg-blue-50 text-blue-600" :
+                          exam.examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
+                          "bg-orange-50 text-orange-600"
+                        }`}>
+                          {exam.examType}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{exam.duration} menit</td>
+                    <td className="px-6 py-4 text-gray-600">{exam._count.questions} soal</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        exam.isPremium
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}>
+                        {exam.isPremium ? "Premium" : "Gratis"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => handleTogglePublish(exam.id, exam.isPublished)}
+                        className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                          exam.isPublished
+                            ? "bg-green-100 text-green-700 hover:bg-green-200"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                      >
+                        {exam.isPublished ? "Published" : "Draft"}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/admin/exams/${exam.id}`}
+                          className="text-blue-600 hover:underline font-medium text-xs"
+                        >
+                          Input Soal
+                        </Link>
+                        <button
+                          onClick={() => openEdit(exam)}
+                          className="text-gray-600 hover:text-gray-900 font-medium text-xs border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-50"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(exam.id)}
+                          className="text-red-400 hover:text-red-600 text-xs"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          )}
+
+        {!loading && exams.length === 0 && (
+          <div className="text-center py-12 text-gray-400">
+            Belum ada ujian. Buat ujian pertamamu!
+          </div>
+        )}
+      </div>
+
+      {/* Modal Create Ujian*/}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Buat Ujian Baru</h2>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Judul Ujian</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Try Out Nasional SKD #1"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Durasi (menit)</label>
+                <input
+                  type="number"
+                  placeholder="Contoh: 100"
+                  value={form.duration}
+                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              {/* Tipe Ujian */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Ujian</label>
+                <select
+                  value={form.examType}
+                  onChange={(e) => setForm({ ...form, examType: e.target.value as any })}
+                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="SKD">SKD — Seleksi Kompetensi Dasar</option>
+                  <option value="PSIKOTEST">Psikotest</option>
+                  <option value="AKADEMIK">Akademik</option>
+                </select>
+              </div>
+
+              {form.examType === "SKD" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Sub-Kategori SKD
+                  </label>
+                  <select
+                    value={form.skdCategory}
+                    onChange={(e) => setForm({ ...form, skdCategory: e.target.value })}
+                    className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Gabungan (TWK + TIU + TKP)</option>
+                    <option value="TWK">TWK — Tes Wawasan Kebangsaan (30 soal)</option>
+                    <option value="TIU">TIU — Tes Intelegensia Umum (35 soal)</option>
+                    <option value="TKP">TKP — Tes Karakteristik Pribadi (45 soal)</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Psikotest fields */}
+              {form.examType === "PSIKOTEST" && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Psikotest</label>
+                    <select
+                      value={form.psikotestCategory}
+                      onChange={(e) => setForm({ ...form, psikotestCategory: e.target.value })}
+                      className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Kecerdasan">Kecerdasan</option>
+                      <option value="Kecermatan">Kecermatan</option>
+                      <option value="Kepribadian">Kepribadian</option>
+                      <option value="GABUNGAN">Gabungan (Kecerdasan + Kecermatan + Kepribadian)</option>
+                    </select>
+                  </div>
+
+                  {/* Input jumlah soal */}
+                  {form.psikotestCategory === "GABUNGAN" ? (
+                    <div className="bg-gray-50 rounded-lg p-3 flex flex-col gap-2">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">Jumlah Soal per Sub-kategori</p>
+                      {[
+                        { key: "psikotestSoalKecerdasan", label: "Kecerdasan" },
+                        { key: "psikotestSoalKecermatan", label: "Kecermatan" },
+                        { key: "psikotestSoalKepribadian", label: "Kepribadian" },
+                      ].map(({ key, label }) => (
+                        <div key={key} className="flex items-center gap-3">
+                          <span className="text-sm text-gray-600 w-28">{label}</span>
+                          <input
+                            type="number"
+                            min="1"
+                            value={form[key as keyof typeof form] as string}
+                            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                            className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <span className="text-xs text-gray-400">soal</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-600">Jumlah Soal</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={form.psikotestSoalKecerdasan}
+                        onChange={(e) => setForm({ ...form, psikotestSoalKecerdasan: e.target.value })}
+                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-xs text-gray-400">soal</span>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Akademik fields */}
+              {form.examType === "AKADEMIK" && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Kategori Akademik
+                  </label>
+                  <select
+                    value={form.akademikCategory}
+                    onChange={(e) => setForm({ ...form, akademikCategory: e.target.value })}
+                    className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">— Pilih Kategori —</option>
+                    <option value="WAWASAN KEBANGSAAN">Wawasan Kebangsaan</option>
+                    <option value="Pengetahuan Umum">Pengetahuan Umum</option>
+                    <option value="Tes Potensi Akademik">Tes Potensi Akademik</option>
+                    <option value="Tes Kompetensi Keahlian">Tes Kompetensi Keahlian</option>
+                    <option value="Tes Pengetahuan Kepolisian">Tes Pengetahuan Kepolisian</option>
+                    <option value="Tes Penalaran Numerik">Tes Penalaran Numerik</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-600">Jumlah Soal</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={form.akademikTotalSoal}
+                        onChange={(e) => setForm({ ...form, akademikTotalSoal: e.target.value })}
+                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-xs text-gray-400">soal</span>
+                    </div>
+              </>
+            )}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="isPremium"
+                  checked={form.isPremium}
+                  onChange={(e) => setForm({ ...form, isPremium: e.target.checked })}
+                  className="rounded"
+                />
+                <label htmlFor="isPremium" className="text-sm text-gray-700">Ujian Premium</label>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex-1 border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-50"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={saving}
+                className="flex-1 bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving ? "Menyimpan..." : "Buat Ujian"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Edit Ujian */}
+      {editModal && editExam && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Edit Ujian</h2>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Judul Ujian</label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Durasi (menit)</label>
+                <input
+                  type="number"
+                  value={editForm.duration}
+                  onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
+                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              {/* Tipe Ujian */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Ujian</label>
+                <select
+                  value={editForm.examType}
+                  onChange={(e) => setEditForm({ ...editForm, examType: e.target.value as any })}
+                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="SKD">SKD — Seleksi Kompetensi Dasar</option>
+                  <option value="PSIKOTEST">Psikotest</option>
+                  <option value="AKADEMIK">Akademik</option>
+                </select>
+              </div>
+
+              {/* SKD fields - Pastikan menggunakan editForm */}
+                {editForm.examType === "SKD" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Sub-Kategori SKD
+                    </label>
+                    <select
+                      value={editForm.skdCategory} // Gunakan editForm
+                      onChange={(e) => setEditForm({ ...editForm, skdCategory: e.target.value })} // Gunakan setEditForm
+                      className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Gabungan (TWK + TIU + TKP)</option>
+                      <option value="TWK">TWK — Tes Wawasan Kebangsaan (30 soal)</option>
+                      <option value="TIU">TIU — Tes Intelegensia Umum (35 soal)</option>
+                      <option value="TKP">TKP — Tes Karakteristik Pribadi (45 soal)</option>
+                    </select>
+                  </div>
+                )}
+
+              {/* Psikotest fields */}
+              {editForm.examType === "PSIKOTEST" && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Psikotest</label>
+                    <select
+                      value={editForm.psikotestCategory}
+                      onChange={(e) => setEditForm({ ...editForm, psikotestCategory: e.target.value })}
+                      className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="KECERDASAN">Kecerdasan</option>
+                      <option value="KECERMATAN">Kecermatan</option>
+                      <option value="KEPRIBADIAN">Kepribadian</option>
+                      <option value="GABUNGAN">Gabungan (Kecerdasan + Kecermatan + Kepribadian)</option>
+                    </select>
+                  </div>
+
+                  {/* Input jumlah soal */}
+                  {editForm.psikotestCategory === "GABUNGAN" ? (
+                    <div className="bg-gray-50 rounded-lg p-3 flex flex-col gap-2">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">Jumlah Soal per Sub-kategori</p>
+                      {[
+                        { key: "psikotestSoalKecerdasan", label: "Kecerdasan" },
+                        { key: "psikotestSoalKecermatan", label: "Kecermatan" },
+                        { key: "psikotestSoalKepribadian", label: "Kepribadian" },
+                      ].map(({ key, label }) => (
+                        <div key={key} className="flex items-center gap-3">
+                          <span className="text-sm text-gray-600 w-28">{label}</span>
+                          <input
+                            type="number"
+                            min="1"
+                            value={editForm[key as keyof typeof editForm] as string}
+                            onChange={(e) => setEditForm({ ...editForm, [key]: e.target.value })}
+                            className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <span className="text-xs text-gray-400">soal</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-600">Jumlah Soal</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={editForm.psikotestSoalKecerdasan}
+                        onChange={(e) => setEditForm({ ...editForm, psikotestSoalKecerdasan: e.target.value })}
+                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-xs text-gray-400">soal</span>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Akademik fields */}
+              {editForm.examType === "AKADEMIK" && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Akademik</label>
+                    <select
+                      value={editForm.akademikCategory}
+                      onChange={(e) => setEditForm({ ...editForm, akademikCategory: e.target.value })}
+                      className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">— Pilih Kategori —</option>
+                      <option value="WAWASAN_KEBANGSAAN">Wawasan Kebangsaan</option>
+                      <option value="PENGETAHUAN_UMUM">Pengetahuan Umum</option>
+                      <option value="TES_POTENSI_AKADEMIK">Tes Potensi Akademik</option>
+                      <option value="TES_KOMPETENSI_KEAHLIAN">Tes Kompetensi Keahlian</option>
+                      <option value="TES_PENGETAHUAN_KEPOLISIAN">Tes Pengetahuan Kepolisian</option>
+                      <option value="TES_PENALARAN_NUMERIK">Tes Penalaran Numerik</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-600">Jumlah Soal</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={editForm.akademikTotalSoal}
+                      onChange={(e) => setEditForm({ ...editForm, akademikTotalSoal: e.target.value })}
+                      className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-xs text-gray-400">soal</span>
+                  </div>
+                </>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipe Akses Ujian</label>
+                <select
+                  value={editForm.isPremium ? "premium" : "free"}
+                  onChange={(e) => setEditForm({ ...editForm, isPremium: e.target.value === "premium" })}
+                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="free">Free</option>
+                  <option value="premium">Premium</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setEditModal(false)}
+                className="flex-1 border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-50"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleEdit}
+                disabled={editSaving}
+                className="flex-1 bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {editSaving ? "Menyimpan..." : "Simpan Perubahan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

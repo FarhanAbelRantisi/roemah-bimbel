@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum Category {
+  TWK
+  TIU
+  TKP
+}
+
+enum ExamType {
+  SKD
+  PSIKOTEST
+  AKADEMIK
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  isPremium Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  attempts  ExamAttempt[]
+}
+
+model Exam {
+  id          String    @id @default(cuid())
+  title       String
+  duration    Int
+  isPremium   Boolean   @default(false)
+  isPublished Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  examType    ExamType  @default(SKD)
+  
+  skdCategory String?
+  psikotestCategory  String?
+  psikotestConfig    String?
+  akademikCategory   String?
+
+  akademikTotalSoal Int?
+
+  questions   Question[]
+  attempts    ExamAttempt[]
+}
+
+model Question {
+  id          String    @id @default(cuid())
+  examId      String
+  
+  category    Category  @default(TWK)
+  aspect      String?
+
+  subCategory String?
+
+  content     String
+  imageUrl    String?
+  orderNum    Int
+
+  optionA     String
+  optionB     String
+  optionC     String
+  optionD     String
+  optionE     String
+
+  correctOption  String?
+  correctOption2 String?
+  scoreA      Int?
+  scoreB      Int?
+  scoreC      Int?
+  scoreD      Int?
+  scoreE      Int?
+
+  exam    Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers Answer[]
+}
+
+model ExamAttempt {
+  id          String    @id @default(cuid())
+  userId      String
+  examId      String
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+
+  twkScore    Int       @default(0)
+  tiuScore    Int       @default(0)
+  tkpScore    Int       @default(0)
+  totalScore  Int       @default(0)
+
+  kecerdasanScore  Int  @default(0)
+  kecermatanScore  Int  @default(0)
+  kepribadianScore Int  @default(0)
+
+  akademikScore    Int  @default(0)
+
+  user    User        @relation(fields: [userId], references: [id])
+  exam    Exam        @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers Answer[]
+}
+
+model Answer {
+  id          String  @id @default(cuid())
+  attemptId   String
+  questionId  String
+  selected    String?
+  selected2   String?
+  isFlagged   Boolean  @default(false)
+
+  attempt  ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+}
+
+model News {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  category    String
+  imageUrl    String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
