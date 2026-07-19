@@ -585,7 +585,7 @@ export default function HomePage() {
                       <IconPhone />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm mb-1">WhatsApp CS</p>
+                      <p className="font-semibold text-gray-900 text-sm mb-1">WhatsApp</p>
                       <div className="flex flex-col gap-1">
                         <a
                           href="https://wa.me/6285366517750"
@@ -593,7 +593,7 @@ export default function HomePage() {
                           rel="noopener noreferrer"
                           className="text-gray-500 hover:text-[#25D366] text-sm transition-colors font-medium"
                         >
-                          +62 853 6651 7750 (CS 1)
+                          +62 853 6651 7750
                         </a>
                         <a
                           href="https://wa.me/6281368012510"
@@ -601,7 +601,7 @@ export default function HomePage() {
                           rel="noopener noreferrer"
                           className="text-gray-500 hover:text-[#25D366] text-sm transition-colors font-medium"
                         >
-                          +62 813 6801 2510 (CS 2)
+                          +62 813 6801 2510
                         </a>
                       </div>
                     </div>
@@ -646,7 +646,7 @@ export default function HomePage() {
                     rel="noopener noreferrer"
                     className="flex w-full items-center justify-center gap-2 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-semibold py-3.5 px-4 rounded-xl hover:shadow-lg hover:shadow-[#25D366]/30 hover:-translate-y-0.5 transition-all duration-300"
                   >
-                    <IconMessageCircle /> 
+                    <IconMessageCircle />
                     <span>Chat dengan CS Kami</span>
                   </a>
                 </div>
