@@ -168,6 +168,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [filterMode, setFilterMode] = useState<string>("ALL");
   const currentMain = filterMode === "ALL" ? "ALL" : filterMode.split("_")[0];
+  const finishedSet = new Set(finishedExamIds);
 
   const currentExams = exams.filter(e => {
     if (filterMode === "ALL") return true;
