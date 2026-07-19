@@ -77,7 +77,7 @@ export default function ExamPage() {
   const [showWarning, setShowWarning] = useState(false);
   const [warningMsg, setWarningMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const MAX_VIOLATIONS = 7;
+  const MAX_VIOLATIONS = 5;
   const [isBlurred, setIsBlurred] = useState(false);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const violationCooldownRef = useRef(false);

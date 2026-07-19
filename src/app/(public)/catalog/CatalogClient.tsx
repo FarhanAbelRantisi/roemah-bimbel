@@ -436,8 +436,8 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                     Sudah Dikerjakan
                   </span>
                 ) : isPremiumLocked ? (
-                  <span className="block w-full text-center bg-yellow-50 border border-yellow-200 text-yellow-600 text-sm font-semibold py-3 rounded-xl cursor-not-allowed">
-                    <IconLock className="w-5 h-5 text-gray-400 mr-2" /> Khusus Member Premium
+                  <span className="flex items-center justify-center gap-2 w-full bg-yellow-50 border border-yellow-200 text-yellow-600 text-sm font-semibold py-3 rounded-xl cursor-not-allowed">
+                    <IconLock className="w-5 h-5 text-yellow-600" /> Khusus Member Premium
                   </span>
                 ) : (
                   <button
