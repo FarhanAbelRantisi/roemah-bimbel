@@ -238,9 +238,9 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
             <button
               key={tab}
               onClick={() => setMainTab(tab)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${mainTab === tab
-                ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap shrink-0 border ${mainTab === tab
+                ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20"
+                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
                 }`}
             >
               {tab}
@@ -264,9 +264,9 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                 : skdExams.filter((e) => e.skdCategory === sub.value).length;
             return (
               <button key={sub.value} onClick={() => setSkdSub(sub.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${skdSub === sub.value
-                  ? "bg-blue-50 text-blue-500 border border-blue-200"
-                  : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${skdSub === sub.value
+                  ? "bg-blue-50 text-blue-600 border-blue-200 shadow-sm"
+                  : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                   }`}>
                 {sub.label}
                 <span className="ml-1 opacity-60">({count})</span>
@@ -287,9 +287,9 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
               <button
                 key={sub}
                 onClick={() => setPsikotestSub(sub)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${psikotestSub === sub
-                  ? "bg-blue-50 text-blue-500 border border-blue-200"
-                  : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${psikotestSub === sub
+                  ? "bg-blue-50 text-blue-600 border-blue-200 shadow-sm"
+                  : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                   }`}
               >
                 {sub === "SEMUA" ? "Semua" : sub.charAt(0) + sub.slice(1).toLowerCase()}
@@ -311,9 +311,9 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
               <button
                 key={sub}
                 onClick={() => setAkademikSub(sub)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${akademikSub === sub
-                  ? "bg-blue-50 text-blue-500 border border-blue-200"
-                  : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${akademikSub === sub
+                  ? "bg-blue-50 text-blue-600 border-blue-200 shadow-sm"
+                  : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                   }`}
               >
                 {AKADEMIK_LABELS[sub]}
@@ -437,7 +437,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                   </span>
                 ) : isPremiumLocked ? (
                   <span className="flex items-center justify-center gap-2 w-full bg-yellow-50 border border-yellow-200 text-yellow-600 text-sm font-semibold py-3 rounded-xl cursor-not-allowed">
-                    <IconLock className="w-5 h-5 text-yellow-600" /> Khusus Member Premium
+                    <IconLock className="w-5 h-5 text-yellow-600 hidden sm:block" /> Khusus Member Premium
                   </span>
                 ) : (
                   <button
