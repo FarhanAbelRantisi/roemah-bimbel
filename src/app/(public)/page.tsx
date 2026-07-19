@@ -556,98 +556,98 @@ export default function HomePage() {
 
             {/* ===== KONTAK ===== */}
             <ScrollAnimate direction="right">
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 h-full flex flex-col">
-                <h3 className="text-lg font-bold text-gray-900 mb-6">
-                  Roemah Bimbel
-                </h3>
+              <div className="bg-white rounded-2xl border border-gray-100 p-8 h-full flex flex-col shadow-sm shadow-blue-500/5 hover:shadow-md transition-shadow relative overflow-hidden group">
+                {/* Decorative background element */}
+                <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-gradient-to-br from-blue-50 to-transparent opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
 
-                <div className="flex flex-col gap-5 flex-1">
-                  <div className="flex gap-4">
-                    <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center">
+                <div className="relative z-10">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Hubungi Kami
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-8">Punya pertanyaan? Kami siap membantu Anda setiap hari.</p>
+                </div>
+
+                <div className="flex flex-col gap-6 flex-1 relative z-10">
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-12 h-12 bg-gray-50 group-hover/item:bg-blue-50 text-gray-400 group-hover/item:text-blue-500 rounded-2xl flex items-center justify-center shrink-0 transition-colors">
                       <IconMapPin />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">Alamat</p>
-                      <p className="text-gray-500 text-sm mt-0.5">
+                      <p className="font-semibold text-gray-900 text-sm mb-1">Alamat Kantor</p>
+                      <p className="text-gray-500 text-sm leading-relaxed">
                         Jambi, Indonesia
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
-                    <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center">
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-12 h-12 bg-gray-50 group-hover/item:bg-[#25D366]/10 text-gray-400 group-hover/item:text-[#25D366] rounded-2xl flex items-center justify-center shrink-0 transition-colors">
                       <IconPhone />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">WhatsApp 1</p>
-                      <a
-                        href="https://wa.me/6285366517750"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 text-sm mt-0.5 hover:underline"
-                      >
-                        +6285366517750
-                      </a>
+                      <p className="font-semibold text-gray-900 text-sm mb-1">WhatsApp CS</p>
+                      <div className="flex flex-col gap-1">
+                        <a
+                          href="https://wa.me/6285366517750"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-500 hover:text-[#25D366] text-sm transition-colors font-medium"
+                        >
+                          +62 853 6651 7750 (CS 1)
+                        </a>
+                        <a
+                          href="https://wa.me/6281368012510"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-500 hover:text-[#25D366] text-sm transition-colors font-medium"
+                        >
+                          +62 813 6801 2510 (CS 2)
+                        </a>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
-                    <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center">
-                      <IconPhone />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 text-sm">WhatsApp 2</p>
-                      <a
-                        href="https://wa.me/6285366517750"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 text-sm mt-0.5 hover:underline"
-                      >
-                        +6281368012510
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center">
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-12 h-12 bg-gray-50 group-hover/item:bg-pink-50 text-gray-400 group-hover/item:text-pink-500 rounded-2xl flex items-center justify-center shrink-0 transition-colors">
                       <IconCamera />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">Instagram</p>
+                      <p className="font-semibold text-gray-900 text-sm mb-1">Instagram</p>
                       <a
                         href="https://instagram.com/bimbel_polri_kedinasan_cpns"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-500 text-sm mt-0.5 hover:underline"
+                        className="text-gray-500 hover:text-pink-500 text-sm transition-colors font-medium break-all"
                       >
                         @bimbel_polri_kedinasan_cpns
                       </a>
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
-                    <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center">
+                  <div className="flex items-start gap-4 group/item">
+                    <div className="w-12 h-12 bg-gray-50 group-hover/item:bg-blue-50 text-gray-400 group-hover/item:text-blue-500 rounded-2xl flex items-center justify-center shrink-0 transition-colors">
                       <IconClock />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">
+                      <p className="font-semibold text-gray-900 text-sm mb-1">
                         Jam Operasional
                       </p>
-                      <p className="text-gray-500 text-sm mt-0.5">
-                        Senin – Sabtu: 08.00 – 17.00 WIB
+                      <p className="text-gray-500 text-sm">
+                        Senin – Sabtu: <span className="font-medium text-gray-700">08.00 – 17.00 WIB</span>
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-gray-100">
+                <div className="mt-8 pt-6 border-t border-gray-100 relative z-10">
                   <a
                     href="https://wa.me/6285366517750"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full text-center bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-[#25D366]/20"
+                    className="flex w-full items-center justify-center gap-2 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-semibold py-3.5 px-4 rounded-xl hover:shadow-lg hover:shadow-[#25D366]/30 hover:-translate-y-0.5 transition-all duration-300"
                   >
-                    <span className="inline-flex items-center gap-2"><IconMessageCircle /> Chat via WhatsApp</span>
+                    <IconMessageCircle /> 
+                    <span>Chat dengan CS Kami</span>
                   </a>
                 </div>
               </div>
@@ -684,7 +684,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-7 w-auto object-contain shrink-0" />
-                <span className="font-bold text-lg">Roemah Bimbel</span>
+                <span className="font-semibold text-lg tracking-wide">Roemah Bimbel</span>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Platform bimbingan dan simulasi ujian terpercaya untuk SKD,

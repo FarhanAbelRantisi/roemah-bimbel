@@ -42,7 +42,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-white">
+        <Link href="/" className="flex items-center gap-2 font-semibold text-lg text-white tracking-wide">
           <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-7 w-auto object-contain shrink-0" />
           Roemah Bimbel
         </Link>

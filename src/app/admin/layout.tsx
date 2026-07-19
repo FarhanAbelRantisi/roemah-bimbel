@@ -69,7 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo */}
         <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-7 w-auto bg-[#0a1628] rounded-md p-1 object-contain shrink-0" />
+            <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-7 w-auto object-contain shrink-0" />
             <span className="font-bold text-gray-800">Roemah Bimbel</span>
           </Link>
           {/* Close button mobile */}
@@ -141,7 +141,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </svg>
           </button>
           <div className="flex items-center gap-2">
-            <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-6 w-auto bg-[#0a1628] rounded-md p-0.5 object-contain shrink-0" />
+            <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-6 w-auto object-contain shrink-0" />
             <span className="font-bold text-gray-800 text-sm">Admin Portal</span>
           </div>
           <div className="w-10" />
