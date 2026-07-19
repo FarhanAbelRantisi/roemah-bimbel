@@ -381,32 +381,17 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
             <div key={exam.id}
               className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow relative flex flex-col">
 
-              {/* Mobile Header (Badges only) - Hidden on md and up */}
-              <div className="flex md:hidden justify-end items-start gap-4 mb-4">
-                <div className="flex flex-wrap justify-end gap-2">
-                  {isDone && (
-                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700 shrink-0">
-                      ✓ Selesai
-                    </span>
-                  )}
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ${exam.isPremium ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 border border-gray-200"
-                    }`}>
-                    {exam.isPremium ? "Premier" : "Free"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Desktop Badges - Hidden on mobile, absolute positioned */}
-              <div className="hidden md:flex absolute top-6 right-6 gap-2">
-                {isDone && (
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700">
-                    ✓ Selesai
-                  </span>
-                )}
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${exam.isPremium ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 border border-gray-200"
+              {/* Badges - Absolute positioned for both mobile and desktop */}
+              <div className="absolute top-6 right-6 flex flex-col md:flex-row items-end md:items-center gap-2">
+                <span className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ${exam.isPremium ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 border border-gray-200"
                   }`}>
                   {exam.isPremium ? "Premier" : "Free"}
                 </span>
+                {isDone && (
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700 shrink-0">
+                    ✓ Selesai
+                  </span>
+                )}
               </div>
 
               <div>
@@ -416,7 +401,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                     <IconFileText />
                   </div>
                   
-                  <div className="flex-1 md:pr-24">
+                  <div className="flex-1 pr-20 md:pr-28">
                     <h2 className="text-lg font-bold text-gray-900">{exam.title}</h2>
                     {/* Sub-label */}
                     <div className="flex items-center gap-2 mt-0.5">
