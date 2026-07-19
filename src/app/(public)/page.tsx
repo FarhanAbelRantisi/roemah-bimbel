@@ -647,7 +647,7 @@ export default function HomePage() {
                     className="flex w-full items-center justify-center gap-2 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-semibold py-3.5 px-4 rounded-xl hover:shadow-lg hover:shadow-[#25D366]/30 hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <IconMessageCircle />
-                    <span>Chat dengan CS Kami</span>
+                    <span>Diskusi Dengan Kami</span>
                   </a>
                 </div>
               </div>
