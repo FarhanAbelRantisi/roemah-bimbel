@@ -13,6 +13,8 @@ const IconSave = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" heigh
 const IconInbox = () => (<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-gray-400"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>);
 const IconFileText = ({ className = "w-6 h-6 text-blue-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>);
 const IconMessageSquare = ({ className = "w-5 h-5 text-gray-400" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>);
+const IconFilter = ({ className = "w-5 h-5 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>);
+const IconChevronDown = ({ className = "w-4 h-4 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>);
 
 interface Exam {
   id: string;
@@ -137,7 +139,7 @@ function ExamWarningModal({
   );
 }
 
-type MainTab = "SKD" | "PSIKOTEST" | "AKADEMIK";
+// Main Types for filtering
 
 const PSIKOTEST_SUBS = ["SEMUA", "KECERDASAN", "KECERMATAN", "KEPRIBADIAN", "GABUNGAN"] as const;
 
@@ -164,37 +166,40 @@ const AKADEMIK_LABELS: Record<string, string> = {
 export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSession }: Props) {
   const router = useRouter();
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
-  const [mainTab, setMainTab] = useState<MainTab>("SKD");
-  const [psikotestSub, setPsikotestSub] = useState("SEMUA");
-  const [akademikSub, setAkademikSub] = useState("SEMUA");
+  const [filterMode, setFilterMode] = useState<string>("ALL");
+  const currentMain = filterMode === "ALL" ? "ALL" : filterMode.split("_")[0];
 
-  const finishedSet = new Set(finishedExamIds);
+  const currentExams = exams.filter(e => {
+    if (filterMode === "ALL") return true;
+    
+    // SKD Filters
+    if (filterMode === "SKD_SEMUA") return e.examType === "SKD";
+    if (filterMode === "SKD_GABUNGAN") return e.examType === "SKD" && !e.skdCategory;
+    if (filterMode.startsWith("SKD_")) return e.examType === "SKD" && e.skdCategory === filterMode.replace("SKD_", "");
+    
+    // Psikotest Filters
+    if (filterMode === "PSIKOTEST_SEMUA") return e.examType === "PSIKOTEST";
+    if (filterMode.startsWith("PSIKOTEST_")) return e.examType === "PSIKOTEST" && e.psikotestCategory === filterMode.replace("PSIKOTEST_", "");
 
-  // Filter exams per tab
-  const skdExams = exams.filter((e) => e.examType === "SKD");
-  const psikotestExams = exams.filter((e) => e.examType === "PSIKOTEST");
-  const akademikExams = exams.filter((e) => e.examType === "AKADEMIK");
+    // Akademik Filters
+    if (filterMode === "AKADEMIK_SEMUA") return e.examType === "AKADEMIK";
+    if (filterMode.startsWith("AKADEMIK_")) return e.examType === "AKADEMIK" && e.akademikCategory === filterMode.replace("AKADEMIK_", "");
 
-  const [skdSub, setSkdSub] = useState("SEMUA");
+    return true;
+  });
 
-  const filteredSKD = skdSub === "SEMUA"
-    ? skdExams
-    : skdSub === "GABUNGAN"
-      ? skdExams.filter((e) => !e.skdCategory)
-      : skdExams.filter((e) => e.skdCategory === skdSub);
-
-  const filteredPsikotest = psikotestSub === "SEMUA"
-    ? psikotestExams
-    : psikotestExams.filter((e) => e.psikotestCategory === psikotestSub);
-
-  const filteredAkademik = akademikSub === "SEMUA"
-    ? akademikExams
-    : akademikExams.filter((e) => e.akademikCategory === akademikSub);
-
-  const currentExams =
-    mainTab === "SKD" ? filteredSKD :
-      mainTab === "PSIKOTEST" ? filteredPsikotest :
-        filteredAkademik;
+  const FILTER_OPTIONS = [
+    { value: "ALL", label: "Semua Ujian" },
+    { value: "SKD_SEMUA", label: "SKD (Semua)" },
+    { value: "SKD_GABUNGAN", label: "SKD - Gabungan" },
+    { value: "SKD_TWK", label: "SKD - TWK" },
+    { value: "SKD_TIU", label: "SKD - TIU" },
+    { value: "SKD_TKP", label: "SKD - TKP" },
+    { value: "PSIKOTEST_SEMUA", label: "Psikotest (Semua)" },
+    ...PSIKOTEST_SUBS.filter(s => s !== "SEMUA").map(s => ({ value: `PSIKOTEST_${s}`, label: `Psikotest - ${s.charAt(0) + s.slice(1).toLowerCase()}` })),
+    { value: "AKADEMIK_SEMUA", label: "Akademik (Semua)" },
+    ...AKADEMIK_SUBS.filter(s => s !== "SEMUA").map(s => ({ value: `AKADEMIK_${s}`, label: `Akademik - ${AKADEMIK_LABELS[s]}` })),
+  ];
 
 
   const handleStartTest = (exam: Exam) => {
@@ -227,102 +232,135 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
         )}
       </div>
 
-      {/* Main Tabs */}
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {(["SKD", "PSIKOTEST", "AKADEMIK"] as MainTab[]).map((tab) => {
-          const count =
-            tab === "SKD" ? skdExams.length :
-              tab === "PSIKOTEST" ? psikotestExams.length :
-                akademikExams.length;
-          return (
-            <button
-              key={tab}
-              onClick={() => setMainTab(tab)}
-              className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap shrink-0 border ${mainTab === tab
-                ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20"
-                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
-                }`}
-            >
-              {tab}
-              <span className="ml-1.5 opacity-70 text-xs">({count})</span>
-            </button>
-          );
-        })}
+      {/* MOBILE FILTER DROPDOWN */}
+      <div className="mb-6 relative max-w-[240px] md:hidden">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <IconFilter className="w-5 h-5 text-gray-500" />
+        </div>
+        <select
+          value={filterMode}
+          onChange={(e) => setFilterMode(e.target.value)}
+          className="block w-full pl-10 pr-10 py-3 text-sm border-gray-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-xl appearance-none bg-white font-semibold shadow-sm shadow-black/5 hover:border-gray-300 transition-colors cursor-pointer text-gray-700 border"
+        >
+          {FILTER_OPTIONS.map((opt) => (
+             <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+          <IconChevronDown className="w-4 h-4 text-gray-500" />
+        </div>
       </div>
 
-      {mainTab === "SKD" && (
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      {/* DESKTOP TABS */}
+      <div className="hidden md:flex flex-col mb-6">
+        {/* Main Tabs */}
+        <div className="flex gap-2 mb-4">
           {[
-            { value: "SEMUA", label: "Semua" },
-            { value: "GABUNGAN", label: "Gabungan" },
-            { value: "TWK", label: "TWK" },
-            { value: "TIU", label: "TIU" },
-            { value: "TKP", label: "TKP" },
-          ].map((sub) => {
-            const count = sub.value === "SEMUA" ? skdExams.length
-              : sub.value === "GABUNGAN" ? skdExams.filter((e) => !e.skdCategory).length
-                : skdExams.filter((e) => e.skdCategory === sub.value).length;
-            return (
-              <button key={sub.value} onClick={() => setSkdSub(sub.value)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${skdSub === sub.value
-                  ? "bg-blue-50 text-blue-600 border-blue-200 shadow-sm"
-                  : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-                  }`}>
-                {sub.label}
-                <span className="ml-1 opacity-60">({count})</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+            { id: "ALL", label: "Semua Ujian" },
+            { id: "SKD", label: "SKD" },
+            { id: "PSIKOTEST", label: "Psikotest" },
+            { id: "AKADEMIK", label: "Akademik" },
+          ].map((tab) => {
+            let count = exams.length;
+            if (tab.id === "SKD") count = exams.filter(e => e.examType === "SKD").length;
+            if (tab.id === "PSIKOTEST") count = exams.filter(e => e.examType === "PSIKOTEST").length;
+            if (tab.id === "AKADEMIK") count = exams.filter(e => e.examType === "AKADEMIK").length;
 
-      {/* Sub-tabs Psikotest */}
-      {mainTab === "PSIKOTEST" && (
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {PSIKOTEST_SUBS.map((sub) => {
-            const count = sub === "SEMUA"
-              ? psikotestExams.length
-              : psikotestExams.filter((e) => e.psikotestCategory === sub).length;
+            const isActive = currentMain === tab.id;
             return (
               <button
-                key={sub}
-                onClick={() => setPsikotestSub(sub)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${psikotestSub === sub
-                  ? "bg-blue-50 text-blue-600 border-blue-200 shadow-sm"
-                  : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                key={tab.id}
+                onClick={() => setFilterMode(tab.id === "ALL" ? "ALL" : `${tab.id}_SEMUA`)}
+                className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap shrink-0 border ${isActive
+                  ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20"
+                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
                   }`}
               >
-                {sub === "SEMUA" ? "Semua" : sub.charAt(0) + sub.slice(1).toLowerCase()}
-                <span className="ml-1 opacity-60">({count})</span>
+                {tab.label}
+                <span className="ml-1.5 opacity-70 text-xs">({count})</span>
               </button>
             );
           })}
         </div>
-      )}
 
-      {/* Sub-tabs Akademik */}
-      {mainTab === "AKADEMIK" && (
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {AKADEMIK_SUBS.map((sub) => {
-            const count = sub === "SEMUA"
-              ? akademikExams.length
-              : akademikExams.filter((e) => e.akademikCategory === sub).length;
-            return (
-              <button
-                key={sub}
-                onClick={() => setAkademikSub(sub)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${akademikSub === sub
-                  ? "bg-blue-50 text-blue-600 border-blue-200 shadow-sm"
-                  : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-                  }`}
-              >
-                {AKADEMIK_LABELS[sub]}
-                <span className="ml-1 opacity-60">({count})</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+        {/* Sub Tabs SKD */}
+        {currentMain === "SKD" && (
+          <div className="flex gap-2">
+            {[
+              { value: "SEMUA", label: "Semua" },
+              { value: "GABUNGAN", label: "Gabungan" },
+              { value: "TWK", label: "TWK" },
+              { value: "TIU", label: "TIU" },
+              { value: "TKP", label: "TKP" },
+            ].map((sub) => {
+              const fullValue = `SKD_${sub.value}`;
+              const count = sub.value === "SEMUA" ? exams.filter(e => e.examType === "SKD").length
+                : sub.value === "GABUNGAN" ? exams.filter(e => e.examType === "SKD" && !e.skdCategory).length
+                : exams.filter(e => e.examType === "SKD" && e.skdCategory === sub.value).length;
+              return (
+                <button key={sub.value} onClick={() => setFilterMode(fullValue)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${filterMode === fullValue
+                    ? "bg-blue-50 text-blue-600 border-blue-200 shadow-sm"
+                    : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                    }`}>
+                  {sub.label}
+                  <span className="ml-1 opacity-60">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Sub Tabs Psikotest */}
+        {currentMain === "PSIKOTEST" && (
+          <div className="flex gap-2">
+            {PSIKOTEST_SUBS.map((sub) => {
+              const fullValue = `PSIKOTEST_${sub}`;
+              const count = sub === "SEMUA"
+                ? exams.filter(e => e.examType === "PSIKOTEST").length
+                : exams.filter(e => e.examType === "PSIKOTEST" && e.psikotestCategory === sub).length;
+              return (
+                <button
+                  key={sub}
+                  onClick={() => setFilterMode(fullValue)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${filterMode === fullValue
+                    ? "bg-blue-50 text-blue-600 border-blue-200 shadow-sm"
+                    : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                    }`}
+                >
+                  {sub === "SEMUA" ? "Semua" : sub.charAt(0) + sub.slice(1).toLowerCase()}
+                  <span className="ml-1 opacity-60">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Sub Tabs Akademik */}
+        {currentMain === "AKADEMIK" && (
+          <div className="flex gap-2">
+            {AKADEMIK_SUBS.map((sub) => {
+              const fullValue = `AKADEMIK_${sub}`;
+              const count = sub === "SEMUA"
+                ? exams.filter(e => e.examType === "AKADEMIK").length
+                : exams.filter(e => e.examType === "AKADEMIK" && e.akademikCategory === sub).length;
+              return (
+                <button
+                  key={sub}
+                  onClick={() => setFilterMode(fullValue)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${filterMode === fullValue
+                    ? "bg-blue-50 text-blue-600 border-blue-200 shadow-sm"
+                    : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                    }`}
+                >
+                  {AKADEMIK_LABELS[sub]}
+                  <span className="ml-1 opacity-60">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {currentExams.length === 0 && (
         <div className="text-center py-20 text-gray-400">
@@ -342,11 +380,8 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
             <div key={exam.id}
               className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow relative flex flex-col">
 
-              {/* Mobile Header (Icon + Badges) - Hidden on md and up */}
-              <div className="flex md:hidden justify-between items-start gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-blue-50">
-                  <IconFileText />
-                </div>
+              {/* Mobile Header (Badges only) - Hidden on md and up */}
+              <div className="flex md:hidden justify-end items-start gap-4 mb-4">
                 <div className="flex flex-wrap justify-end gap-2">
                   {isDone && (
                     <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700 shrink-0">
@@ -413,17 +448,17 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
 
                 <div className="flex items-center gap-6 mb-5">
                   <div className="flex items-center gap-2">
-                    <IconClock className="w-5 h-5 text-gray-400" />
+                    <IconClock className="w-5 h-5 text-gray-400 hidden md:block" />
                     <div>
                       <p className="font-semibold text-gray-900 text-sm">{exam.duration} mins</p>
                       <p className="text-xs text-gray-400">Duration</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <IconMessageSquare />
+                    <IconMessageSquare className="w-5 h-5 text-gray-400 hidden md:block" />
                     <div>
                       <p className="font-semibold text-gray-900 text-sm">{exam._count.questions}</p>
-                      <p className="text-xs text-gray-400">Questions Total</p>
+                      <p className="text-xs text-gray-400">Questions</p>
                     </div>
                   </div>
                 </div>
@@ -437,7 +472,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                   </span>
                 ) : isPremiumLocked ? (
                   <span className="flex items-center justify-center gap-2 w-full bg-yellow-50 border border-yellow-200 text-yellow-600 text-sm font-semibold py-3 rounded-xl cursor-not-allowed">
-                    <IconLock className="w-5 h-5 text-yellow-600 hidden sm:block" /> Khusus Member Premium
+                    <IconLock className="w-5 h-5 text-yellow-600 hidden md:block" /> Khusus Member Premium
                   </span>
                 ) : (
                   <button
