@@ -4,11 +4,18 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
+const IconDashboard = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>;
+const IconExam = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>;
+const IconUsers = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+const IconNews = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>;
+const IconHome = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+const IconLogout = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
+
 const menuItems = [
-  { href: "/admin", label: "Dashboard", icon: "▣" },
-  { href: "/admin/exams", label: "Kelola Ujian", icon: "📋" },
-  { href: "/admin/users", label: "Manajemen User", icon: "👥" },
-  { href: "/admin/news", label: "News & CMS", icon: "📰" },
+  { href: "/admin", label: "Dashboard", icon: <IconDashboard /> },
+  { href: "/admin/exams", label: "Kelola Ujian", icon: <IconExam /> },
+  { href: "/admin/users", label: "Manajemen User", icon: <IconUsers /> },
+  { href: "/admin/news", label: "News & CMS", icon: <IconNews /> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -62,7 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo */}
         <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="bg-blue-600 text-white font-bold rounded-md px-2 py-1 text-sm">RB</span>
+            <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-7 w-auto bg-white rounded-md p-1 object-contain shrink-0" />
             <span className="font-bold text-gray-800">Roemah Bimbel</span>
           </Link>
           {/* Close button mobile */}
@@ -107,14 +114,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
           >
-            <span>🏠</span>
+            <span className="text-gray-500"><IconHome /></span>
             Kembali ke Website
           </Link>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors w-full text-left"
           >
-            <span>🚪</span>
+            <span className="text-red-400"><IconLogout /></span>
             Logout
           </button>
         </div>
@@ -134,7 +141,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </svg>
           </button>
           <div className="flex items-center gap-2">
-            <span className="bg-blue-600 text-white font-bold rounded-md px-2 py-1 text-xs">RB</span>
+            <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-6 w-auto bg-white rounded-md p-0.5 object-contain shrink-0" />
             <span className="font-bold text-gray-800 text-sm">Admin Portal</span>
           </div>
           <div className="w-10" />

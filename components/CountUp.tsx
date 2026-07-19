@@ -15,7 +15,6 @@ export default function CountUp({ value, label }: Props) {
   useEffect(() => {
     if (!isInView) return;
 
-    // Cek apakah value adalah angka
     const numMatch = value.match(/^(\d+)(.*)$/);
     if (!numMatch) {
       setDisplayed(value);
@@ -23,7 +22,7 @@ export default function CountUp({ value, label }: Props) {
     }
 
     const target = parseInt(numMatch[1]);
-    const suffix = numMatch[2]; // "+", "k+", dll
+    const suffix = numMatch[2];
     const duration = 1500;
     const steps = 40;
     const increment = target / steps;

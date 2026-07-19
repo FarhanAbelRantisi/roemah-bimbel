@@ -43,7 +43,7 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl text-white">
-          <span className="bg-blue-500 text-white rounded-md px-2 py-1 text-sm">RB</span>
+          <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-7 w-auto bg-white rounded-md p-1 object-contain shrink-0" />
           Roemah Bimbel
         </Link>
 
@@ -204,7 +204,7 @@ export default function Navbar() {
                   onClick={() => setMenuOpen(false)}
                   className="px-3 py-2.5 rounded-lg text-sm font-medium text-blue-500 hover:bg-blue-50 transition-colors"
                 >
-                  🔧 Admin Panel
+                  Admin Panel
                 </Link>
               )}
 
@@ -212,7 +212,7 @@ export default function Navbar() {
                 onClick={handleLogout}
                 className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-white/10 transition-colors"
               >
-                🚪 Logout
+                Logout
               </button>
             </>
           ) : (

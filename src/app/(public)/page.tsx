@@ -297,7 +297,7 @@ export default function HomePage() {
                     {
                       icon: <IconTrophy />,
                       title: "Terbukti Menghasilkan Lulusan",
-                      desc: "Lebih dari 200 siswa telah lulus seleksi impian mereka sejak Roemah Bimbel berdiri pada tahun 2015.",
+                      desc: "Ratusan siswa telah lulus seleksi impian mereka sejak Roemah Bimbel berdiri pada tahun 2015.",
                     },
                   ].map((item) => (
                     <div key={item.title} className="flex gap-4">
@@ -502,7 +502,7 @@ export default function HomePage() {
 
             {!showAllPhotos && (
               <div className="md:hidden flex justify-center mb-16 pb-4">
-                <button 
+                <button
                   onClick={() => setShowAllPhotos(true)}
                   className="bg-white border border-gray-200 text-gray-700 font-semibold text-sm px-6 py-2.5 rounded-full shadow-sm hover:bg-gray-50 transition-colors"
                 >
