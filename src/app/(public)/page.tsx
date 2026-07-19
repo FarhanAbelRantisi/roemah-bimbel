@@ -683,7 +683,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="bg-blue-500 font-bold rounded-md px-2 py-1 text-sm">RB</span>
+                <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-7 w-auto object-contain shrink-0" />
                 <span className="font-bold text-lg">Roemah Bimbel</span>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">

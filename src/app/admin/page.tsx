@@ -47,14 +47,19 @@ async function getStats() {
   }
 }
 
+const IconExam = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>;
+const IconUsers = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+const IconCheck = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>;
+const IconNews = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>;
+
 export default async function AdminDashboard() {
   const stats = await getStats();
 
   const statCards = [
-    { label: "Total Ujian", value: stats.totalExams, icon: "📋", sub: `${stats.publishedExams} published`, color: "text-blue-600 bg-blue-50" },
-    { label: "Total Siswa", value: stats.totalStudents, icon: "👥", sub: "terdaftar", color: "text-green-600 bg-green-50" },
-    { label: "Ujian Dikerjakan", value: stats.totalAttempts, icon: "✅", sub: "total attempt", color: "text-yellow-600 bg-yellow-50" },
-    { label: "Berita Aktif", value: stats.totalNews, icon: "📰", sub: "published", color: "text-purple-600 bg-purple-50" },
+    { label: "Total Ujian", value: stats.totalExams, icon: <IconExam />, sub: `${stats.publishedExams} published`, color: "text-blue-600 bg-blue-50" },
+    { label: "Total Siswa", value: stats.totalStudents, icon: <IconUsers />, sub: "terdaftar", color: "text-green-600 bg-green-50" },
+    { label: "Ujian Dikerjakan", value: stats.totalAttempts, icon: <IconCheck />, sub: "total attempt", color: "text-yellow-600 bg-yellow-50" },
+    { label: "Berita Aktif", value: stats.totalNews, icon: <IconNews />, sub: "published", color: "text-purple-600 bg-purple-50" },
   ];
 
   // Serialize data untuk client component
@@ -115,16 +120,16 @@ export default async function AdminDashboard() {
           <h2 className="text-base font-semibold text-gray-800 mb-4">Quick Actions</h2>
           <div className="flex flex-col gap-3">
             {[
-              { href: "/admin/exams", icon: "📋", label: "Buat Ujian Baru", desc: "Tambah paket soal baru" },
-              { href: "/admin/news", icon: "📰", label: "Tulis Berita", desc: "Publish informasi terbaru" },
-              { href: "/admin/users", icon: "👥", label: "Kelola User", desc: "Manajemen akun siswa" },
+              { href: "/admin/exams", icon: <IconExam />, label: "Buat Ujian Baru", desc: "Tambah paket soal baru" },
+              { href: "/admin/news", icon: <IconNews />, label: "Tulis Berita", desc: "Publish informasi terbaru" },
+              { href: "/admin/users", icon: <IconUsers />, label: "Kelola User", desc: "Manajemen akun siswa" },
             ].map((action) => (
               <Link
                 key={action.href}
                 href={action.href}
                 className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors group"
               >
-                <span className="text-2xl">{action.icon}</span>
+                <span className="text-blue-600">{action.icon}</span>
                 <div>
                   <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600">
                     {action.label}

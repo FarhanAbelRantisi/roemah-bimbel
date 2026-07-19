@@ -43,7 +43,7 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl text-white">
-          <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-7 w-auto bg-white rounded-md p-1 object-contain shrink-0" />
+          <img src="/images/logo_roemahbimbel.png" alt="RB" className="h-7 w-auto object-contain shrink-0" />
           Roemah Bimbel
         </Link>
 
