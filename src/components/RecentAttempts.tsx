@@ -86,15 +86,25 @@ export default function RecentAttempts({ attempts }: { attempts: Attempt[] }) {
       )
     : [];
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Yakin ingin menghapus attempt ini?")) return;
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const confirmDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteConfirmId) return;
+    const id = deleteConfirmId;
+    setDeleteConfirmId(null);
     try {
       setDeletingId(id);
       const res = await fetch(`/api/attempts/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       router.refresh();
     } catch {
-      alert("Gagal menghapus data");
+      setErrorMsg("Gagal menghapus data attempt");
+      setTimeout(() => setErrorMsg(null), 4000);
     } finally {
       setDeletingId(null);
     }
@@ -343,7 +353,7 @@ export default function RecentAttempts({ attempts }: { attempts: Attempt[] }) {
 
                     {/* Delete button */}
                     <button
-                      onClick={() => handleDelete(attempt.id)}
+                      onClick={() => confirmDelete(attempt.id)}
                       disabled={deletingId === attempt.id}
                       title="Hapus attempt"
                       className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-red-50 hover:border-red-200 hover:text-red-600 disabled:opacity-40 transition-colors"
@@ -470,6 +480,35 @@ export default function RecentAttempts({ attempts }: { attempts: Attempt[] }) {
               ✕
             </button>
             <PauliReportView attemptId={viewPauliId} />
+          </div>
+      {/* Modal Confirm Delete Attempt */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] px-4 animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl border border-gray-100 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 border border-red-100">
+              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-1">Hapus Riwayat Attempt?</h3>
+            <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+              Tindakan ini akan menghapus riwayat pengerjaan peserta ini secara permanen dari basis data.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 font-semibold text-xs md:text-sm rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={executeDelete}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white font-semibold text-xs md:text-sm rounded-xl hover:bg-red-700 transition-all shadow-md shadow-red-500/20"
+              >
+                Hapus
+              </button>
+            </div>
           </div>
         </div>
       )}

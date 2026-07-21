@@ -99,19 +99,23 @@ export default function HistoryDetailPage() {
         <div className="mb-4">
           <Link
             href="/history"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            className="inline-flex items-center gap-2 text-xs md:text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors group"
           >
-            ← Kembali ke Riwayat
+            <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Kembali ke Riwayat Ujian</span>
           </Link>
         </div>
-        <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-lg">
+
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
           <PauliReportView attemptId={attempt.id} />
-          <div className="mt-8 pt-6 border-t border-gray-100 flex justify-center">
+          <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
             <Link
               href="/history"
-              className="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-md"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white font-semibold px-6 py-3 rounded-2xl text-xs md:text-sm hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20"
             >
-              Kembali ke Riwayat
+              <span>Kembali ke Daftar Riwayat</span>
             </Link>
           </div>
         </div>

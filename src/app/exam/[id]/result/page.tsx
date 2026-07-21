@@ -55,15 +55,15 @@ export default function ResultPage() {
 
   if (result.exam.psikotestCategory === "PAULI") {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-3xl bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 text-center shadow-lg">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-4xl bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 text-center shadow-md">
           <PauliReportView attemptId={attemptId!} />
-          <div className="mt-8 pt-6 border-t border-gray-100 flex justify-center">
+          <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
             <Link
               href="/catalog"
-              className="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-md"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white font-semibold px-6 py-3 rounded-2xl text-xs md:text-sm hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20"
             >
-              Kembali ke Katalog
+              <span>Kembali ke Katalog Ujian</span>
             </Link>
           </div>
         </div>

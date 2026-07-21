@@ -850,35 +850,68 @@ export default function AdminExamDetailPage() {
 
       {/* Special Pauli Banner Config */}
       {exam?.examType === "PSIKOTEST_TNI" && exam?.psikotestCategory === "PAULI" && (
-        <div className="bg-gradient-to-r from-green-50 to-green-50 border border-green-200 rounded-xl p-6 mb-6 shadow-sm">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                {/* <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
-                  Tes Pauli
-                </span> */}
-                {/* <span className="text-xs text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full font-medium">
-                  Auto-Generated System
-                </span> */}
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Konfigurasi Lembar Kerja Pauli</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Soal Tes Pauli di-generate secara acak (0-9) oleh sistem saat ujian berlangsung. Admin tidak perlu menginputkan soal secara manual.
-              </p>
+        <div className="bg-gradient-to-br from-emerald-900 via-slate-900 to-teal-950 text-white rounded-3xl p-6 md:p-8 mb-6 shadow-xl relative overflow-hidden border border-emerald-500/20">
+          {/* Subtle background glow */}
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white/80 p-4 rounded-lg border border-blue-100 text-xs">
-                <div>
-                  <span className="text-gray-500 block">Total Durasi Ujian</span>
-                  <strong className="text-gray-900 text-sm">{(exam?.duration ?? 0) * 60} Detik ({exam?.duration ?? 0} Menit)</strong>
+          <div className="relative z-10 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
                 </div>
                 <div>
-                  <span className="text-gray-500 block">Interval Garis (Switch Kolom)</span>
-                  <strong className="text-gray-900 text-sm">{getPsikotestConfig().signal_interval_sec ?? 180} Detik ({(getPsikotestConfig().signal_interval_sec ?? 180) / 60} Menit)</strong>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                      Ujian Psikotes Pauli
+                    </span>
+                    <span className="bg-white/10 text-slate-300 text-[10px] font-medium px-2 py-0.5 rounded-full">
+                      Sistem Otomatis
+                    </span>
+                  </div>
+                  <h3 className="text-lg md:text-xl font-bold text-white">Konfigurasi Lembar Kerja Pauli</h3>
                 </div>
-                <div>
-                  <span className="text-gray-500 block">Jumlah Kolom Kerja</span>
-                  <strong className="text-gray-900 text-sm">{Math.floor(((exam?.duration ?? 0) * 60) / (getPsikotestConfig().signal_interval_sec ?? 180))} Kolom</strong>
-                </div>
+              </div>
+            </div>
+
+            <p className="text-xs md:text-sm text-slate-300 leading-relaxed max-w-3xl">
+              Soal Ujian Pauli di-generate secara acak (angka 0–9) oleh sistem secara otomatis saat ujian dimulai. Admin tidak perlu menginputkan butir soal satu per satu.
+            </p>
+
+            {/* Config metrics grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex flex-col justify-between">
+                <span className="text-xs text-slate-300 font-medium flex items-center gap-1.5 mb-2">
+                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Total Durasi Ujian
+                </span>
+                <p className="text-lg font-bold text-white">
+                  {(exam?.duration ?? 0) * 60} Detik
+                  <span className="text-xs font-normal text-slate-300 ml-1">({exam?.duration ?? 0} Menit)</span>
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex flex-col justify-between">
+                <span className="text-xs text-slate-300 font-medium flex items-center gap-1.5 mb-2">
+                  <svg className="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  Interval Per Kolom
+                </span>
+                <p className="text-lg font-bold text-white">
+                  {getPsikotestConfig().signal_interval_sec ?? 180} Detik
+                  <span className="text-xs font-normal text-slate-300 ml-1">({(getPsikotestConfig().signal_interval_sec ?? 180) / 60} Menit)</span>
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex flex-col justify-between">
+                <span className="text-xs text-slate-300 font-medium flex items-center gap-1.5 mb-2">
+                  <svg className="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                  Jumlah Lembar Kolom
+                </span>
+                <p className="text-lg font-bold text-white">
+                  {Math.floor(((exam?.duration ?? 0) * 60) / (getPsikotestConfig().signal_interval_sec ?? 180))} Kolom Kerja
+                </p>
               </div>
             </div>
           </div>
