@@ -723,22 +723,18 @@ export default function AdminExamDetailPage() {
                 Soal Tes Pauli di-generate secara acak (0-9) oleh sistem saat ujian berlangsung. Admin tidak perlu menginputkan soal secara manual.
               </p>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white/80 p-4 rounded-lg border border-blue-100 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white/80 p-4 rounded-lg border border-blue-100 text-xs">
                 <div>
-                  <span className="text-gray-500 block">Total Durasi</span>
+                  <span className="text-gray-500 block">Total Durasi Ujian</span>
                   <strong className="text-gray-900 text-sm">{exam?.duration ?? 0} Menit ({(exam?.duration ?? 0) * 60} dtk)</strong>
                 </div>
                 <div>
-                  <span className="text-gray-500 block">Interval Garis (Switch)</span>
+                  <span className="text-gray-500 block">Interval Garis (Switch Kolom)</span>
                   <strong className="text-gray-900 text-sm">{getPsikotestConfig().signal_interval_sec ?? 180} Detik ({(getPsikotestConfig().signal_interval_sec ?? 180)/60} Menit)</strong>
                 </div>
                 <div>
-                  <span className="text-gray-500 block">Jumlah Kolom</span>
-                  <strong className="text-gray-900 text-sm">{Math.floor(((exam?.duration ?? 0) * 60) / (getPsikotestConfig().signal_interval_sec ?? 180))} Kolom</strong>
-                </div>
-                <div>
-                  <span className="text-gray-500 block">Kapasitas per Kolom</span>
-                  <strong className="text-gray-900 text-sm">{getPsikotestConfig().angka_per_kolom ?? 45} Baris Angka</strong>
+                  <span className="text-gray-500 block">Jumlah Kolom Kerja</span>
+                  <strong className="text-gray-900 text-sm">{Math.floor(((exam?.duration ?? 0) * 60) / (getPsikotestConfig().signal_interval_sec ?? 180))} Kolom (Lazy Generator Unlimited)</strong>
                 </div>
               </div>
             </div>

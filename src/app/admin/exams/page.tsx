@@ -632,7 +632,7 @@ export default function AdminExamsPage() {
                         <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Real-Time Generator</span>
                         <p className="text-xs font-bold text-blue-900">Konfigurasi Lembar Kerja Tes Pauli</p>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 gap-3">
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">Durasi per Kolom / Garis (Detik)</label>
                           <input
@@ -642,16 +642,6 @@ export default function AdminExamsPage() {
                             className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                           />
                           <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 180 detik (3 menit)</span>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Jumlah Angka per Kolom</label>
-                          <input
-                            type="number" min="10"
-                            value={form.pauliAngkaPerKolom}
-                            onChange={(e) => setForm({ ...form, pauliAngkaPerKolom: e.target.value })}
-                            className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                          />
-                          <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 45 angka per kolom</span>
                         </div>
                       </div>
                       <p className="text-xs text-blue-800 bg-blue-100/60 rounded-lg px-3 py-2 border border-blue-200/50">
@@ -901,26 +891,16 @@ export default function AdminExamsPage() {
                         <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Real-Time Generator</span>
                         <p className="text-xs font-bold text-blue-900">Konfigurasi Lembar Kerja Tes Pauli</p>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 gap-3">
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Durasi per Kolom / Garis (Detik)</label>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Interval Garis Pindah Kolom (Detik)</label>
                           <input
                             type="number" min="10"
                             value={editForm.pauliIntervalSec}
                             onChange={(e) => setEditForm({ ...editForm, pauliIntervalSec: e.target.value })}
                             className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                           />
-                          <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 180 detik (3 menit)</span>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Jumlah Angka per Kolom</label>
-                          <input
-                            type="number" min="10"
-                            value={editForm.pauliAngkaPerKolom}
-                            onChange={(e) => setEditForm({ ...editForm, pauliAngkaPerKolom: e.target.value })}
-                            className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                          />
-                          <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 45 angka per kolom</span>
+                          <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 180 detik (3 menit per kolom)</span>
                         </div>
                       </div>
                       <p className="text-xs text-blue-800 bg-blue-100/60 rounded-lg px-3 py-2 border border-blue-200/50">
