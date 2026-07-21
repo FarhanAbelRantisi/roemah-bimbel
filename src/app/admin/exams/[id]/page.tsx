@@ -65,7 +65,7 @@ type Category = "TWK" | "TIU" | "TKP";
 
 interface ExamDetail {
   id: string;
-  examType: "SKD" | "PSIKOTEST" | "AKADEMIK";
+  examType: "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
   skdCategory?: string;
   psikotestCategory?: string;
   psikotestConfig?: string;

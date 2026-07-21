@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK";
+type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
 
 // 1. UPDATE INTERFACE AGAR MENERIMA SEMUA SKOR
 interface Attempt {

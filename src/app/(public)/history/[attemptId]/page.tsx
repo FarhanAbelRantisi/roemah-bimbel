@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
-type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK";
+type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
 
 interface Question {
   id: string;

@@ -8,7 +8,7 @@ const IconLock = ({ className = "shrink-0 mt-0.5" }: { className?: string }) => 
 const IconFlag = ({ className = "w-4 h-4" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>);
 
 type Category = "TWK" | "TIU" | "TKP";
-type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK";
+type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
 
 interface Question {
   id: string;
