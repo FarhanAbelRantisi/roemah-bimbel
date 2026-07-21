@@ -169,9 +169,8 @@ export default function PauliReportView({ attemptId }: { attemptId: string }) {
             Klasifikasi Norma TNI
           </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              { label: "Jumlah Total", data: norm.jumlah_total },
               { label: "Rasio Ketelitian", data: norm.rasio_ketelitian },
               { label: "Deviasi Konsistensi", data: norm.deviasi_konsistensi },
             ].map((item) => (

@@ -998,36 +998,36 @@ export default function ExamPage() {
         </div>
 
         {/* Sidebar */}
-        <aside className="w-full landscape:w-56 lg:w-80 xl:w-96 bg-white border-b landscape:border-b-0 lg:border-b-0 landscape:border-l lg:border-l border-slate-200/80 p-5 lg:p-6 landscape:overflow-y-auto lg:overflow-y-auto flex flex-col gap-5 lg:gap-6 order-1 landscape:order-2 lg:order-2 shrink-0 shadow-sm">
+        <aside className="w-full landscape:w-72 lg:w-96 xl:w-[420px] 2xl:w-[460px] bg-white border-b landscape:border-b-0 lg:border-b-0 landscape:border-l lg:border-l border-slate-200/80 p-5 lg:p-7 landscape:overflow-y-auto lg:overflow-y-auto flex flex-col gap-6 lg:gap-7 order-1 landscape:order-2 lg:order-2 shrink-0 shadow-sm">
           {/* Timer */}
-          <div className="bg-slate-50 rounded-2xl p-4 lg:p-5 text-center border border-slate-200/80 shadow-xs">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Time Remaining</p>
-            <p className={`text-3xl lg:text-4xl font-extrabold tabular-nums tracking-tight ${timeLeft < 300 ? "text-rose-600 animate-pulse" : "text-slate-900"}`}>
+          <div className="bg-slate-50 rounded-2xl p-5 lg:p-6 text-center border border-slate-200/80 shadow-xs">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Time Remaining</p>
+            <p className={`text-4xl lg:text-5xl font-black tabular-nums tracking-tight ${timeLeft < 300 ? "text-rose-600 animate-pulse" : "text-slate-900"}`}>
               {formatTime(timeLeft)}
             </p>
           </div>
 
           {/* Question Palette */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-700">Question Palette</p>
-              <span className="text-xs font-semibold text-slate-400">{shuffledAnswers.length} Total</span>
+            <div className="flex items-center justify-between mb-3.5">
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">Question Palette</p>
+              <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">{shuffledAnswers.length} Total</span>
             </div>
 
-            <div className="grid grid-cols-3 sm:grid-cols-4 landscape:grid-cols-4 lg:grid-cols-4 gap-2.5 max-h-40 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-1 landscape:pr-0 lg:pr-0">
+            <div className="grid grid-cols-3 sm:grid-cols-4 landscape:grid-cols-4 lg:grid-cols-4 gap-3 max-h-48 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-1 landscape:pr-0 lg:pr-0">
               {shuffledAnswers.map((ans, idx) => {
                 const s = getStatus(ans, idx);
                 return (
                   <button
                     key={ans.questionId}
                     onClick={() => setCurrentIdx(idx)}
-                    className={`w-full aspect-square rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center ${s === "current"
-                      ? "bg-white border-2 border-blue-600 text-blue-600 shadow-sm"
+                    className={`w-full aspect-square rounded-2xl text-sm lg:text-base font-extrabold transition-all shadow-xs flex items-center justify-center ${s === "current"
+                      ? "bg-white border-3 border-blue-600 text-blue-600 shadow-md ring-2 ring-blue-600/20"
                       : s === "answered"
-                        ? "bg-blue-600 text-white shadow-xs"
+                        ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
                         : s === "flagged"
-                          ? "bg-amber-500 text-white shadow-xs"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                          ? "bg-amber-500 text-white shadow-sm hover:bg-amber-600"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60"
                       }`}
                   >
                     {idx + 1}
@@ -1038,28 +1038,28 @@ export default function ExamPage() {
           </div>
 
           {/* Legend */}
-          <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100">
             {[
               { color: "bg-blue-600", label: "Answered" },
               { color: "bg-amber-500", label: "Flagged" },
               { color: "bg-slate-100 border border-slate-200", label: "Unanswered" },
               { color: "bg-white border-2 border-blue-600", label: "Current" },
             ].map((item) => (
-              <div key={item.label} className="flex items-center gap-2">
-                <div className={`w-3.5 h-3.5 rounded-md shrink-0 ${item.color}`} />
-                <span className="text-xs font-medium text-slate-500">{item.label}</span>
+              <div key={item.label} className="flex items-center gap-2.5">
+                <div className={`w-4 h-4 rounded-lg shrink-0 ${item.color}`} />
+                <span className="text-xs font-semibold text-slate-600">{item.label}</span>
               </div>
             ))}
           </div>
 
           {/* User */}
-          <div className="mt-auto flex items-center gap-3 pt-4 border-t border-slate-100">
-            <div className="w-9 h-9 bg-blue-100 border border-blue-200 rounded-full flex items-center justify-center text-sm font-bold text-blue-700">
+          <div className="mt-auto flex items-center gap-3.5 pt-5 border-t border-slate-100">
+            <div className="w-11 h-11 bg-blue-100 border border-blue-200 rounded-2xl flex items-center justify-center text-base font-black text-blue-700 shadow-xs">
               {session?.user?.name?.[0]?.toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-800 truncate">{session?.user?.name}</p>
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Candidate</p>
+              <p className="text-sm font-extrabold text-slate-900 truncate">{session?.user?.name}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Candidate</p>
             </div>
           </div>
         </aside>
