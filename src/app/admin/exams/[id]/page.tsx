@@ -425,9 +425,10 @@ export default function AdminExamDetailPage() {
     let defaultSub = "";
 
     if (exam?.examType === "SKD") {
-      defaultCat = activeTab; 
+      defaultCat = activeTab === "ALL" ? "TWK" : activeTab; 
     } else {
-      defaultSub = activeSubTab || getSubCategories()[0] || ""; 
+      const subs = getSubCategories();
+      defaultSub = (activeSubTab && activeSubTab !== "ALL") ? activeSubTab : (subs[0] || exam?.psikotestCategory || ""); 
     }
 
     setForm({
@@ -527,17 +528,30 @@ export default function AdminExamDetailPage() {
     return () => { isMounted = false; };
   }, [id]);
 
-  const checkCategoryLimit = (category: Category): boolean => {
-    if (editId) return true;
-    if (exam?.examType !== "SKD") return true; // Psikotest & Akademik: cek di API
-    const limits: Record<Category, number> = { TWK: 30, TIU: 35, TKP: 45 };
-    return categoryCount(category) < limits[category];
+  const isQuestionLimitReached = (): boolean => {
+    if (editId) return false;
+    if (exam?.examType === "SKD") {
+      const cat = form.category || (activeTab === "ALL" ? "TWK" : activeTab);
+      const limits: Record<Category, number> = { TWK: 30, TIU: 35, TKP: 45 };
+      return categoryCount(cat) >= (limits[cat] ?? 30);
+    }
+    if (exam?.examType === "PSIKOTEST" || exam?.examType === "PSIKOTEST_TNI") {
+      const sub = form.subCategory || (activeSubTab !== "ALL" ? activeSubTab : "") || getSubCategories()[0];
+      if (!sub) return false;
+      const limit = getLimit(sub);
+      return limit !== Infinity && subCategoryCount(sub) >= limit;
+    }
+    if (exam?.examType === "AKADEMIK") {
+      const limit = exam?.akademikTotalSoal ?? Infinity;
+      return limit !== Infinity && questions.length >= limit;
+    }
+    return false;
   };
 
   const handleSave = async () => {
     if (!form.content) return;
-    if (!checkCategoryLimit(form.category)) {
-      alert(`Kategori ${form.category} sudah mencapai batas maksimal!`);
+    if (isQuestionLimitReached()) {
+      alert(`Jumlah soal sudah mencapai batas maksimal!`);
       return;
     }
 
@@ -585,8 +599,8 @@ export default function AdminExamDetailPage() {
 
   const handleSaveAndNext = async () => {
     if (!form.content) return;
-    if (!checkCategoryLimit(form.category)) {
-      alert(`Kategori ${form.category} sudah mencapai batas maksimal!`);
+    if (isQuestionLimitReached()) {
+      alert("Batas maksimal jumlah soal untuk sub-kategori ini telah tercapai!");
       return;
     }
 
@@ -619,14 +633,24 @@ export default function AdminExamDetailPage() {
     await fetchQuestions();
     setSaving(false);
 
-    // Reset form tapi pertahankan subCategory & category
-    setForm({
-      ...emptyQuestion(),
-      category: form.category,
-      subCategory: form.subCategory,
-    });
-    setImageFile(null);
-    setImagePreview(null);
+    // Cek apakah setelah simpan soal ini sudah penuh
+    const sub = form.subCategory || getSubCategories()[0];
+    const currentCount = subCategoryCount(sub) + 1;
+    const limit = getLimit(sub);
+
+    if (limit !== Infinity && currentCount >= limit) {
+      setShowModal(false);
+      alert("Soal berhasil disimpan! Kuota jumlah soal untuk sub-kategori ini telah terpenuhi.");
+    } else {
+      // Reset form tapi pertahankan subCategory & category
+      setForm({
+        ...emptyQuestion(),
+        category: form.category,
+        subCategory: form.subCategory,
+      });
+      setImageFile(null);
+      setImagePreview(null);
+    }
   };
 
   const handleDelete = async (qid: string) => {
@@ -1307,30 +1331,40 @@ export default function AdminExamDetailPage() {
             </div>
 
             {/* Tombol Aksi */}
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 mt-6">
               <button
                 onClick={() => setShowModal(false)}
-                className="border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-50"
+                className="border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-50"
               >
-                Selesai
+                Batal
               </button>
 
-              {/* Simpan & Tutup — hanya saat edit */}
+              {/* Edit mode: Simpan Perubahan */}
               {editId && (
                 <button
                   onClick={handleSave}
-                  className="flex-1 border border-blue-200 text-blue-600 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50"
+                  disabled={saving}
+                  className="flex-1 bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
-                  Simpan Perubahan
+                  {saving ? "Memproses..." : "Simpan Perubahan"}
                 </button>
               )}
 
-              {/* Simpan & Lanjut — hanya saat tambah baru */}
+              {/* Create mode: Simpan & Simpan & Lanjut */}
               {!editId && (
                 <>
                   <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex-1 border border-blue-200 bg-blue-50 text-blue-700 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-blue-100 disabled:opacity-50"
+                  >
+                    {saving ? "Memproses..." : "Simpan"}
+                  </button>
+
+                  <button
                     onClick={handleSaveAndNext}
-                    className="flex-1 bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700"
+                    disabled={saving || isQuestionLimitReached()}
+                    className="flex-1 bg-blue-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                   >
                     Simpan & Lanjut →
                   </button>

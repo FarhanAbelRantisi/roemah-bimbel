@@ -32,8 +32,6 @@ export default function PauliExamView({
 
   // State
   const [kolomIndex, setKolomIndex] = useState(0);
-  const [kolomTimeLeft, setKolomTimeLeft] = useState(signalIntervalSec);
-  const [totalTimeLeft, setTotalTimeLeft] = useState(totalDurationSec);
   const [posisiIndex, setPosisiIndex] = useState(0);
   const [jumlahDikerjakan, setJumlahDikerjakan] = useState(0);
   const [jumlahBenar, setJumlahBenar] = useState(0);
@@ -45,16 +43,22 @@ export default function PauliExamView({
     attemptId.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0)
   ).current;
 
+  // Timers in Ref to prevent interval resets
+  const kolomTimeLeftRef = useRef(signalIntervalSec);
+  const totalTimeLeftRef = useRef(totalDurationSec);
+
   // Refs for current values in callbacks
   const kolomIndexRef = useRef(kolomIndex);
   const jumlahDikerjakanRef = useRef(jumlahDikerjakan);
   const jumlahBenarRef = useRef(jumlahBenar);
   const isSubmittingRef = useRef(isSubmitting);
+  const onFinishRef = useRef(onFinish);
 
   useEffect(() => { kolomIndexRef.current = kolomIndex; }, [kolomIndex]);
   useEffect(() => { jumlahDikerjakanRef.current = jumlahDikerjakan; }, [jumlahDikerjakan]);
   useEffect(() => { jumlahBenarRef.current = jumlahBenar; }, [jumlahBenar]);
   useEffect(() => { isSubmittingRef.current = isSubmitting; }, [isSubmitting]);
+  useEffect(() => { onFinishRef.current = onFinish; }, [onFinish]);
 
   // Submit column result to API
   const saveColumnResult = useCallback(async (kIdx: number, dikerjakan: number, benar: number) => {
@@ -85,45 +89,43 @@ export default function PauliExamView({
     await saveColumnResult(currentK, currentD, currentB);
 
     if (currentK + 1 >= totalColumns) {
-      // Selesai seluruh kolom
-      onFinish();
+      onFinishRef.current();
     } else {
       setKolomIndex(currentK + 1);
       setPosisiIndex(0);
       setJumlahDikerjakan(0);
       setJumlahBenar(0);
-      setKolomTimeLeft(signalIntervalSec);
-      setFlashMessage(`Pindah ke Kolom #${currentK + 2}`);
+      kolomTimeLeftRef.current = signalIntervalSec;
+      setFlashMessage(`Garis! Pindah ke Kolom Berikutnya`);
       setTimeout(() => setFlashMessage(null), 2500);
     }
     setIsSubmitting(false);
-  }, [saveColumnResult, signalIntervalSec, totalColumns, onFinish]);
+  }, [saveColumnResult, signalIntervalSec, totalColumns]);
 
-  // Timers
+  const nextColumnRef = useRef(nextColumn);
+  useEffect(() => { nextColumnRef.current = nextColumn; }, [nextColumn]);
+
+  // Background Timers (silent execution)
   useEffect(() => {
     const timer = setInterval(() => {
-      setTotalTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          nextColumn();
-          return 0;
-        }
-        return prev - 1;
-      });
+      totalTimeLeftRef.current -= 1;
+      kolomTimeLeftRef.current -= 1;
 
-      setKolomTimeLeft((prev) => {
-        if (prev <= 1) {
-          nextColumn();
-          return signalIntervalSec;
-        }
-        return prev - 1;
-      });
+      if (kolomTimeLeftRef.current <= 0) {
+        kolomTimeLeftRef.current = signalIntervalSec;
+        nextColumnRef.current();
+      }
+
+      if (totalTimeLeftRef.current <= 0) {
+        clearInterval(timer);
+        onFinishRef.current();
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [nextColumn, signalIntervalSec]);
+  }, [signalIntervalSec]);
 
-  // Digits for display (show current position and next 15 pairs)
+  // Digits for display (show current position and next 8 pairs)
   const currentDigitA = digitAt(seed, kolomIndex, posisiIndex, 0, 9);
   const currentDigitB = digitAt(seed, kolomIndex, posisiIndex + 1, 0, 9);
   const expectedAnswer = (currentDigitA + currentDigitB) % 10;
@@ -148,12 +150,6 @@ export default function PauliExamView({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleDigitInput]);
 
-  const formatTime = (sec: number) => {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
-  };
-
   // Generate preview rows
   const previewRows = Array.from({ length: 8 }, (_, i) => {
     const idx = posisiIndex + i;
@@ -168,36 +164,20 @@ export default function PauliExamView({
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-20">
         <div>
           <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-            Tes Pauli (Koran)
+            Tes Pauli
           </span>
-          <h1 className="text-lg font-bold text-gray-900 mt-1">
-            Kolom {kolomIndex + 1} dari {totalColumns}
+          <h1 className="text-sm font-bold text-gray-800 mt-1">
+            Peserta: {candidateName}
           </h1>
         </div>
 
-        {/* Timer stats */}
-        <div className="flex items-center gap-6">
-          <div className="text-right">
-            <span className="text-xs text-gray-400 block uppercase font-medium">Garis Berikutnya</span>
-            <span className="text-xl font-mono font-bold text-indigo-600">
-              {formatTime(kolomTimeLeft)}
-            </span>
-          </div>
-          <div className="h-8 w-px bg-gray-200" />
-          <div className="text-right">
-            <span className="text-xs text-gray-400 block uppercase font-medium">Sisa Waktu Ujian</span>
-            <span className="text-xl font-mono font-bold text-gray-800">
-              {formatTime(totalTimeLeft)}
-            </span>
-          </div>
-          <button
-            onClick={nextColumn}
-            disabled={isSubmitting}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm"
-          >
-            Selesai Ujian
-          </button>
-        </div>
+        <button
+          onClick={nextColumn}
+          disabled={isSubmitting}
+          className="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm"
+        >
+          Selesai Ujian
+        </button>
       </header>
 
       {/* Flash Message Banner */}
@@ -272,17 +252,12 @@ export default function PauliExamView({
             </button>
             <div />
           </div>
-
-          <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-            <span>Dikerjakan: <strong>{jumlahDikerjakan}</strong></span>
-            <span>Benar: <strong className="text-green-600">{jumlahBenar}</strong></span>
-          </div>
         </div>
       </main>
 
       {/* Footer Info */}
       <footer className="bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-400">
-        Roemah Bimbel — Tes Pauli Real-time Generator
+        Roemah Bimbel — Tes Pauli
       </footer>
     </div>
   );

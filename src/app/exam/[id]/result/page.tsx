@@ -52,6 +52,32 @@ export default function ResultPage() {
     );
   }
 
+  if (result.exam.psikotestCategory === "PAULI") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-white border border-gray-200 rounded-3xl p-8 text-center shadow-lg">
+          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-5 font-bold">
+            ✓
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Tes Selesai</h1>
+          <p className="text-gray-600 text-sm mb-6">
+            Tes telah selesai. Terima kasih atas partisipasi Anda.
+          </p>
+          <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-6 text-xs text-gray-500 text-left space-y-1">
+            <p><strong>Status:</strong> selesai</p>
+            <p><strong>Pesan:</strong> Tes telah selesai. Terima kasih atas partisipasi Anda.</p>
+          </div>
+          <Link
+            href="/catalog"
+            className="w-full inline-block bg-blue-600 text-white font-semibold py-3 rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-md"
+          >
+            Kembali ke Katalog
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const answered = result.answers.filter((a) => a.selected || a.selected2).length;
   const total = result.answers.length;
   const examType = result.exam.examType ?? "SKD";

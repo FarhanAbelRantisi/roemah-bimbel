@@ -92,6 +92,32 @@ export default function HistoryDetailPage() {
 
   if (!attempt) return null;
 
+  if (attempt.exam.psikotestCategory === "PAULI") {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 text-center">
+        <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-lg">
+          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-5 font-bold">
+            ✓
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Tes Pauli Selesai</h1>
+          <p className="text-gray-600 text-sm mb-6">
+            Tes telah selesai. Terima kasih atas partisipasi Anda.
+          </p>
+          <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-6 text-xs text-gray-500 text-left space-y-1">
+            <p><strong>Status:</strong> selesai</p>
+            <p><strong>Pesan:</strong> Tes telah selesai. Terima kasih atas partisipasi Anda.</p>
+          </div>
+          <Link
+            href="/history"
+            className="w-full inline-block bg-blue-600 text-white font-semibold py-3 rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-md"
+          >
+            Kembali ke Riwayat
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const examType = attempt.exam.examType ?? "SKD";
   const psikotestConfig = attempt.exam.psikotestConfig
     ? JSON.parse(attempt.exam.psikotestConfig) as Record<string, number>
