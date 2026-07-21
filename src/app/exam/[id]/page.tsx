@@ -998,11 +998,11 @@ export default function ExamPage() {
         </div>
 
         {/* Sidebar */}
-        <aside className="w-full landscape:w-48 lg:w-72 bg-white border-b landscape:border-b-0 lg:border-b-0 landscape:border-l lg:border-l border-gray-200 p-4 lg:p-5 landscape:overflow-y-auto lg:overflow-y-auto flex flex-col gap-4 lg:gap-5 order-1 landscape:order-2 lg:order-2 shrink-0">
+        <aside className="w-full landscape:w-56 lg:w-80 xl:w-96 bg-white border-b landscape:border-b-0 lg:border-b-0 landscape:border-l lg:border-l border-slate-200/80 p-5 lg:p-6 landscape:overflow-y-auto lg:overflow-y-auto flex flex-col gap-5 lg:gap-6 order-1 landscape:order-2 lg:order-2 shrink-0 shadow-sm">
           {/* Timer */}
-          <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-200">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Time Remaining</p>
-            <p className={`text-4xl font-bold tabular-nums ${timeLeft < 300 ? "text-red-500" : "text-gray-900"}`}>
+          <div className="bg-slate-50 rounded-2xl p-4 lg:p-5 text-center border border-slate-200/80 shadow-xs">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Time Remaining</p>
+            <p className={`text-3xl lg:text-4xl font-extrabold tabular-nums tracking-tight ${timeLeft < 300 ? "text-rose-600 animate-pulse" : "text-slate-900"}`}>
               {formatTime(timeLeft)}
             </p>
           </div>
@@ -1010,24 +1010,24 @@ export default function ExamPage() {
           {/* Question Palette */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-gray-700">Question Palette</p>
-              <span className="text-xs text-gray-400">{shuffledAnswers.length} Total</span>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-700">Question Palette</p>
+              <span className="text-xs font-semibold text-slate-400">{shuffledAnswers.length} Total</span>
             </div>
 
-            <div className="grid grid-cols-3 sm:grid-cols-4 landscape:grid-cols-4 lg:grid-cols-4 gap-2 max-h-32 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-2 landscape:pr-0 lg:pr-0">
+            <div className="grid grid-cols-3 sm:grid-cols-4 landscape:grid-cols-4 lg:grid-cols-4 gap-2.5 max-h-40 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-1 landscape:pr-0 lg:pr-0">
               {shuffledAnswers.map((ans, idx) => {
                 const s = getStatus(ans, idx);
                 return (
                   <button
                     key={ans.questionId}
                     onClick={() => setCurrentIdx(idx)}
-                    className={`w-full aspect-square rounded-lg text-xs font-semibold transition-colors ${s === "current"
-                      ? "bg-white border-2 border-blue-500 text-blue-500"
+                    className={`w-full aspect-square rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs flex items-center justify-center ${s === "current"
+                      ? "bg-white border-2 border-blue-600 text-blue-600 shadow-sm"
                       : s === "answered"
-                        ? "bg-blue-500 text-white"
+                        ? "bg-blue-600 text-white shadow-xs"
                         : s === "flagged"
-                          ? "bg-orange-400 text-white"
-                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                          ? "bg-amber-500 text-white shadow-xs"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                       }`}
                   >
                     {idx + 1}
@@ -1038,28 +1038,28 @@ export default function ExamPage() {
           </div>
 
           {/* Legend */}
-          <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-slate-100">
             {[
-              { color: "bg-blue-500", label: "Answered" },
-              { color: "bg-orange-400", label: "Flagged" },
-              { color: "bg-gray-100 border border-gray-200", label: "Unanswered" },
-              { color: "bg-white border-2 border-blue-500", label: "Current" },
+              { color: "bg-blue-600", label: "Answered" },
+              { color: "bg-amber-500", label: "Flagged" },
+              { color: "bg-slate-100 border border-slate-200", label: "Unanswered" },
+              { color: "bg-white border-2 border-blue-600", label: "Current" },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-2">
-                <div className={`w-4 h-4 rounded ${item.color}`} />
-                <span className="text-xs text-gray-500">{item.label}</span>
+                <div className={`w-3.5 h-3.5 rounded-md shrink-0 ${item.color}`} />
+                <span className="text-xs font-medium text-slate-500">{item.label}</span>
               </div>
             ))}
           </div>
 
           {/* User */}
-          <div className="mt-auto flex items-center gap-3 pt-4 border-t border-gray-200">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-500">
+          <div className="mt-auto flex items-center gap-3 pt-4 border-t border-slate-100">
+            <div className="w-9 h-9 bg-blue-100 border border-blue-200 rounded-full flex items-center justify-center text-sm font-bold text-blue-700">
               {session?.user?.name?.[0]?.toUpperCase()}
             </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-800">{session?.user?.name}</p>
-              <p className="text-xs text-gray-400 uppercase">Candidate</p>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-800 truncate">{session?.user?.name}</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Candidate</p>
             </div>
           </div>
         </aside>
