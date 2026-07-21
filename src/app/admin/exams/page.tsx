@@ -29,6 +29,10 @@ const TNI_SUB_CATEGORIES = [
   { value: "PAULI", label: "Pauli (Input Angka Real-time)" },
 ] as const;
 
+const IconAlertTriangle = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+);
+
 export default function AdminExamsPage() {
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
@@ -248,12 +252,80 @@ export default function AdminExamsPage() {
     });
   };
 
-  const handleEdit = async () => {
-    if (!editExam || !editForm.title || !editForm.duration) return;
-    if (editForm.examType === "AKADEMIK" && !editForm.akademikCategory) {
-      showAlert("Pilih Kategori Akademik", "Silakan pilih sub-kategori akademik terlebih dahulu.");
-      return;
+  const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
+
+  const validateEditForm = () => {
+    const errs: Record<string, string> = {};
+    if (!editForm.title.trim()) errs.title = "Judul ujian wajib diisi";
+    if (!editForm.duration.trim() || Number(editForm.duration) <= 0) errs.duration = "Durasi ujian wajib diisi";
+
+    if (editForm.examType === "AKADEMIK") {
+      if (!editForm.akademikCategory) errs.akademikCategory = "Kategori akademik wajib dipilih";
+      if (!editForm.akademikTotalSoal || Number(editForm.akademikTotalSoal) <= 0) errs.akademikTotalSoal = "Jumlah soal wajib diisi";
+    } else if (editForm.examType === "PSIKOTEST") {
+      if (editForm.psikotestCategory === "GABUNGAN") {
+        if (!editForm.psikotestSoalKecerdasan || Number(editForm.psikotestSoalKecerdasan) <= 0) errs.psikotestSoalKecerdasan = "Wajib diisi";
+        if (!editForm.psikotestSoalKecermatan || Number(editForm.psikotestSoalKecermatan) <= 0) errs.psikotestSoalKecermatan = "Wajib diisi";
+        if (!editForm.psikotestSoalKepribadian || Number(editForm.psikotestSoalKepribadian) <= 0) errs.psikotestSoalKepribadian = "Wajib diisi";
+      } else {
+        if (!editForm.psikotestSoalKecerdasan || Number(editForm.psikotestSoalKecerdasan) <= 0) errs.psikotestSoalKecerdasan = "Jumlah soal wajib diisi";
+      }
+    } else if (editForm.examType === "PSIKOTEST_TNI") {
+      if (editForm.tniCategory === "GABUNGAN_TNI") {
+        if (!editForm.tniSoalVerbal || Number(editForm.tniSoalVerbal) <= 0) errs.tniSoalVerbal = "Wajib diisi";
+        if (!editForm.tniSoalMatematika || Number(editForm.tniSoalMatematika) <= 0) errs.tniSoalMatematika = "Wajib diisi";
+        if (!editForm.tniSoalLogika || Number(editForm.tniSoalLogika) <= 0) errs.tniSoalLogika = "Wajib diisi";
+        if (!editForm.tniSoalDeretAngka || Number(editForm.tniSoalDeretAngka) <= 0) errs.tniSoalDeretAngka = "Wajib diisi";
+        if (!editForm.tniSoalDeretGambar || Number(editForm.tniSoalDeretGambar) <= 0) errs.tniSoalDeretGambar = "Wajib diisi";
+        if (!editForm.tniSoalKubus || Number(editForm.tniSoalKubus) <= 0) errs.tniSoalKubus = "Wajib diisi";
+      } else if (editForm.tniCategory === "PAULI") {
+        if (!editForm.pauliIntervalSec || Number(editForm.pauliIntervalSec) <= 0) errs.pauliIntervalSec = "Durasi per kolom wajib diisi";
+      } else {
+        if (!editForm.tniJumlahSoalSingle || Number(editForm.tniJumlahSoalSingle) <= 0) errs.tniJumlahSoalSingle = "Jumlah soal wajib diisi";
+      }
     }
+    setEditErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const validateCreateForm = () => {
+    const errs: Record<string, string> = {};
+    if (!form.title.trim()) errs.title = "Judul ujian wajib diisi";
+    if (!form.duration.trim() || Number(form.duration) <= 0) errs.duration = "Durasi ujian wajib diisi";
+
+    if (form.examType === "AKADEMIK") {
+      if (!form.akademikCategory) errs.akademikCategory = "Kategori akademik wajib dipilih";
+      if (!form.akademikTotalSoal || Number(form.akademikTotalSoal) <= 0) errs.akademikTotalSoal = "Jumlah soal wajib diisi";
+    } else if (form.examType === "PSIKOTEST") {
+      if (form.psikotestCategory === "GABUNGAN") {
+        if (!form.psikotestSoalKecerdasan || Number(form.psikotestSoalKecerdasan) <= 0) errs.psikotestSoalKecerdasan = "Wajib diisi";
+        if (!form.psikotestSoalKecermatan || Number(form.psikotestSoalKecermatan) <= 0) errs.psikotestSoalKecermatan = "Wajib diisi";
+        if (!form.psikotestSoalKepribadian || Number(form.psikotestSoalKepribadian) <= 0) errs.psikotestSoalKepribadian = "Wajib diisi";
+      } else {
+        if (!form.psikotestSoalKecerdasan || Number(form.psikotestSoalKecerdasan) <= 0) errs.psikotestSoalKecerdasan = "Jumlah soal wajib diisi";
+      }
+    } else if (form.examType === "PSIKOTEST_TNI") {
+      if (form.tniCategory === "GABUNGAN_TNI") {
+        if (!form.tniSoalVerbal || Number(form.tniSoalVerbal) <= 0) errs.tniSoalVerbal = "Wajib diisi";
+        if (!form.tniSoalMatematika || Number(form.tniSoalMatematika) <= 0) errs.tniSoalMatematika = "Wajib diisi";
+        if (!form.tniSoalLogika || Number(form.tniSoalLogika) <= 0) errs.tniSoalLogika = "Wajib diisi";
+        if (!form.tniSoalDeretAngka || Number(form.tniSoalDeretAngka) <= 0) errs.tniSoalDeretAngka = "Wajib diisi";
+        if (!form.tniSoalDeretGambar || Number(form.tniSoalDeretGambar) <= 0) errs.tniSoalDeretGambar = "Wajib diisi";
+        if (!form.tniSoalKubus || Number(form.tniSoalKubus) <= 0) errs.tniSoalKubus = "Wajib diisi";
+      } else if (form.tniCategory === "PAULI") {
+        if (!form.pauliIntervalSec || Number(form.pauliIntervalSec) <= 0) errs.pauliIntervalSec = "Durasi per kolom wajib diisi";
+      } else {
+        if (!form.tniJumlahSoalSingle || Number(form.tniJumlahSoalSingle) <= 0) errs.tniJumlahSoalSingle = "Jumlah soal wajib diisi";
+      }
+    }
+    setCreateErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleEdit = async () => {
+    if (!editExam) return;
+    if (!validateEditForm()) return;
     setEditSaving(true);
 
     let psikotestConfig: string | null = null;
@@ -286,8 +358,8 @@ export default function AdminExamsPage() {
           editForm.examType === "PSIKOTEST"
             ? editForm.psikotestCategory
             : editForm.examType === "PSIKOTEST_TNI"
-            ? editForm.tniCategory
-            : null,
+              ? editForm.tniCategory
+              : null,
         psikotestConfig,
         akademikCategory: editForm.examType === "AKADEMIK" ? editForm.akademikCategory : null,
         akademikTotalSoal:
@@ -308,11 +380,7 @@ export default function AdminExamsPage() {
   };
 
   const handleCreate = async () => {
-    if (!form.title || !form.duration) return;
-    if (form.examType === "AKADEMIK" && !form.akademikCategory) {
-      showAlert("Pilih Kategori Akademik", "Silakan pilih sub-kategori akademik terlebih dahulu.");
-      return;
-    }
+    if (!validateCreateForm()) return;
     setSaving(true);
 
     let psikotestConfig: string | null = null;
@@ -346,8 +414,8 @@ export default function AdminExamsPage() {
             form.examType === "PSIKOTEST"
               ? (form.psikotestCategory || "KECERDASAN")
               : form.examType === "PSIKOTEST_TNI"
-              ? form.tniCategory
-              : null,
+                ? form.tniCategory
+                : null,
           psikotestConfig,
           akademikCategory: form.examType === "AKADEMIK" ? form.akademikCategory : null,
           akademikTotalSoal:
@@ -460,15 +528,16 @@ export default function AdminExamsPage() {
               <tbody>
                 {exams.map((exam) => {
                   const subCatLabel = (() => {
+                    const formatTitle = (str: string) => str.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
                     if (exam.examType === "SKD") return exam.skdCategory || "Gabungan";
                     if (exam.examType === "PSIKOTEST") {
                       if (exam.psikotestCategory === "GABUNGAN") return "Gabungan";
-                      if (exam.psikotestCategory) return exam.psikotestCategory;
+                      if (exam.psikotestCategory) return formatTitle(exam.psikotestCategory);
                       if (exam.psikotestConfig) {
                         try {
                           const keys = Object.keys(JSON.parse(exam.psikotestConfig));
                           if (keys.length > 1) return "Gabungan";
-                          if (keys.length === 1) return keys[0];
+                          if (keys.length === 1) return formatTitle(keys[0]);
                         } catch { }
                       }
                       return "Kecerdasan";
@@ -476,10 +545,10 @@ export default function AdminExamsPage() {
                     if (exam.examType === "PSIKOTEST_TNI") {
                       if (exam.psikotestCategory === "GABUNGAN_TNI") return "Gabungan TNI";
                       if (exam.psikotestCategory === "PAULI") return "Pauli";
-                      return exam.psikotestCategory ? exam.psikotestCategory.replace(/_/g, " ") : "Gabungan TNI";
+                      return exam.psikotestCategory ? formatTitle(exam.psikotestCategory) : "Gabungan TNI";
                     }
                     if (exam.examType === "AKADEMIK") {
-                      return exam.akademikCategory ? exam.akademikCategory.replace(/_/g, " ") : "Akademik";
+                      return exam.akademikCategory ? formatTitle(exam.akademikCategory) : "Akademik";
                     }
                     return null;
                   })();
@@ -490,9 +559,9 @@ export default function AdminExamsPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span>{exam.title}</span>
                           <span className={`text-xs px-2 py-0.5 rounded font-medium ${exam.examType === "SKD" ? "bg-blue-50 text-blue-600 border border-blue-100" :
-                              exam.examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600 border border-purple-100" :
-                                exam.examType === "PSIKOTEST_TNI" ? "bg-green-50 text-green-700 border border-green-200 font-bold" :
-                                  "bg-orange-50 text-orange-600 border border-orange-100"
+                            exam.examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600 border border-purple-100" :
+                              exam.examType === "PSIKOTEST_TNI" ? "bg-green-50 text-green-700 border border-green-200 font-bold" :
+                                "bg-orange-50 text-orange-600 border border-orange-100"
                             }`}>
                             {exam.examType === "PSIKOTEST_TNI" ? "PSIKOTEST TNI" : exam.examType}
                           </span>
@@ -507,18 +576,17 @@ export default function AdminExamsPage() {
                       <td className="px-6 py-4 text-gray-600">{exam._count.questions} soal</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${exam.isPremium
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-gray-100 text-gray-600"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-gray-100 text-gray-600"
                           }`}>
                           {exam.isPremium ? "Premium" : "Gratis"}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          exam.isPublished
-                            ? "bg-green-100 text-green-700 border border-green-200"
-                            : "bg-gray-100 text-gray-600 border border-gray-200"
-                        }`}>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${exam.isPublished
+                          ? "bg-green-100 text-green-700 border border-green-200"
+                          : "bg-gray-100 text-gray-600 border border-gray-200"
+                          }`}>
                           {exam.isPublished ? "Diterbitkan" : "Draf"}
                         </span>
                       </td>
@@ -538,20 +606,19 @@ export default function AdminExamsPage() {
                           </button>
                           <button
                             onClick={() => handleTogglePublish(exam.id, exam.isPublished)}
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
-                              exam.isPublished
-                                ? "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
-                                : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                            }`}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${exam.isPublished
+                              ? "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+                              : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                              }`}
                           >
                             {exam.isPublished ? (
                               <>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8v13H3V8" /><path d="M1 3h22v5H1z" /><path d="M10 12h4" /></svg>
                                 <span>Jadikan Draf</span>
                               </>
                             ) : (
                               <>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14.89 9 20l11-11"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14.89 9 20l11-11" /></svg>
                                 <span>Terbitkan</span>
                               </>
                             )}
@@ -560,7 +627,7 @@ export default function AdminExamsPage() {
                             onClick={() => handleDelete(exam.id)}
                             className="inline-flex items-center gap-1 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
                             <span>Hapus</span>
                           </button>
                         </div>
@@ -592,9 +659,17 @@ export default function AdminExamsPage() {
                   type="text"
                   placeholder="Contoh: Try Out Nasional SKD #1"
                   value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => {
+                    setForm({ ...form, title: e.target.value });
+                    if (createErrors.title) setCreateErrors({ ...createErrors, title: "" });
+                  }}
+                  className={`w-full border ${createErrors.title ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2`}
                 />
+                {createErrors.title && (
+                  <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                    <IconAlertTriangle /> <span>{createErrors.title}</span>
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Durasi (menit)</label>
@@ -602,9 +677,17 @@ export default function AdminExamsPage() {
                   type="number"
                   placeholder="Contoh: 100"
                   value={form.duration}
-                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
-                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => {
+                    setForm({ ...form, duration: e.target.value });
+                    if (createErrors.duration) setCreateErrors({ ...createErrors, duration: "" });
+                  }}
+                  className={`w-full border ${createErrors.duration ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2`}
                 />
+                {createErrors.duration && (
+                  <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                    <IconAlertTriangle /> <span>{createErrors.duration}</span>
+                  </p>
+                )}
               </div>
               {/* Tipe Ujian */}
               <div>
@@ -665,30 +748,50 @@ export default function AdminExamsPage() {
                         { key: "psikotestSoalKecermatan", label: "Kecermatan" },
                         { key: "psikotestSoalKepribadian", label: "Kepribadian" },
                       ].map(({ key, label }) => (
-                        <div key={key} className="flex items-center gap-3">
-                          <span className="text-sm text-gray-600 w-28">{label}</span>
-                          <input
-                            type="number"
-                            min="1"
-                            value={form[key as keyof typeof form] as string}
-                            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                            className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          <span className="text-xs text-gray-400">soal</span>
+                        <div key={key} className="flex flex-col gap-1">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-600 w-28">{label}</span>
+                            <input
+                              type="number"
+                              min="1"
+                              value={form[key as keyof typeof form] as string}
+                              onChange={(e) => {
+                                setForm({ ...form, [key]: e.target.value });
+                                if (createErrors[key]) setCreateErrors({ ...createErrors, [key]: "" });
+                              }}
+                              className={`flex-1 border ${createErrors[key] ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2`}
+                            />
+                            <span className="text-xs text-gray-400">soal</span>
+                          </div>
+                          {createErrors[key] && (
+                            <p className="text-xs text-red-500 font-medium ml-31 flex items-center gap-1">
+                              <IconAlertTriangle /> <span>{createErrors[key]}</span>
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-600">Jumlah Soal</span>
-                      <input
-                        type="number"
-                        min="1"
-                        value={form.psikotestSoalKecerdasan}
-                        onChange={(e) => setForm({ ...form, psikotestSoalKecerdasan: e.target.value })}
-                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span className="text-xs text-gray-400">soal</span>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-600">Jumlah Soal</span>
+                        <input
+                          type="number"
+                          min="1"
+                          value={form.psikotestSoalKecerdasan}
+                          onChange={(e) => {
+                            setForm({ ...form, psikotestSoalKecerdasan: e.target.value });
+                            if (createErrors.psikotestSoalKecerdasan) setCreateErrors({ ...createErrors, psikotestSoalKecerdasan: "" });
+                          }}
+                          className={`flex-1 border ${createErrors.psikotestSoalKecerdasan ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2`}
+                        />
+                        <span className="text-xs text-gray-400">soal</span>
+                      </div>
+                      {createErrors.psikotestSoalKecerdasan && (
+                        <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                          <IconAlertTriangle /> <span>{createErrors.psikotestSoalKecerdasan}</span>
+                        </p>
+                      )}
                     </div>
                   )}
                 </>
@@ -721,15 +824,25 @@ export default function AdminExamsPage() {
                         { key: "tniSoalDeretGambar", label: "Deret Gambar" },
                         { key: "tniSoalKubus", label: "Kubus" },
                       ].map(({ key, label }) => (
-                        <div key={key} className="flex items-center gap-3">
-                          <span className="text-sm text-gray-600 w-36">{label}</span>
-                          <input
-                            type="number" min="1"
-                            value={form[key as keyof typeof form] as string}
-                            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                            className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          <span className="text-xs text-gray-400">soal</span>
+                        <div key={key} className="flex flex-col gap-1">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-600 w-36">{label}</span>
+                            <input
+                              type="number" min="1"
+                              value={form[key as keyof typeof form] as string}
+                              onChange={(e) => {
+                                setForm({ ...form, [key]: e.target.value });
+                                if (createErrors[key]) setCreateErrors({ ...createErrors, [key]: "" });
+                              }}
+                              className={`flex-1 border ${createErrors[key] ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2`}
+                            />
+                            <span className="text-xs text-gray-400">soal</span>
+                          </div>
+                          {createErrors[key] && (
+                            <p className="text-xs text-red-500 font-medium ml-39 flex items-center gap-1">
+                              <IconAlertTriangle /> <span>{createErrors[key]}</span>
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -747,28 +860,47 @@ export default function AdminExamsPage() {
                           <input
                             type="number" min="10"
                             value={form.pauliIntervalSec}
-                            onChange={(e) => setForm({ ...form, pauliIntervalSec: e.target.value })}
-                            className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                            onChange={(e) => {
+                              setForm({ ...form, pauliIntervalSec: e.target.value });
+                              if (createErrors.pauliIntervalSec) setCreateErrors({ ...createErrors, pauliIntervalSec: "" });
+                            }}
+                            className={`w-full border ${createErrors.pauliIntervalSec ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 bg-white`}
                           />
                           <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 180 detik (3 menit)</span>
+                          {createErrors.pauliIntervalSec && (
+                            <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                              <IconAlertTriangle /> <span>{createErrors.pauliIntervalSec}</span>
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <p className="text-xs text-blue-800 bg-blue-100/60 rounded-lg px-3 py-2 border border-blue-200/50">
-                        ℹ️ <strong>Informasi:</strong> Angka 0-9 untuk Tes Pauli di-generate secara acak oleh sistem saat siswa mengerjakan ujian. Admin <strong>tidak perlu menginputkan soal secara manual</strong>.
+                      <p className="text-xs text-blue-800 bg-blue-100/60 rounded-lg px-3 py-2 border border-blue-200/50 flex items-start gap-1.5">
+                        <svg className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
+                        <span><strong>Informasi:</strong> Angka 0-9 untuk Tes Pauli di-generate secara acak oleh sistem saat siswa mengerjakan ujian. Admin <strong>tidak perlu menginputkan soal secara manual</strong>.</span>
                       </p>
                     </div>
                   )}
 
                   {form.tniCategory !== "GABUNGAN_TNI" && form.tniCategory !== "PAULI" && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-600">Jumlah Soal Target</span>
-                      <input
-                        type="number" min="1"
-                        value={form.tniJumlahSoalSingle}
-                        onChange={(e) => setForm({ ...form, tniJumlahSoalSingle: e.target.value })}
-                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span className="text-xs text-gray-400">soal</span>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-600">Jumlah Soal Target</span>
+                        <input
+                          type="number" min="1"
+                          value={form.tniJumlahSoalSingle}
+                          onChange={(e) => {
+                            setForm({ ...form, tniJumlahSoalSingle: e.target.value });
+                            if (createErrors.tniJumlahSoalSingle) setCreateErrors({ ...createErrors, tniJumlahSoalSingle: "" });
+                          }}
+                          className={`flex-1 border ${createErrors.tniJumlahSoalSingle ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2`}
+                        />
+                        <span className="text-xs text-gray-400">soal</span>
+                      </div>
+                      {createErrors.tniJumlahSoalSingle && (
+                        <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                          <IconAlertTriangle /> <span>{createErrors.tniJumlahSoalSingle}</span>
+                        </p>
+                      )}
                     </div>
                   )}
                 </>
@@ -783,8 +915,11 @@ export default function AdminExamsPage() {
                     </label>
                     <select
                       value={form.akademikCategory}
-                      onChange={(e) => setForm({ ...form, akademikCategory: e.target.value })}
-                      className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onChange={(e) => {
+                        setForm({ ...form, akademikCategory: e.target.value });
+                        if (createErrors.akademikCategory) setCreateErrors({ ...createErrors, akademikCategory: "" });
+                      }}
+                      className={`w-full border ${createErrors.akademikCategory ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2`}
                     >
                       <option value="">— Pilih Kategori —</option>
                       <option value="WAWASAN KEBANGSAAN">Wawasan Kebangsaan</option>
@@ -794,18 +929,33 @@ export default function AdminExamsPage() {
                       <option value="Tes Pengetahuan Kepolisian">Tes Pengetahuan Kepolisian</option>
                       <option value="Tes Penalaran Numerik">Tes Penalaran Numerik</option>
                     </select>
+                    {createErrors.akademikCategory && (
+                      <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                        <IconAlertTriangle /> <span>{createErrors.akademikCategory}</span>
+                      </p>
+                    )}
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-600">Jumlah Soal</span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={form.akademikTotalSoal}
-                      onChange={(e) => setForm({ ...form, akademikTotalSoal: e.target.value })}
-                      className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <span className="text-xs text-gray-400">soal</span>
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-600">Jumlah Soal</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={form.akademikTotalSoal}
+                        onChange={(e) => {
+                          setForm({ ...form, akademikTotalSoal: e.target.value });
+                          if (createErrors.akademikTotalSoal) setCreateErrors({ ...createErrors, akademikTotalSoal: "" });
+                        }}
+                        className={`flex-1 border ${createErrors.akademikTotalSoal ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2`}
+                      />
+                      <span className="text-xs text-gray-400">soal</span>
+                    </div>
+                    {createErrors.akademikTotalSoal && (
+                      <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                        <IconAlertTriangle /> <span>{createErrors.akademikTotalSoal}</span>
+                      </p>
+                    )}
                   </div>
                 </>
               )}
@@ -850,18 +1000,34 @@ export default function AdminExamsPage() {
                 <input
                   type="text"
                   value={editForm.title}
-                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => {
+                    setEditForm({ ...editForm, title: e.target.value });
+                    if (editErrors.title) setEditErrors({ ...editErrors, title: "" });
+                  }}
+                  className={`w-full border ${editErrors.title ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2`}
                 />
+                {editErrors.title && (
+                  <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                    <IconAlertTriangle /> <span>{editErrors.title}</span>
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Durasi (menit)</label>
                 <input
                   type="number"
                   value={editForm.duration}
-                  onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
-                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => {
+                    setEditForm({ ...editForm, duration: e.target.value });
+                    if (editErrors.duration) setEditErrors({ ...editErrors, duration: "" });
+                  }}
+                  className={`w-full border ${editErrors.duration ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2`}
                 />
+                {editErrors.duration && (
+                  <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                    <IconAlertTriangle /> <span>{editErrors.duration}</span>
+                  </p>
+                )}
               </div>
 
               {/* Tipe Ujian */}
@@ -924,30 +1090,50 @@ export default function AdminExamsPage() {
                         { key: "psikotestSoalKecermatan", label: "Kecermatan" },
                         { key: "psikotestSoalKepribadian", label: "Kepribadian" },
                       ].map(({ key, label }) => (
-                        <div key={key} className="flex items-center gap-3">
-                          <span className="text-sm text-gray-600 w-28">{label}</span>
-                          <input
-                            type="number"
-                            min="1"
-                            value={editForm[key as keyof typeof editForm] as string}
-                            onChange={(e) => setEditForm({ ...editForm, [key]: e.target.value })}
-                            className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          <span className="text-xs text-gray-400">soal</span>
+                        <div key={key} className="flex flex-col gap-1">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-600 w-28">{label}</span>
+                            <input
+                              type="number"
+                              min="1"
+                              value={editForm[key as keyof typeof editForm] as string}
+                              onChange={(e) => {
+                                setEditForm({ ...editForm, [key]: e.target.value });
+                                if (editErrors[key]) setEditErrors({ ...editErrors, [key]: "" });
+                              }}
+                              className={`flex-1 border ${editErrors[key] ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2`}
+                            />
+                            <span className="text-xs text-gray-400">soal</span>
+                          </div>
+                          {editErrors[key] && (
+                            <p className="text-xs text-red-500 font-medium ml-31 flex items-center gap-1">
+                              <IconAlertTriangle /> <span>{editErrors[key]}</span>
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-600">Jumlah Soal</span>
-                      <input
-                        type="number"
-                        min="1"
-                        value={editForm.psikotestSoalKecerdasan}
-                        onChange={(e) => setEditForm({ ...editForm, psikotestSoalKecerdasan: e.target.value })}
-                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span className="text-xs text-gray-400">soal</span>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-600">Jumlah Soal</span>
+                        <input
+                          type="number"
+                          min="1"
+                          value={editForm.psikotestSoalKecerdasan}
+                          onChange={(e) => {
+                            setEditForm({ ...editForm, psikotestSoalKecerdasan: e.target.value });
+                            if (editErrors.psikotestSoalKecerdasan) setEditErrors({ ...editErrors, psikotestSoalKecerdasan: "" });
+                          }}
+                          className={`flex-1 border ${editErrors.psikotestSoalKecerdasan ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2`}
+                        />
+                        <span className="text-xs text-gray-400">soal</span>
+                      </div>
+                      {editErrors.psikotestSoalKecerdasan && (
+                        <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                          <IconAlertTriangle /> <span>{editErrors.psikotestSoalKecerdasan}</span>
+                        </p>
+                      )}
                     </div>
                   )}
                 </>
@@ -980,25 +1166,34 @@ export default function AdminExamsPage() {
                         { key: "tniSoalDeretGambar", label: "Deret Gambar" },
                         { key: "tniSoalKubus", label: "Kubus" },
                       ].map(({ key, label }) => (
-                        <div key={key} className="flex items-center gap-3">
-                          <span className="text-sm text-gray-600 w-36">{label}</span>
-                          <input
-                            type="number" min="1"
-                            value={editForm[key as keyof typeof editForm] as string}
-                            onChange={(e) => setEditForm({ ...editForm, [key]: e.target.value })}
-                            className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          <span className="text-xs text-gray-400">soal</span>
+                        <div key={key} className="flex flex-col gap-1">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-600 w-36">{label}</span>
+                            <input
+                              type="number" min="1"
+                              value={editForm[key as keyof typeof editForm] as string}
+                              onChange={(e) => {
+                                setEditForm({ ...editForm, [key]: e.target.value });
+                                if (editErrors[key]) setEditErrors({ ...editErrors, [key]: "" });
+                              }}
+                              className={`flex-1 border ${editErrors[key] ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2`}
+                            />
+                            <span className="text-xs text-gray-400">soal</span>
+                          </div>
+                          {editErrors[key] && (
+                            <p className="text-xs text-red-500 font-medium ml-39 flex items-center gap-1">
+                              <IconAlertTriangle /> <span>{editErrors[key]}</span>
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
                   )}
 
                   {editForm.tniCategory === "PAULI" && (
-                    <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-4 flex flex-col gap-3">
+                    <div className="bg-green-50/70 border border-green-200 rounded-xl p-4 flex flex-col gap-3">
                       <div className="flex items-center gap-2">
-                        <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Real-Time Generator</span>
-                        <p className="text-xs font-bold text-blue-900">Konfigurasi Lembar Kerja Tes Pauli</p>
+                        <p className="text-xs font-bold text-green-900">Konfigurasi Lembar Kerja Tes Pauli</p>
                       </div>
                       <div className="grid grid-cols-1 gap-3">
                         <div>
@@ -1006,28 +1201,47 @@ export default function AdminExamsPage() {
                           <input
                             type="number" min="10"
                             value={editForm.pauliIntervalSec}
-                            onChange={(e) => setEditForm({ ...editForm, pauliIntervalSec: e.target.value })}
-                            className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                            onChange={(e) => {
+                              setEditForm({ ...editForm, pauliIntervalSec: e.target.value });
+                              if (editErrors.pauliIntervalSec) setEditErrors({ ...editErrors, pauliIntervalSec: "" });
+                            }}
+                            className={`w-full border ${editErrors.pauliIntervalSec ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 bg-white`}
                           />
                           <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 180 detik (3 menit per kolom)</span>
+                          {editErrors.pauliIntervalSec && (
+                            <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                              <IconAlertTriangle /> <span>{editErrors.pauliIntervalSec}</span>
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <p className="text-xs text-blue-800 bg-blue-100/60 rounded-lg px-3 py-2 border border-blue-200/50">
-                        ℹ️ <strong>Informasi:</strong> Angka 0-9 untuk Tes Pauli di-generate secara acak oleh sistem saat siswa mengerjakan ujian. Admin <strong>tidak perlu menginputkan soal secara manual</strong>.
+                      <p className="text-xs text-green-800 bg-green-100/60 rounded-lg px-3 py-2 border border-green-200/50 flex items-start gap-1.5">
+                        <svg className="w-4 h-4 text-green-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
+                        <span><strong>Informasi:</strong> Angka 0-9 untuk Tes Pauli di-generate secara acak oleh sistem saat siswa mengerjakan ujian. Admin <strong>tidak perlu menginputkan soal secara manual</strong>.</span>
                       </p>
                     </div>
                   )}
 
                   {editForm.tniCategory !== "GABUNGAN_TNI" && editForm.tniCategory !== "PAULI" && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-600">Jumlah Soal Target</span>
-                      <input
-                        type="number" min="1"
-                        value={editForm.tniJumlahSoalSingle}
-                        onChange={(e) => setEditForm({ ...editForm, tniJumlahSoalSingle: e.target.value })}
-                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span className="text-xs text-gray-400">soal</span>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-600">Jumlah Soal Target</span>
+                        <input
+                          type="number" min="1"
+                          value={editForm.tniJumlahSoalSingle}
+                          onChange={(e) => {
+                            setEditForm({ ...editForm, tniJumlahSoalSingle: e.target.value });
+                            if (editErrors.tniJumlahSoalSingle) setEditErrors({ ...editErrors, tniJumlahSoalSingle: "" });
+                          }}
+                          className={`flex-1 border ${editErrors.tniJumlahSoalSingle ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2`}
+                        />
+                        <span className="text-xs text-gray-400">soal</span>
+                      </div>
+                      {editErrors.tniJumlahSoalSingle && (
+                        <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                          <IconAlertTriangle /> <span>{editErrors.tniJumlahSoalSingle}</span>
+                        </p>
+                      )}
                     </div>
                   )}
                 </>

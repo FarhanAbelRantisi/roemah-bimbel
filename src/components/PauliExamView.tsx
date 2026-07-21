@@ -11,6 +11,14 @@ interface PauliExamViewProps {
   onFinish: () => void;
 }
 
+const IconLock = ({ className = "w-16 h-16 text-white mb-4" }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+);
+
+const IconAlertTriangle = ({ className = "text-2xl shrink-0 text-yellow-500" }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+);
+
 export default function PauliExamView({
   attemptId,
   durationMinutes,
@@ -36,6 +44,15 @@ export default function PauliExamView({
   const [answersMap, setAnswersMap] = useState<Record<number, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
+
+  // Violations & Security
+  const MAX_VIOLATIONS = 5;
+  const [tabWarning, setTabWarning] = useState(0);
+  const [showWarning, setShowWarning] = useState(false);
+  const [warningMsg, setWarningMsg] = useState("");
+  const [isBlurred, setIsBlurred] = useState(false);
+  const violationCooldownRef = useRef(false);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
 
   // Derive seed from attemptId
   const seed = useRef<number>(
@@ -131,6 +148,112 @@ export default function PauliExamView({
     return () => clearInterval(timer);
   }, [signalIntervalSec]);
 
+  // Violation Protection Effects
+  useEffect(() => {
+    document.body.style.userSelect = "none";
+    document.body.style.webkitUserSelect = "none";
+
+    const triggerViolation = (reason: string) => {
+      if (violationCooldownRef.current) return;
+      violationCooldownRef.current = true;
+      setTimeout(() => { violationCooldownRef.current = false; }, 1000);
+
+      setIsBlurred(true);
+
+      setTabWarning((prev) => {
+        const next = prev + 1;
+        if (next >= MAX_VIOLATIONS) {
+          setWarningMsg("Kamu telah melakukan pelanggaran batas maksimum. Ujian akan otomatis diselesaikan.");
+          setShowWarning(true);
+          setTimeout(() => {
+            nextColumnRef.current().then(() => {
+              onFinishRef.current();
+            });
+          }, 3000);
+        } else {
+          setWarningMsg(`Peringatan ${next}/${MAX_VIOLATIONS}: ${reason}`);
+          setShowWarning(true);
+          setTimeout(() => setShowWarning(false), 4000);
+        }
+        return next;
+      });
+    };
+
+    const triggerScreenshotViolation = () => {
+      triggerViolation("Dilarang melakukan screenshot atau screen recording saat ujian!");
+    };
+
+    const handleWindowBlur = () => {
+      triggerViolation("Dilarang meninggalkan halaman ujian!");
+    };
+
+    const handleWindowFocus = () => {
+      setTimeout(() => { setIsBlurred(false); }, 800);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        triggerViolation("Dilarang berpindah tab atau minimize browser!");
+      } else {
+        setTimeout(() => { setIsBlurred(false); }, 800);
+      }
+    };
+
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    const handleKeyDownViolation = (e: KeyboardEvent) => {
+      if (e.key === "PrintScreen") {
+        e.preventDefault();
+        triggerScreenshotViolation();
+      }
+      if (
+        (e.ctrlKey && (e.key === "p" || e.key === "s")) ||
+        (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "i") ||
+        e.key === "F12"
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    const detectScreenCapture = async () => {
+      try {
+        const originalGetDisplayMedia = navigator.mediaDevices?.getDisplayMedia?.bind(navigator.mediaDevices);
+        if (originalGetDisplayMedia) {
+          navigator.mediaDevices.getDisplayMedia = async (constraints) => {
+            const stream = await originalGetDisplayMedia(constraints);
+            mediaStreamRef.current = stream;
+            triggerScreenshotViolation();
+            stream.getTracks().forEach((track) => track.stop());
+            throw new Error("Screen capture tidak diizinkan selama ujian.");
+          };
+        }
+      } catch {}
+    };
+
+    detectScreenCapture();
+
+    window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("focus", handleWindowFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("contextmenu", handleContextMenu);
+    window.addEventListener("keydown", handleKeyDownViolation);
+
+    return () => {
+      document.body.style.userSelect = "auto";
+      document.body.style.webkitUserSelect = "auto";
+      window.removeEventListener("blur", handleWindowBlur);
+      window.removeEventListener("focus", handleWindowFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("contextmenu", handleContextMenu);
+      window.removeEventListener("keydown", handleKeyDownViolation);
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
+
   // Input Digit
   const handleDigitInput = useCallback((inputVal: number) => {
     setAnswersMap((prev) => ({
@@ -149,7 +272,7 @@ export default function PauliExamView({
     setPosisiIndex((prev) => prev + 1);
   }, []);
 
-  // Keydown listener
+  // Keydown listener for digits & movement
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key >= "0" && e.key <= "9") {
@@ -179,30 +302,64 @@ export default function PauliExamView({
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between font-sans selection:bg-none">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-between font-sans selection:bg-none relative">
+      {/* Blur Overlay when window loses focus */}
+      {isBlurred && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9997,
+            backdropFilter: "blur(20px)",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            gap: "12px",
+          }}
+        >
+          <IconLock className="w-16 h-16 text-white mb-4" />
+          <p style={{ color: "white", fontWeight: "700", fontSize: "20px" }}>
+            Ujian Terkunci
+          </p>
+          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px" }}>
+            Kembali ke halaman ini untuk melanjutkan ujian
+          </p>
+        </div>
+      )}
+
+      {/* Warning Toast */}
+      {showWarning && tabWarning < MAX_VIOLATIONS && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] animate-bounce">
+          <div className="bg-red-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md">
+            <IconAlertTriangle className="text-2xl shrink-0 text-yellow-500" />
+            <div>
+              <p className="font-bold text-sm">Pelanggaran Terdeteksi!</p>
+              <p className="text-xs text-red-100 mt-0.5">{warningMsg}</p>
+            </div>
+            <div className="ml-auto shrink-0 bg-red-500 rounded-full w-8 h-8 flex items-center justify-center font-bold">
+              {MAX_VIOLATIONS - tabWarning}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header Bar */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-20">
         <div>
-          <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
             Tes Pauli
           </span>
           <h1 className="text-sm font-bold text-gray-800 mt-1">
             Peserta: {candidateName}
           </h1>
         </div>
-
-        <button
-          onClick={nextColumn}
-          disabled={isSubmitting}
-          className="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm"
-        >
-          Selesai Ujian
-        </button>
       </header>
 
       {/* Flash Message Banner */}
       {flashMessage && (
-        <div className="bg-indigo-600 text-white py-2.5 text-center font-bold text-sm shadow-md animate-bounce">
+        <div className="bg-blue-600 text-white py-2.5 text-center font-bold text-sm shadow-md animate-bounce">
           ⚡ {flashMessage}
         </div>
       )}
@@ -230,7 +387,7 @@ export default function PauliExamView({
                   onClick={() => setPosisiIndex(idx)}
                   className={`flex items-center justify-between px-6 py-3 rounded-xl border cursor-pointer transition-all ${
                     isCurrent
-                      ? "bg-indigo-50 border-indigo-400 ring-2 ring-indigo-500/20 scale-105 shadow-sm"
+                      ? "bg-blue-50 border-blue-400 ring-2 ring-blue-500/20 scale-105 shadow-sm"
                       : "bg-gray-50/50 border-gray-100 opacity-60 hover:opacity-80"
                   }`}
                 >
@@ -241,11 +398,11 @@ export default function PauliExamView({
                   </div>
                   <div className="font-mono font-bold text-lg">
                     {val !== undefined ? (
-                      <span className={`px-3 py-1 rounded-lg ${isCurrent ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-700"}`}>
+                      <span className={`px-3 py-1 rounded-lg ${isCurrent ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700"}`}>
                         {val}
                       </span>
                     ) : isCurrent ? (
-                      <span className="px-3 py-1 bg-indigo-600 text-white rounded-lg animate-pulse">?</span>
+                      <span className="px-3 py-1 bg-blue-600 text-white rounded-lg animate-pulse">?</span>
                     ) : (
                       <span className="text-gray-300">...</span>
                     )}
@@ -256,7 +413,7 @@ export default function PauliExamView({
           </div>
 
           <p className="text-xs text-gray-400 mt-4 text-center">
-            Gunakan tombol ⬆/⬇ atau panah keyboard untuk berpindah antar soal
+            Gunakan tombol panah keyboard atau keypad untuk berpindah antar soal
           </p>
         </div>
 
@@ -271,7 +428,7 @@ export default function PauliExamView({
               <button
                 key={num}
                 onClick={() => handleDigitInput(num)}
-                className="py-4 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 border border-gray-200 rounded-xl font-mono text-2xl font-bold text-gray-800 transition-all active:scale-95 shadow-sm"
+                className="py-4 bg-gray-50 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 border border-gray-200 rounded-xl font-mono text-2xl font-bold text-gray-800 transition-all active:scale-95 shadow-sm"
               >
                 {num}
               </button>
@@ -281,22 +438,28 @@ export default function PauliExamView({
             <button
               onClick={handleMoveUp}
               title="Ke soal sebelumnya (Atas)"
-              className="py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 rounded-xl font-bold text-xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
+              className="py-4 bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 rounded-xl font-bold text-xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
             >
-              ⬆
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 19V5"/>
+                <path d="m5 12 7-7 7 7"/>
+              </svg>
             </button>
             <button
               onClick={() => handleDigitInput(0)}
-              className="py-4 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 border border-gray-200 rounded-xl font-mono text-2xl font-bold text-gray-800 transition-all active:scale-95 shadow-sm"
+              className="py-4 bg-gray-50 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 border border-gray-200 rounded-xl font-mono text-2xl font-bold text-gray-800 transition-all active:scale-95 shadow-sm"
             >
               0
             </button>
             <button
               onClick={handleMoveDown}
               title="Ke soal berikutnya (Bawah)"
-              className="py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 rounded-xl font-bold text-xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
+              className="py-4 bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 rounded-xl font-bold text-xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
             >
-              ⬇
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14"/>
+                <path d="m19 12-7 7-7-7"/>
+              </svg>
             </button>
           </div>
         </div>

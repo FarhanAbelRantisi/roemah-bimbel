@@ -485,6 +485,7 @@ export default function AdminExamDetailPage() {
 
     setImageFile(null);
     setImagePreview(null);
+    setFormErrors({});
     setShowModal(true);
   };
 
@@ -510,6 +511,7 @@ export default function AdminExamDetailPage() {
     });
     setImagePreview(null);
     setImageFile(null);
+    setFormErrors({});
     setShowModal(true);
   };
 
@@ -574,6 +576,27 @@ export default function AdminExamDetailPage() {
     return () => { isMounted = false; };
   }, [id]);
 
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const validateQuestionForm = () => {
+    const errs: Record<string, string> = {};
+    if (!form.content.trim()) errs.content = "Teks soal wajib diisi";
+
+    OPTIONS.forEach((opt) => {
+      const val = form[`option${opt}` as keyof typeof form] as string;
+      if (!val || !val.trim()) {
+        errs[`option${opt}`] = `Opsi ${opt} wajib diisi`;
+      }
+    });
+
+    if (form.category !== "TKP" && !form.correctOption) {
+      errs.correctOption = "Jawaban benar wajib dipilih";
+    }
+
+    setFormErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const isQuestionLimitReached = (): boolean => {
     if (editId) return false;
     if (exam?.examType === "SKD") {
@@ -595,7 +618,7 @@ export default function AdminExamDetailPage() {
   };
 
   const handleSave = async () => {
-    if (!form.content) return;
+    if (!validateQuestionForm()) return;
     if (isQuestionLimitReached()) {
       showAlert("Batas Maksimal Tercapai", "Jumlah soal untuk kategori ini sudah mencapai batas maksimal.");
       return;
@@ -641,10 +664,11 @@ export default function AdminExamDetailPage() {
     setShowModal(false);
     setImageFile(null);
     setImagePreview(null);
+    setFormErrors({});
   };
 
   const handleSaveAndNext = async () => {
-    if (!form.content) return;
+    if (!validateQuestionForm()) return;
     if (isQuestionLimitReached()) {
       showAlert("Batas Maksimal Tercapai", "Batas maksimal jumlah soal untuk sub-kategori ini telah tercapai.");
       return;
@@ -686,6 +710,7 @@ export default function AdminExamDetailPage() {
 
     if (limit !== Infinity && currentCount >= limit) {
       setShowModal(false);
+      setFormErrors({});
       showAlert("Kuota Terpenuhi", "Soal berhasil disimpan! Kuota jumlah soal untuk sub-kategori ini telah terpenuhi.", undefined, "success");
     } else {
       // Reset form tapi pertahankan subCategory & category
@@ -696,6 +721,7 @@ export default function AdminExamDetailPage() {
       });
       setImageFile(null);
       setImagePreview(null);
+      setFormErrors({});
     }
   };
 
@@ -726,28 +752,29 @@ export default function AdminExamDetailPage() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className={`text-xs font-semibold px-2 py-0.5 rounded uppercase ${exam?.examType === "PSIKOTEST_TNI"
-                  ? "bg-green-100 text-green-700 font-bold border border-green-200"
-                  : "bg-blue-100 text-blue-700"
+                ? "bg-green-100 text-green-700 font-bold border border-green-200"
+                : "bg-blue-100 text-blue-700"
                 }`}>
                 {exam?.examType === "PSIKOTEST_TNI" ? "PSIKOTEST TNI" : exam?.examType?.replace(/_/g, " ")}
               </span>
               {(() => {
                 const subLabel = (() => {
                   if (!exam) return null;
+                  const formatTitle = (str: string) => str.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
                   if (exam.examType === "SKD") return exam.skdCategory || "Gabungan";
                   if (exam.examType === "PSIKOTEST_TNI") {
                     if (exam.psikotestCategory === "GABUNGAN_TNI") return "Gabungan TNI";
                     if (exam.psikotestCategory === "PAULI") return "Pauli";
-                    return exam.psikotestCategory ? exam.psikotestCategory.replace(/_/g, " ") : "Gabungan TNI";
+                    return exam.psikotestCategory ? formatTitle(exam.psikotestCategory) : "Gabungan TNI";
                   }
                   if (exam.examType === "PSIKOTEST") {
                     if (exam.psikotestCategory === "GABUNGAN") return "Gabungan";
-                    if (exam.psikotestCategory) return exam.psikotestCategory;
+                    if (exam.psikotestCategory) return formatTitle(exam.psikotestCategory);
                     if (exam.psikotestConfig) {
                       try {
                         const keys = Object.keys(JSON.parse(exam.psikotestConfig));
                         if (keys.length > 1) return "Gabungan";
-                        if (keys.length === 1) return keys[0];
+                        if (keys.length === 1) return formatTitle(keys[0]);
                       } catch { }
                     }
                     return "Kecerdasan";
@@ -778,13 +805,15 @@ export default function AdminExamDetailPage() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={downloadTemplate}
-              className="flex-1 md:flex-none border border-gray-200 text-gray-600 text-xs md:text-sm px-3 py-2 rounded-lg"
+              className="flex-1 md:flex-none border border-gray-200 text-gray-600 text-xs md:text-sm px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 hover:bg-gray-50 transition-colors"
             >
-              ⬇ Template
+              <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <span>Template</span>
             </button>
 
-            <label className={`flex-1 md:flex-none border border-green-200 text-green-700 text-xs md:text-sm px-3 py-2 rounded-lg text-center cursor-pointer ${importing ? "opacity-50 pointer-events-none" : ""}`}>
-              {importing ? "Mengimport..." : "📂 Import"}
+            <label className={`flex-1 md:flex-none border border-green-200 text-green-700 text-xs md:text-sm px-3 py-2 rounded-lg text-center cursor-pointer flex items-center justify-center gap-1.5 hover:bg-green-50 transition-colors ${importing ? "opacity-50 pointer-events-none" : ""}`}>
+              <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+              <span>{importing ? "Mengimport..." : "Import"}</span>
               <input
                 type="file"
                 accept=".xlsx,.xls,.csv"
@@ -805,13 +834,13 @@ export default function AdminExamDetailPage() {
 
       {/* Special Pauli Banner Config */}
       {exam?.examType === "PSIKOTEST_TNI" && exam?.psikotestCategory === "PAULI" && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6 shadow-sm">
+        <div className="bg-gradient-to-r from-green-50 to-green-50 border border-green-200 rounded-xl p-6 mb-6 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+                {/* <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                   Tes Pauli
-                </span>
+                </span> */}
                 {/* <span className="text-xs text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full font-medium">
                   Auto-Generated System
                 </span> */}
@@ -824,7 +853,7 @@ export default function AdminExamDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white/80 p-4 rounded-lg border border-blue-100 text-xs">
                 <div>
                   <span className="text-gray-500 block">Total Durasi Ujian</span>
-                  <strong className="text-gray-900 text-sm">({(exam?.duration ?? 0) * 60} Detik) {exam?.duration ?? 0} Menit</strong>
+                  <strong className="text-gray-900 text-sm">{(exam?.duration ?? 0) * 60} Detik ({exam?.duration ?? 0} Menit)</strong>
                 </div>
                 <div>
                   <span className="text-gray-500 block">Interval Garis (Switch Kolom)</span>
@@ -947,8 +976,8 @@ export default function AdminExamDetailPage() {
           ).map((cat) => (
             <button key={cat} onClick={() => setActiveTab(cat)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === cat
-                  ? "bg-blue-600 text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                ? "bg-blue-600 text-white"
+                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
                 }`}>
               {cat} ({categoryCount(cat)})
             </button>
@@ -978,16 +1007,16 @@ export default function AdminExamDetailPage() {
             const activeClass = isAkademik
               ? "bg-orange-50 text-orange-600 border-orange-200"
               : isTni
-              ? "bg-green-600 text-white"
-              : "bg-purple-600 text-white";
+                ? "bg-green-600 text-white"
+                : "bg-purple-600 text-white";
 
             return (
               <button
                 key={sub}
                 onClick={() => setActiveSubTab(sub)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${isActive
-                    ? activeClass
-                    : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                  ? activeClass
+                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                   }`}
               >
                 {formattedSub} ({subCategoryCount(sub)}/{getLimit(sub) === Infinity ? "∞" : getLimit(sub)})
@@ -1069,8 +1098,8 @@ export default function AdminExamDetailPage() {
                     <div
                       key={opt}
                       className={`text-xs px-2 py-1 rounded border ${q.category !== "TKP" && q.correctOption === opt
-                          ? "border-green-300 bg-green-50 text-green-700 font-medium"
-                          : "border-gray-100 bg-gray-50 text-gray-600"
+                        ? "border-green-300 bg-green-50 text-green-700 font-medium"
+                        : "border-gray-100 bg-gray-50 text-gray-600"
                         }`}
                     >
                       <span className="font-semibold">{opt}.</span>{" "}
@@ -1275,9 +1304,18 @@ export default function AdminExamDetailPage() {
                   rows={3}
                   placeholder="Tulis soal di sini..."
                   value={form.content}
-                  onChange={(e) => setForm({ ...form, content: e.target.value })}
-                  className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  onChange={(e) => {
+                    setForm({ ...form, content: e.target.value });
+                    if (formErrors.content) setFormErrors({ ...formErrors, content: "" });
+                  }}
+                  className={`w-full border ${formErrors.content ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 resize-none`}
                 />
+                {formErrors.content && (
+                  <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>{formErrors.content}</span>
+                  </p>
+                )}
               </div>
 
               {/* Gambar Soal (opsional) */}
@@ -1327,7 +1365,7 @@ export default function AdminExamDetailPage() {
                 {/* Input file */}
                 {!imagePreview && !form.imageUrl && (
                   <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                    <span className="text-2xl mb-1">🖼️</span>
+                    <svg className="w-7 h-7 text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     <span className="text-sm text-gray-500">Klik untuk upload gambar</span>
                     <span className="text-xs text-gray-400 mt-0.5">PNG, JPG, JPEG (maks. 2MB)</span>
                     <input
@@ -1356,35 +1394,53 @@ export default function AdminExamDetailPage() {
                 </label>
                 <div className="flex flex-col gap-2">
                   {OPTIONS.map((opt) => (
-                    <div key={opt} className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-gray-500 w-5">{opt}</span>
-                      <input
-                        type="text"
-                        placeholder={`Opsi ${opt}`}
-                        value={form[`option${opt}` as keyof typeof form] as string}
-                        onChange={(e) =>
-                          setForm({ ...form, [`option${opt}`]: e.target.value })
-                        }
-                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      {form.category !== "TKP" && (
+                    <div key={opt} className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-gray-500 w-5">{opt}</span>
                         <input
-                          type="radio"
-                          name="correctOption"
-                          checked={form.correctOption === opt}
-                          onChange={() => setForm({ ...form, correctOption: opt })}
-                          className="w-4 h-4 accent-blue-600"
-                          title="Jawaban benar"
+                          type="text"
+                          placeholder={`Opsi ${opt}`}
+                          value={form[`option${opt}` as keyof typeof form] as string}
+                          onChange={(e) => {
+                            setForm({ ...form, [`option${opt}`]: e.target.value });
+                            if (formErrors[`option${opt}`]) setFormErrors({ ...formErrors, [`option${opt}`]: "" });
+                          }}
+                          className={`flex-1 border ${formErrors[`option${opt}`] ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"} text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2`}
                         />
-                      )}
-                      {form.category === "TKP" && (
-                        <span className="w-16 text-center text-sm font-semibold text-blue-600 border border-blue-100 bg-blue-50 rounded-lg px-2 py-2">
-                          {OPTIONS.indexOf(opt) + 1}
-                        </span>
+                        {form.category !== "TKP" && (
+                          <input
+                            type="radio"
+                            name="correctOption"
+                            checked={form.correctOption === opt}
+                            onChange={() => {
+                              setForm({ ...form, correctOption: opt });
+                              if (formErrors.correctOption) setFormErrors({ ...formErrors, correctOption: "" });
+                            }}
+                            className="w-4 h-4 accent-blue-600"
+                            title="Jawaban benar"
+                          />
+                        )}
+                        {form.category === "TKP" && (
+                          <span className="w-16 text-center text-sm font-semibold text-blue-600 border border-blue-100 bg-blue-50 rounded-lg px-2 py-2">
+                            {OPTIONS.indexOf(opt) + 1}
+                          </span>
+                        )}
+                      </div>
+                      {formErrors[`option${opt}`] && (
+                        <p className="text-xs text-red-500 font-medium ml-7 flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                          <span>{formErrors[`option${opt}`]}</span>
+                        </p>
                       )}
                     </div>
                   ))}
                 </div>
+                {formErrors.correctOption && (
+                  <p className="text-xs text-red-500 font-medium mt-2 flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>{formErrors.correctOption}</span>
+                  </p>
+                )}
                 {form.category !== "TKP" && (
                   <p className="text-xs text-gray-400 mt-1">
                     ● Pilih radio button di kanan untuk menandai jawaban benar

@@ -139,34 +139,34 @@ export default function RegisterPage() {
 
             {/* Password */}
             <div>
-            <label style={{ fontSize: "12px", fontWeight: "600", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "6px" }}>
-              Password
-            </label>
-            <div style={{ position: "relative"}}>
-              <input
-                type="text"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="Min. 8 karakter"
-                required
-                style={{
-                  ...inputStyle,
-                  paddingRight: "44px",
-                  WebkitTextSecurity: showPassword ? "none" : "disc",
-                } as React.CSSProperties}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "14px", padding: "4px" }}
-              >
-                {showPassword ? "🙈" : "👁️"}
-              </button>
+              <label style={{ fontSize: "12px", fontWeight: "600", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "6px" }}>
+                Password
+              </label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type="text"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="Min. 8 karakter"
+                  required
+                  style={{
+                    ...inputStyle,
+                    paddingRight: "44px",
+                    WebkitTextSecurity: showPassword ? "none" : "disc",
+                  } as React.CSSProperties}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "14px", padding: "4px" }}
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
+              </div>
+              <p style={{ fontSize: "11px", color: "#9ca3af", margin: "5px 0 0" }}>
+                Min. 8 karakter, huruf besar, angka & simbol (@$!%*?&)
+              </p>
             </div>
-            <p style={{ fontSize: "11px", color: "#9ca3af", margin: "5px 0 0" }}>
-              Min. 8 karakter, huruf besar, angka & simbol (@$!%*?&)
-            </p>
-          </div>
 
             {/* Confirm Password */}
             <div>
@@ -198,8 +198,9 @@ export default function RegisterPage() {
 
             {/* Error */}
             {error && (
-              <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "10px", padding: "10px 14px" }}>
-                <p style={{ fontSize: "13px", color: "#dc2626", margin: 0 }}>⚠️ {error}</p>
+              <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                <p style={{ fontSize: "13px", color: "#dc2626", margin: 0 }}>{error}</p>
               </div>
             )}
 

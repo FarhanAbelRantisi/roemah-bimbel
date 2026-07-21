@@ -184,14 +184,15 @@ export default function AdminUsersPage() {
                         {/* Toggle Premium */}
                         <button
                           onClick={() => handleUpdate(user.id, { isPremium: !user.isPremium })}
-                          className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-colors ${
+                          className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-colors flex items-center gap-1 ${
                             user.isPremium
                               ? "border-yellow-200 text-yellow-600 hover:bg-yellow-50"
                               : "border-gray-200 text-gray-600 hover:bg-gray-50"
                           }`}
                           title={user.isPremium ? "Cabut Premium" : "Set Premium"}
                         >
-                          {user.isPremium ? "⭐ Cabut" : "⭐ Premium"}
+                          <svg className="w-3.5 h-3.5 fill-current text-yellow-500" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                          <span>{user.isPremium ? "Cabut" : "Premium"}</span>
                         </button>
 
                         {/* Toggle Role */}
@@ -201,14 +202,24 @@ export default function AdminUsersPage() {
                               role: user.role === "ADMIN" ? "STUDENT" : "ADMIN",
                             })
                           }
-                          className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-colors ${
+                          className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition-colors flex items-center gap-1 ${
                             user.role === "ADMIN"
                               ? "border-purple-200 text-purple-600 hover:bg-purple-50"
                               : "border-gray-200 text-gray-600 hover:bg-gray-50"
                           }`}
                           title={user.role === "ADMIN" ? "Jadikan Student" : "Jadikan Admin"}
                         >
-                          {user.role === "ADMIN" ? "👤 Demote" : "🔑 Admin"}
+                          {user.role === "ADMIN" ? (
+                            <>
+                              <svg className="w-3.5 h-3.5 stroke-current" fill="none" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                              <span>Demote</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-3.5 h-3.5 stroke-current" fill="none" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                              <span>Admin</span>
+                            </>
+                          )}
                         </button>
 
                         {/* Hapus */}

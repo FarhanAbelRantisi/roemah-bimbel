@@ -3,18 +3,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const IconClipboard = () => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z"/></svg>);
-const IconAlertTriangle = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-red-600"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>);
-const IconSmartphone = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>);
-const IconBan = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>);
-const IconClock = ({ className = "shrink-0 mt-0.5 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>);
-const IconLock = ({ className = "shrink-0 mt-0.5 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
-const IconSave = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>);
-const IconInbox = () => (<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-gray-400"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>);
-const IconFileText = ({ className = "w-6 h-6 text-blue-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>);
-const IconMessageSquare = ({ className = "w-5 h-5 text-gray-400" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>);
-const IconFilter = ({ className = "w-5 h-5 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>);
-const IconChevronDown = ({ className = "w-4 h-4 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>);
+const IconClipboard = () => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z" /></svg>);
+const IconAlertTriangle = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-red-600"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>);
+const IconSmartphone = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>);
+const IconBan = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><circle cx="12" cy="12" r="10" /><path d="m4.9 4.9 14.2 14.2" /></svg>);
+const IconClock = ({ className = "shrink-0 mt-0.5 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>);
+const IconLock = ({ className = "shrink-0 mt-0.5 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>);
+const IconSave = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5 text-gray-500"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>);
+const IconInbox = () => (<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-gray-400"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" /><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></svg>);
+const IconFileText = ({ className = "w-6 h-6 text-blue-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>);
+const IconMessageSquare = ({ className = "w-5 h-5 text-gray-400" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>);
+const IconFilter = ({ className = "w-5 h-5 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>);
+const IconChevronDown = ({ className = "w-4 h-4 text-gray-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6" /></svg>);
 
 interface Exam {
   id: string;
@@ -183,17 +183,17 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
   const [filterMode, setFilterMode] = useState<string>("ALL");
   const currentMain = filterMode === "ALL" ? "ALL"
     : filterMode.startsWith("PSIKOTEST_TNI") ? "PSIKOTEST_TNI"
-    : filterMode.split("_")[0];
+      : filterMode.split("_")[0];
   const finishedSet = new Set(finishedExamIds);
 
   const currentExams = exams.filter(e => {
     if (filterMode === "ALL") return true;
-    
+
     // SKD Filters
     if (filterMode === "SKD_SEMUA") return e.examType === "SKD";
     if (filterMode === "SKD_GABUNGAN") return e.examType === "SKD" && !e.skdCategory;
     if (filterMode.startsWith("SKD_")) return e.examType === "SKD" && e.skdCategory === filterMode.replace("SKD_", "");
-    
+
     // Psikotest Filters
     if (filterMode === "PSIKOTEST_SEMUA") return e.examType === "PSIKOTEST";
     if (filterMode.startsWith("PSIKOTEST_TNI_")) {
@@ -267,7 +267,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
           className="block w-full pl-10 pr-10 py-3 text-sm border-gray-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-xl appearance-none bg-white font-semibold shadow-sm shadow-black/5 hover:border-gray-300 transition-colors cursor-pointer text-gray-700 border"
         >
           {FILTER_OPTIONS.map((opt) => (
-             <option key={opt.value} value={opt.value}>{opt.label}</option>
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -322,7 +322,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
               const fullValue = `SKD_${sub.value}`;
               const count = sub.value === "SEMUA" ? exams.filter(e => e.examType === "SKD").length
                 : sub.value === "GABUNGAN" ? exams.filter(e => e.examType === "SKD" && !e.skdCategory).length
-                : exams.filter(e => e.examType === "SKD" && e.skdCategory === sub.value).length;
+                  : exams.filter(e => e.examType === "SKD" && e.skdCategory === sub.value).length;
               return (
                 <button key={sub.value} onClick={() => setFilterMode(fullValue)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${filterMode === fullValue
@@ -450,16 +450,15 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                   <div className="hidden md:flex w-12 h-12 rounded-xl items-center justify-center shrink-0 bg-blue-50">
                     <IconFileText />
                   </div>
-                  
+
                   <div className="flex-1 pr-20 md:pr-28">
                     <h2 className="text-lg font-bold text-gray-900">{exam.title}</h2>
                     {/* Sub-label */}
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                        exam.examType === "PSIKOTEST_TNI"
+                      <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${exam.examType === "PSIKOTEST_TNI"
                           ? "bg-green-50 text-green-700 font-bold border border-green-200"
                           : "bg-blue-50 text-blue-500"
-                      }`}>
+                        }`}>
                         {exam.examType === "PSIKOTEST_TNI" ? "PSIKOTEST TNI" : exam.examType}
                       </span>
                       {exam.examType === "SKD" && (
@@ -469,7 +468,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                       )}
                       {exam.examType === "PSIKOTEST" && exam.psikotestCategory && (
                         <span className="text-xs text-gray-400">
-                          · {exam.psikotestCategory.replace(/_/g, " ")}
+                          · {exam.psikotestCategory.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}
                         </span>
                       )}
                       {exam.examType === "PSIKOTEST_TNI" && exam.psikotestCategory && (
@@ -483,8 +482,8 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                         </span>
                       )}
                     </div>
-                    {isDone && (
-                      <p className="text-sm text-green-600 font-semibold mt-1">Skor kamu: {score}</p>
+                    {isDone && exam.psikotestCategory !== "PAULI" && (
+                      <p className="text-sm text-green-600 font-semibold mt-3">Skor kamu: {score}</p>
                     )}
                   </div>
                 </div>

@@ -299,7 +299,7 @@ export default function AdminNewsPage() {
                   </div>
                 ) : (
                   <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                    <span className="text-2xl mb-1">🖼️</span>
+                    <svg className="w-7 h-7 text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     <span className="text-sm text-gray-500">Klik untuk upload gambar</span>
                     <input
                       type="file"

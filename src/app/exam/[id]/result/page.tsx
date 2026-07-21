@@ -114,7 +114,7 @@ export default function ResultPage() {
             {examType === "SKD" && result.exam.skdCategory &&
               ` · ${result.exam.skdCategory}`}
             {examType === "PSIKOTEST" && result.exam.psikotestCategory &&
-              ` · ${result.exam.psikotestCategory}`}
+              ` · ${result.exam.psikotestCategory.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}`}
             {examType === "AKADEMIK" && result.exam.akademikCategory &&
               ` · ${result.exam.akademikCategory.replace(/_/g, " ")}`}
           </span>

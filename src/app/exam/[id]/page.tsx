@@ -136,7 +136,7 @@ export default function ExamPage() {
         setShowWarning(true);
         setTimeout(() => { handleFinish(true); }, 3000);
       } else {
-        setWarningMsg(`⚠️ Peringatan ${next}/${MAX_VIOLATIONS}: Screenshot terdeteksi! Dilarang mengambil screenshot selama ujian!`);
+        setWarningMsg(`Peringatan ${next}/${MAX_VIOLATIONS}: Screenshot terdeteksi! Dilarang mengambil screenshot selama ujian!`);
         setShowWarning(true);
         setTimeout(() => setShowWarning(false), 4000);
       }
@@ -384,7 +384,7 @@ export default function ExamPage() {
           setTimeout(() => { handleFinish(true); }, 3000);
         } else {
           setWarningMsg(
-            `⚠️ Peringatan ${next}/${MAX_VIOLATIONS}: ${reason}`
+            `Peringatan ${next}/${MAX_VIOLATIONS}: ${reason}`
           );
           setShowWarning(true);
           setTimeout(() => setShowWarning(false), 4000);
@@ -809,7 +809,7 @@ export default function ExamPage() {
                     Psikotest
                     {currentQuestion.subCategory && (
                       <span className="text-sm font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-lg">
-                        {currentQuestion.subCategory}
+                        {currentQuestion.subCategory.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}
                       </span>
                     )}
                   </>

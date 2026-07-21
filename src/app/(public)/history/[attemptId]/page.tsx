@@ -167,10 +167,10 @@ export default function HistoryDetailPage() {
   // Tab options per examType
   const tabOptions: string[] =
     examType === "SKD" ? ["ALL", "TWK", "TIU", "TKP"] :
-    examType === "PSIKOTEST" ? ["ALL", ...Object.keys(psikotestConfig).length > 0
-      ? Object.keys(psikotestConfig)
-      : [attempt.exam.psikotestCategory ?? ""]] :
-    ["ALL"];
+      examType === "PSIKOTEST" ? ["ALL", ...Object.keys(psikotestConfig).length > 0
+        ? Object.keys(psikotestConfig)
+        : [attempt.exam.psikotestCategory ?? ""]] :
+        ["ALL"];
 
   const filteredAnswers = attempt.answers.filter((a) => {
     const matchTab = activeTab === "ALL" ||
@@ -195,9 +195,9 @@ export default function HistoryDetailPage() {
 
   const passed = examType === "SKD"
     ? skdCat === "TWK" ? attempt.twkScore >= 65
-    : skdCat === "TIU" ? attempt.tiuScore >= 80
-    : skdCat === "TKP" ? attempt.tkpScore >= 156
-    : attempt.twkScore >= 65 && attempt.tiuScore >= 80 && attempt.tkpScore >= 156
+      : skdCat === "TIU" ? attempt.tiuScore >= 80
+        : skdCat === "TKP" ? attempt.tkpScore >= 156
+          : attempt.twkScore >= 65 && attempt.tiuScore >= 80 && attempt.tkpScore >= 156
     : null;
 
   return (
@@ -215,11 +215,10 @@ export default function HistoryDetailPage() {
           <div>
             <h1 className="text-xl font-bold text-gray-900 mb-1">{attempt.exam.title}</h1>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                examType === "SKD" ? "bg-blue-50 text-blue-600" :
-                examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
-                "bg-orange-50 text-orange-600"
-              }`}>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${examType === "SKD" ? "bg-blue-50 text-blue-600" :
+                  examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
+                    "bg-orange-50 text-orange-600"
+                }`}>
                 {examType}
                 {examType === "SKD" && skdCat && ` · ${skdCat}`}
                 {examType === "PSIKOTEST" && attempt.exam.psikotestCategory &&
@@ -237,10 +236,9 @@ export default function HistoryDetailPage() {
           </div>
 
           {passed !== null && (
-            <span className={`text-sm font-bold px-4 py-2 rounded-xl shrink-0 ${
-              passed ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
-            }`}>
-              {passed ? "✅ Lulus" : "❌ Belum Lulus"}
+            <span className={`text-sm font-bold px-4 py-2 rounded-xl shrink-0 ${passed ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+              }`}>
+              {passed ? "Lulus" : "Belum Lulus"}
             </span>
           )}
         </div>
@@ -250,16 +248,15 @@ export default function HistoryDetailPage() {
           <div className={`grid gap-3 ${skdCat ? "grid-cols-2" : "grid-cols-4"}`}>
             {skdCat ? (
               <>
-                <div className={`rounded-xl p-3 text-center ${
-                  skdCat === "TWK" ? "bg-blue-50 text-blue-700" :
-                  skdCat === "TIU" ? "bg-purple-50 text-purple-700" :
-                  "bg-green-50 text-green-700"
-                }`}>
+                <div className={`rounded-xl p-3 text-center ${skdCat === "TWK" ? "bg-blue-50 text-blue-700" :
+                    skdCat === "TIU" ? "bg-purple-50 text-purple-700" :
+                      "bg-green-50 text-green-700"
+                  }`}>
                   <p className="text-xs mb-0.5 opacity-70">{skdCat}</p>
                   <p className="text-xl font-bold">
                     {skdCat === "TWK" ? attempt.twkScore :
-                    skdCat === "TIU" ? attempt.tiuScore :
-                    attempt.tkpScore}
+                      skdCat === "TIU" ? attempt.tiuScore :
+                        attempt.tkpScore}
                   </p>
                   <p className="text-xs opacity-60">
                     /{skdCat === "TWK" ? 150 : skdCat === "TIU" ? 175 : 225}
@@ -389,9 +386,8 @@ export default function HistoryDetailPage() {
               : attempt.answers.filter((a) => a.question.subCategory === tab).length;
           return (
             <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${
-                activeTab === tab ? "bg-blue-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}>
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeTab === tab ? "bg-blue-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                }`}>
               {tab === "ALL" ? "Semua" : tab}
               <span className="ml-1.5 opacity-70">({count})</span>
             </button>
@@ -408,9 +404,8 @@ export default function HistoryDetailPage() {
           { value: "empty", label: "— Kosong" },
         ].map((f) => (
           <button key={f.value} onClick={() => setFilter(f.value as typeof filter)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
-              filter === f.value ? "bg-gray-800 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}>
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${filter === f.value ? "bg-gray-800 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}>
             {f.label}
           </button>
         ))}
@@ -431,23 +426,21 @@ export default function HistoryDetailPage() {
           const isPsikotest = examType === "PSIKOTEST";
 
           return (
-            <div key={answer.id} className={`bg-white border rounded-2xl p-6 ${
-              answerStatus === "correct" ? "border-green-200" :
-              answerStatus === "wrong" ? "border-red-200" :
-              answerStatus === "empty" ? "border-gray-200" :
-              "border-blue-200"
-            }`}>
+            <div key={answer.id} className={`bg-white border rounded-2xl p-6 ${answerStatus === "correct" ? "border-green-200" :
+                answerStatus === "wrong" ? "border-red-200" :
+                  answerStatus === "empty" ? "border-gray-200" :
+                    "border-blue-200"
+              }`}>
 
               {/* Header soal */}
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* Badge kategori */}
                   {examType === "SKD" && (
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                      q.category === "TWK" ? "bg-blue-100 text-blue-700" :
-                      q.category === "TIU" ? "bg-purple-100 text-purple-700" :
-                      "bg-green-100 text-green-700"
-                    }`}>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${q.category === "TWK" ? "bg-blue-100 text-blue-700" :
+                        q.category === "TIU" ? "bg-purple-100 text-purple-700" :
+                          "bg-green-100 text-green-700"
+                      }`}>
                       {q.category}
                     </span>
                   )}
@@ -470,15 +463,14 @@ export default function HistoryDetailPage() {
                   )}
                 </div>
 
-                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
-                  answerStatus === "correct" ? "bg-green-100 text-green-700" :
-                  answerStatus === "wrong" ? "bg-red-100 text-red-600" :
-                  answerStatus === "empty" ? "bg-gray-100 text-gray-500" :
-                  "bg-blue-100 text-blue-600"
-                }`}>
-                  {answerStatus === "correct" ? "✓ Benar" :
-                  answerStatus === "wrong" ? "✗ Salah" :
-                  answerStatus === "empty" ? "— Kosong" : "TKP"}
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${answerStatus === "correct" ? "bg-green-100 text-green-700" :
+                    answerStatus === "wrong" ? "bg-red-100 text-red-600" :
+                      answerStatus === "empty" ? "bg-gray-100 text-gray-500" :
+                        "bg-blue-100 text-blue-600"
+                  }`}>
+                  {answerStatus === "correct" ? "Benar" :
+                    answerStatus === "wrong" ? "Salah" :
+                      answerStatus === "empty" ? "Kosong" : "TKP"}
                 </span>
               </div>
 
@@ -501,7 +493,7 @@ export default function HistoryDetailPage() {
                   const isCorrect1 = q.correctOption === opt;
                   const isCorrect2 = q.correctOption2 === opt;
                   const isAnyCorrect = isCorrect1 || (isPsikotest && isCorrect2);
-                  
+
                   // Deteksi apakah soal ini punya 2 jawaban benar (khusus psikotest)
                   const hasDualAnswer = isPsikotest && !!(q.correctOption2 && q.correctOption2.trim() !== "");
 
@@ -516,12 +508,11 @@ export default function HistoryDetailPage() {
 
                   return (
                     <div key={opt} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border text-sm ${style}`}>
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                        isSelected ? "bg-blue-500 text-white" :
-                        isSelected2 ? "bg-green-400 text-white" :
-                        isAnyCorrect && !isTKP ? "bg-green-500 text-white" :
-                        "bg-gray-200 text-gray-600"
-                      }`}>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isSelected ? "bg-blue-500 text-white" :
+                          isSelected2 ? "bg-green-400 text-white" :
+                            isAnyCorrect && !isTKP ? "bg-green-500 text-white" :
+                              "bg-gray-200 text-gray-600"
+                        }`}>
                         {opt}
                       </span>
                       <span className="flex-1">{optText}</span>
@@ -532,7 +523,7 @@ export default function HistoryDetailPage() {
                             +{q[`score${opt}` as keyof Question] ?? 0}
                           </span>
                         )}
-                        
+
                         {/* Teks dinamis berdasarkan hasDualAnswer */}
                         {isSelected && (
                           <span className="text-xs font-semibold text-blue-500">
