@@ -57,7 +57,7 @@ export default function ResultPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-3xl bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 text-center shadow-lg">
-          <PauliReportView attemptId={result.id} />
+          <PauliReportView attemptId={attemptId!} />
           <div className="mt-8 pt-6 border-t border-gray-100 flex justify-center">
             <Link
               href="/catalog"
