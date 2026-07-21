@@ -23,7 +23,7 @@ interface Exam {
   isPremium: boolean;
   isPublished: boolean;
   skdCategory: string | null;
-  examType: "SKD" | "PSIKOTEST" | "AKADEMIK";
+  examType: "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
   psikotestCategory: string | null;
   akademikCategory: string | null;
   _count: { questions: number };
@@ -142,6 +142,18 @@ function ExamWarningModal({
 // Main Types for filtering
 
 const PSIKOTEST_SUBS = ["SEMUA", "KECERDASAN", "KECERMATAN", "KEPRIBADIAN", "GABUNGAN"] as const;
+const TNI_SUBS = ["SEMUA", "GABUNGAN_TNI", "VERBAL", "MATEMATIKA_DASAR", "LOGIKA", "DERET_ANGKA", "DERET_GAMBAR", "KUBUS", "PAULI"] as const;
+const TNI_LABELS: Record<string, string> = {
+  SEMUA: "Semua",
+  GABUNGAN_TNI: "Gabungan",
+  VERBAL: "Verbal",
+  MATEMATIKA_DASAR: "Matematika Dasar",
+  LOGIKA: "Logika",
+  DERET_ANGKA: "Deret Angka",
+  DERET_GAMBAR: "Deret Gambar",
+  KUBUS: "Kubus",
+  PAULI: "Pauli",
+};
 
 const AKADEMIK_SUBS = [
   "SEMUA",
@@ -167,7 +179,9 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
   const router = useRouter();
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [filterMode, setFilterMode] = useState<string>("ALL");
-  const currentMain = filterMode === "ALL" ? "ALL" : filterMode.split("_")[0];
+  const currentMain = filterMode === "ALL" ? "ALL"
+    : filterMode.startsWith("PSIKOTEST_TNI") ? "PSIKOTEST_TNI"
+    : filterMode.split("_")[0];
   const finishedSet = new Set(finishedExamIds);
 
   const currentExams = exams.filter(e => {
@@ -180,6 +194,11 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
     
     // Psikotest Filters
     if (filterMode === "PSIKOTEST_SEMUA") return e.examType === "PSIKOTEST";
+    if (filterMode.startsWith("PSIKOTEST_TNI_")) {
+      const sub = filterMode.replace("PSIKOTEST_TNI_", "");
+      if (sub === "SEMUA") return e.examType === "PSIKOTEST_TNI";
+      return e.examType === "PSIKOTEST_TNI" && e.psikotestCategory === sub;
+    }
     if (filterMode.startsWith("PSIKOTEST_")) return e.examType === "PSIKOTEST" && e.psikotestCategory === filterMode.replace("PSIKOTEST_", "");
 
     // Akademik Filters
@@ -200,6 +219,8 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
     ...PSIKOTEST_SUBS.filter(s => s !== "SEMUA").map(s => ({ value: `PSIKOTEST_${s}`, label: `Psikotest - ${s.charAt(0) + s.slice(1).toLowerCase()}` })),
     { value: "AKADEMIK_SEMUA", label: "Akademik (Semua)" },
     ...AKADEMIK_SUBS.filter(s => s !== "SEMUA").map(s => ({ value: `AKADEMIK_${s}`, label: `Akademik - ${AKADEMIK_LABELS[s]}` })),
+    { value: "PSIKOTEST_TNI_SEMUA", label: "Psikotest TNI (Semua)" },
+    ...TNI_SUBS.filter(s => s !== "SEMUA").map(s => ({ value: `PSIKOTEST_TNI_${s}`, label: `TNI - ${TNI_LABELS[s]}` })),
   ];
 
 
@@ -260,18 +281,20 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
             { id: "ALL", label: "Semua Ujian" },
             { id: "SKD", label: "SKD" },
             { id: "PSIKOTEST", label: "Psikotest" },
+            { id: "PSIKOTEST_TNI", label: "Psikotest TNI" },
             { id: "AKADEMIK", label: "Akademik" },
           ].map((tab) => {
             let count = exams.length;
             if (tab.id === "SKD") count = exams.filter(e => e.examType === "SKD").length;
             if (tab.id === "PSIKOTEST") count = exams.filter(e => e.examType === "PSIKOTEST").length;
+            if (tab.id === "PSIKOTEST_TNI") count = exams.filter(e => e.examType === "PSIKOTEST_TNI").length;
             if (tab.id === "AKADEMIK") count = exams.filter(e => e.examType === "AKADEMIK").length;
 
             const isActive = currentMain === tab.id;
             return (
               <button
                 key={tab.id}
-                onClick={() => setFilterMode(tab.id === "ALL" ? "ALL" : `${tab.id}_SEMUA`)}
+                onClick={() => setFilterMode(tab.id === "ALL" ? "ALL" : tab.id === "PSIKOTEST_TNI" ? "PSIKOTEST_TNI_SEMUA" : `${tab.id}_SEMUA`)}
                 className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap shrink-0 border ${isActive
                   ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20"
                   : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
@@ -355,6 +378,31 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                     }`}
                 >
                   {AKADEMIK_LABELS[sub]}
+                  <span className="ml-1 opacity-60">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Sub Tabs Psikotest TNI */}
+        {currentMain === "PSIKOTEST_TNI" && (
+          <div className="flex gap-2 flex-wrap">
+            {TNI_SUBS.map((sub) => {
+              const fullValue = `PSIKOTEST_TNI_${sub}`;
+              const count = sub === "SEMUA"
+                ? exams.filter(e => e.examType === "PSIKOTEST_TNI").length
+                : exams.filter(e => e.examType === "PSIKOTEST_TNI" && e.psikotestCategory === sub).length;
+              return (
+                <button
+                  key={sub}
+                  onClick={() => setFilterMode(fullValue)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap shrink-0 border ${filterMode === fullValue
+                    ? "bg-blue-50 text-blue-600 border-blue-200 shadow-sm"
+                    : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                    }`}
+                >
+                  {TNI_LABELS[sub]}
                   <span className="ml-1 opacity-60">({count})</span>
                 </button>
               );

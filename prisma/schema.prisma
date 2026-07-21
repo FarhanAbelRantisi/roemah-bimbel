@@ -22,6 +22,7 @@ enum ExamType {
   SKD
   PSIKOTEST
   AKADEMIK
+  PSIKOTEST_TNI
 }
 
 model User {
@@ -107,11 +108,17 @@ model ExamAttempt {
   kecermatanScore  Int  @default(0)
   kepribadianScore Int  @default(0)
 
+  // Psikotest TNI — skor per sub (persentase 0-100)
+  // Sub non-Pauli: reuse kecerdasanScore sebagai totalScore TNI,
+  // atau gunakan pauliScore untuk sub Pauli.
+  pauliScore       Int  @default(0)
+
   akademikScore    Int  @default(0)
 
   user    User        @relation(fields: [userId], references: [id])
   exam    Exam        @relation(fields: [examId], references: [id], onDelete: Cascade)
   answers Answer[]
+  pauliColumns PauliColumnResult[]
 }
 
 model Answer {
@@ -136,4 +143,33 @@ model News {
   imageUrl    String?
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())
+}
+
+// Norma kelompok untuk Tes Pauli (port dari engine.py)
+// Digunakan untuk mengklasifikasikan skor Pauli individu:
+// Rendah / Sedang / Tinggi berdasarkan Z-score dari histori
+model PauliNorm {
+  id          String   @id @default(cuid())
+  normGroup   String   // contoh: "TNI" — bisa diperluas per batch
+  metricName  String   // "jumlah_total" | "rasio_ketelitian" | "deviasi_konsistensi"
+  n           Int      // jumlah sesi yang menjadi dasar norma
+  meanValue   Float
+  sdValue     Float
+  updatedAt   DateTime @default(now())
+
+  @@unique([normGroup, metricName])
+}
+
+// Data mentah per-kolom hasil Tes Pauli (granular, untuk audit & grafik)
+model PauliColumnResult {
+  id                 String   @id @default(cuid())
+  attemptId          String
+  kolomIndex         Int      // urutan kolom (0-based)
+  jumlahDikerjakan   Int
+  jumlahBenar        Int
+  jumlahSalah        Int
+
+  attempt ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, kolomIndex])
 }

@@ -8,7 +8,7 @@ interface Exam {
   duration: number;
   isPremium: boolean;
   isPublished: boolean;
-  examType: "SKD" | "PSIKOTEST" | "AKADEMIK";
+  examType: "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
   skdCategory: string | null; 
   psikotestCategory: string | null;
   akademikCategory: string | null;
@@ -28,7 +28,7 @@ async function getExams(): Promise<Exam[]> {
       duration: e.duration,
       isPremium: e.isPremium,
       isPublished: e.isPublished,
-      examType: e.examType as "SKD" | "PSIKOTEST" | "AKADEMIK",
+      examType: e.examType as "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI",
       skdCategory: e.skdCategory,
       psikotestCategory: e.psikotestCategory,
       akademikCategory: e.akademikCategory,

@@ -8,13 +8,24 @@ interface Exam {
   duration: number;
   isPremium: boolean;
   isPublished: boolean;
-  examType: "SKD" | "PSIKOTEST" | "AKADEMIK";
+  examType: "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
   psikotestCategory?: string;
   psikotestConfig?: string;
   akademikCategory?: string;
   akademikTotalSoal?: number;
   _count: { questions: number };
 }
+
+const TNI_SUB_CATEGORIES = [
+  { value: "GABUNGAN_TNI", label: "Gabungan (Verbal + Mtk + Logika + Deret + Kubus)" },
+  { value: "VERBAL", label: "Verbal" },
+  { value: "MATEMATIKA_DASAR", label: "Matematika Dasar" },
+  { value: "LOGIKA", label: "Logika" },
+  { value: "DERET_ANGKA", label: "Deret Angka" },
+  { value: "DERET_GAMBAR", label: "Deret Gambar" },
+  { value: "KUBUS", label: "Kubus" },
+  { value: "PAULI", label: "Pauli (Input Angka Real-time)" },
+] as const;
 
 export default function AdminExamsPage() {
   const [exams, setExams] = useState<Exam[]>([]);
@@ -24,12 +35,14 @@ export default function AdminExamsPage() {
     title: "",
     duration: "",
     isPremium: false,
-    examType: "SKD" as "SKD" | "PSIKOTEST" | "AKADEMIK",
+    examType: "SKD" as "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI",
     skdCategory: "",
     psikotestCategory: "",
     psikotestSoalKecerdasan: "40",
     psikotestSoalKecermatan: "30",
     psikotestSoalKepribadian: "30",
+    tniCategory: "GABUNGAN_TNI",
+    tniJumlahSoal: "50",
     akademikCategory: "",
     akademikTotalSoal: "",
   });
@@ -40,12 +53,14 @@ export default function AdminExamsPage() {
     title: "",
     duration: "",
     isPremium: false,
-    examType: "SKD" as "SKD" | "PSIKOTEST" | "AKADEMIK",
+    examType: "SKD" as "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI",
     skdCategory: "",
     psikotestCategory: "KECERDASAN",
     psikotestSoalKecerdasan: "",
     psikotestSoalKecermatan: "",
     psikotestSoalKepribadian: "",
+    tniCategory: "GABUNGAN_TNI",
+    tniJumlahSoal: "",
     akademikCategory: "",
     akademikTotalSoal: "",
   });
@@ -140,6 +155,10 @@ export default function AdminExamsPage() {
           [editForm.psikotestCategory]: Number(editForm.psikotestSoalKecerdasan),
         });
       }
+    } else if (editForm.examType === "PSIKOTEST_TNI") {
+      psikotestConfig = JSON.stringify({
+        [editForm.tniCategory]: Number(editForm.tniJumlahSoal),
+      });
     }
 
     const res = await fetch(`/api/exams/${editExam.id}`, {
@@ -150,7 +169,12 @@ export default function AdminExamsPage() {
         duration: Number(editForm.duration),
         isPremium: editForm.isPremium,
         examType: editForm.examType,
-        psikotestCategory: editForm.examType === "PSIKOTEST" ? editForm.psikotestCategory : null,
+        psikotestCategory:
+          editForm.examType === "PSIKOTEST"
+            ? editForm.psikotestCategory
+            : editForm.examType === "PSIKOTEST_TNI"
+            ? editForm.tniCategory
+            : null,
         psikotestConfig,
         akademikCategory: editForm.examType === "AKADEMIK" ? editForm.akademikCategory : null,
         akademikTotalSoal:
@@ -192,6 +216,10 @@ export default function AdminExamsPage() {
           [form.psikotestCategory]: Number(form.psikotestSoalKecerdasan),
         });
       }
+    } else if (form.examType === "PSIKOTEST_TNI") {
+      psikotestConfig = JSON.stringify({
+        [form.tniCategory]: Number(form.tniJumlahSoal),
+      });
     }
 
     try {
@@ -204,7 +232,12 @@ export default function AdminExamsPage() {
           isPremium: form.isPremium,
           examType: form.examType,
           skdCategory: form.examType === "SKD" ? (form.skdCategory || null) : null,
-          psikotestCategory: form.examType === "PSIKOTEST" ? form.psikotestCategory : null,
+          psikotestCategory:
+            form.examType === "PSIKOTEST"
+              ? form.psikotestCategory
+              : form.examType === "PSIKOTEST_TNI"
+              ? form.tniCategory
+              : null,
           psikotestConfig,
           akademikCategory: form.examType === "AKADEMIK" ? form.akademikCategory : null,
           akademikTotalSoal:
@@ -394,6 +427,7 @@ export default function AdminExamsPage() {
                 >
                   <option value="SKD">SKD — Seleksi Kompetensi Dasar</option>
                   <option value="PSIKOTEST">Psikotest</option>
+                  <option value="PSIKOTEST_TNI">Psikotest TNI</option>
                   <option value="AKADEMIK">Akademik</option>
                 </select>
               </div>
@@ -467,6 +501,41 @@ export default function AdminExamsPage() {
                       />
                       <span className="text-xs text-gray-400">soal</span>
                     </div>
+                  )}
+                </>
+              )}
+
+              {/* Psikotest TNI fields */}
+              {form.examType === "PSIKOTEST_TNI" && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sub-Kategori Psikotest TNI</label>
+                    <select
+                      value={form.tniCategory}
+                      onChange={(e) => setForm({ ...form, tniCategory: e.target.value })}
+                      className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {TNI_SUB_CATEGORIES.map((s) => (
+                        <option key={s.value} value={s.value}>{s.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {form.tniCategory !== "PAULI" && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-600">Jumlah Soal</span>
+                      <input
+                        type="number" min="1"
+                        value={form.tniJumlahSoal}
+                        onChange={(e) => setForm({ ...form, tniJumlahSoal: e.target.value })}
+                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-xs text-gray-400">soal</span>
+                    </div>
+                  )}
+                  {form.tniCategory === "PAULI" && (
+                    <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                      ⚠️ Tes Pauli menggunakan format <strong>input angka real-time</strong>. Pastikan soal dibuat dengan format deret angka per kolom.
+                    </p>
                   )}
                 </>
               )}
@@ -571,6 +640,7 @@ export default function AdminExamsPage() {
                 >
                   <option value="SKD">SKD — Seleksi Kompetensi Dasar</option>
                   <option value="PSIKOTEST">Psikotest</option>
+                  <option value="PSIKOTEST_TNI">Psikotest TNI</option>
                   <option value="AKADEMIK">Akademik</option>
                 </select>
               </div>
@@ -645,6 +715,41 @@ export default function AdminExamsPage() {
                       />
                       <span className="text-xs text-gray-400">soal</span>
                     </div>
+                  )}
+                </>
+              )}
+
+              {/* Psikotest TNI fields (Edit) */}
+              {editForm.examType === "PSIKOTEST_TNI" && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sub-Kategori Psikotest TNI</label>
+                    <select
+                      value={editForm.tniCategory}
+                      onChange={(e) => setEditForm({ ...editForm, tniCategory: e.target.value })}
+                      className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {TNI_SUB_CATEGORIES.map((s) => (
+                        <option key={s.value} value={s.value}>{s.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {editForm.tniCategory !== "PAULI" && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-600">Jumlah Soal</span>
+                      <input
+                        type="number" min="1"
+                        value={editForm.tniJumlahSoal}
+                        onChange={(e) => setEditForm({ ...editForm, tniJumlahSoal: e.target.value })}
+                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-xs text-gray-400">soal</span>
+                    </div>
+                  )}
+                  {editForm.tniCategory === "PAULI" && (
+                    <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                      ⚠️ Tes Pauli menggunakan format <strong>input angka real-time</strong>.
+                    </p>
                   )}
                 </>
               )}

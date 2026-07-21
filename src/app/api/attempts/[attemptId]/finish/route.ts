@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { computePauliMetrics, recomputePauliNorm } from "@/lib/pauli-engine";
 
 export async function POST(
   _req: NextRequest,
@@ -26,7 +27,7 @@ export async function POST(
 
     let twkScore = 0, tiuScore = 0, tkpScore = 0;
     let kecerdasanScore = 0, kecermatanScore = 0, kepribadianScore = 0;
-    let akademikScore = 0;
+    let akademikScore = 0, pauliScore = 0;
 
     // ===== SKD =====
     if (examType === "SKD") {
@@ -127,6 +128,71 @@ export async function POST(
       }
 
       akademikScore = Math.round((correctCount / totalSoal) * 100);
+
+    // ===== PSIKOTEST TNI (non-Pauli) =====
+    } else if (examType === "PSIKOTEST_TNI") {
+      const psikotestCategory = attempt.exam.psikotestCategory?.trim().toUpperCase() ?? "";
+
+      if (psikotestCategory === "PAULI") {
+        // --- Pauli: input angka real-time, scoring berbasis kolom ---
+        // Ambil data per kolom dari PauliColumnResult
+        const columnRows = await prisma.pauliColumnResult.findMany({
+          where: { attemptId },
+          orderBy: { kolomIndex: "asc" },
+        });
+
+        if (columnRows.length > 0) {
+          const cols = columnRows.map((c) => ({
+            kolomIndex: c.kolomIndex,
+            jumlahDikerjakan: c.jumlahDikerjakan,
+            jumlahBenar: c.jumlahBenar,
+          }));
+
+          const metrics = computePauliMetrics(cols);
+          // pauliScore = persentase ketelitian (0-100)
+          pauliScore = Math.round(metrics.rasioKetelitian * 100);
+
+          // Trigger recompute norma setelah sesi selesai (async, tidak blocking response)
+          recomputePauliNorm("TNI").catch((e) =>
+            console.error("[PauliNorm] Recompute error:", e)
+          );
+        }
+
+      } else {
+        // --- Sub non-Pauli (VERBAL, MATEMATIKA_DASAR, dll.) ---
+        // Reuse logika scoring PSIKOTEST biasa
+        const correctPerSub: Record<string, number> = {};
+        const totalSoalPerSub: Record<string, number> = {};
+
+        const getSub = (answer: typeof attempt.answers[0]) => {
+          const raw = answer.question.subCategory?.trim() ||
+                      attempt.exam.psikotestCategory?.trim() ||
+                      "";
+          return raw.toUpperCase();
+        };
+
+        for (const answer of attempt.answers) {
+          const sub = getSub(answer);
+          totalSoalPerSub[sub] = (totalSoalPerSub[sub] ?? 0) + 1;
+          correctPerSub[sub] = correctPerSub[sub] ?? 0;
+        }
+
+        for (const answer of attempt.answers) {
+          const q = answer.question;
+          const sub = getSub(answer);
+          const isCorrect = answer.selected?.trim() === q.correctOption?.trim();
+          if (isCorrect) correctPerSub[sub]++;
+        }
+
+        let totalCorrect = 0;
+        let totalSoal = 0;
+        for (const [sub, correct] of Object.entries(correctPerSub)) {
+          totalCorrect += correct;
+          totalSoal += totalSoalPerSub[sub] || 1;
+        }
+        // Simpan sebagai kecerdasanScore (reuse kolom existing)
+        kecerdasanScore = totalSoal > 0 ? Math.round((totalCorrect / totalSoal) * 100) : 0;
+      }
     }
 
     // ===== TOTAL SCORE =====
@@ -134,6 +200,10 @@ export async function POST(
       ? twkScore + tiuScore + tkpScore
       : examType === "PSIKOTEST"
       ? kecerdasanScore + kecermatanScore + kepribadianScore
+      : examType === "PSIKOTEST_TNI"
+      ? (attempt.exam.psikotestCategory?.toUpperCase() === "PAULI"
+          ? pauliScore
+          : kecerdasanScore)
       : akademikScore;
 
     const finished = await prisma.examAttempt.update({
@@ -142,6 +212,7 @@ export async function POST(
         finishedAt: new Date(),
         twkScore, tiuScore, tkpScore,
         kecerdasanScore, kecermatanScore, kepribadianScore,
+        pauliScore,
         akademikScore,
         totalScore,
       },
