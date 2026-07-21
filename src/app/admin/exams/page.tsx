@@ -42,7 +42,15 @@ export default function AdminExamsPage() {
     psikotestSoalKecermatan: "30",
     psikotestSoalKepribadian: "30",
     tniCategory: "GABUNGAN_TNI",
-    tniJumlahSoal: "50",
+    tniSoalVerbal: "20",
+    tniSoalMatematika: "20",
+    tniSoalLogika: "20",
+    tniSoalDeretAngka: "20",
+    tniSoalDeretGambar: "20",
+    tniSoalKubus: "20",
+    tniJumlahSoalSingle: "50",
+    pauliIntervalSec: "180",
+    pauliAngkaPerKolom: "45",
     akademikCategory: "",
     akademikTotalSoal: "",
   });
@@ -60,7 +68,15 @@ export default function AdminExamsPage() {
     psikotestSoalKecermatan: "",
     psikotestSoalKepribadian: "",
     tniCategory: "GABUNGAN_TNI",
-    tniJumlahSoal: "",
+    tniSoalVerbal: "20",
+    tniSoalMatematika: "20",
+    tniSoalLogika: "20",
+    tniSoalDeretAngka: "20",
+    tniSoalDeretGambar: "20",
+    tniSoalKubus: "20",
+    tniJumlahSoalSingle: "50",
+    pauliIntervalSec: "180",
+    pauliAngkaPerKolom: "45",
     akademikCategory: "",
     akademikTotalSoal: "",
   });
@@ -97,33 +113,56 @@ export default function AdminExamsPage() {
   const openEdit = (exam: Exam) => {
     setEditExam(exam);
 
-    // Ambil data psikotest jika ada
     let kecerdasan = "";
     let kecermatan = "";
     let kepribadian = "";
-    let tniCategory = "GABUNGAN_TNI";
-    let tniJumlahSoal = "";
+    let tniCategory = exam.psikotestCategory || "GABUNGAN_TNI";
+    let tniSoalVerbal = "20";
+    let tniSoalMatematika = "20";
+    let tniSoalLogika = "20";
+    let tniSoalDeretAngka = "20";
+    let tniSoalDeretGambar = "20";
+    let tniSoalKubus = "20";
+    let tniJumlahSoalSingle = "50";
+    let pauliIntervalSec = "180";
+    let pauliAngkaPerKolom = "45";
+
     const psiCat = exam.psikotestCategory || "KECERDASAN";
 
     if (exam.examType === "PSIKOTEST" && exam.psikotestConfig) {
       try {
         const config = JSON.parse(exam.psikotestConfig);
+        const getVal = (key: string) => {
+          for (const k of Object.keys(config)) {
+            if (k.toUpperCase() === key.toUpperCase()) return String(config[k]);
+          }
+          return "";
+        };
         if (psiCat === "GABUNGAN") {
-          kecerdasan = String(config.KECERDASAN || "");
-          kecermatan = String(config.KECERMATAN || "");
-          kepribadian = String(config.KEPRIBADIAN || "");
+          kecerdasan = getVal("KECERDASAN");
+          kecermatan = getVal("KECERMATAN");
+          kepribadian = getVal("KEPRIBADIAN");
         } else {
-          kecerdasan = String(config[psiCat] || "");
+          kecerdasan = getVal(psiCat);
         }
       } catch (e) {}
-    } else if (exam.examType === "PSIKOTEST_TNI") {
-      tniCategory = exam.psikotestCategory || "GABUNGAN_TNI";
-      if (exam.psikotestConfig) {
-        try {
-          const config = JSON.parse(exam.psikotestConfig);
-          tniJumlahSoal = String(config[tniCategory] || "");
-        } catch (e) {}
-      }
+    } else if (exam.examType === "PSIKOTEST_TNI" && exam.psikotestConfig) {
+      try {
+        const config = JSON.parse(exam.psikotestConfig);
+        if (tniCategory === "GABUNGAN_TNI") {
+          tniSoalVerbal = String(config.VERBAL || 20);
+          tniSoalMatematika = String(config.MATEMATIKA_DASAR || 20);
+          tniSoalLogika = String(config.LOGIKA || 20);
+          tniSoalDeretAngka = String(config.DERET_ANGKA || 20);
+          tniSoalDeretGambar = String(config.DERET_GAMBAR || 20);
+          tniSoalKubus = String(config.KUBUS || 20);
+        } else if (tniCategory === "PAULI") {
+          pauliIntervalSec = String(config.signal_interval_sec || 180);
+          pauliAngkaPerKolom = String(config.angka_per_kolom || 45);
+        } else {
+          tniJumlahSoalSingle = String(config[tniCategory] || 50);
+        }
+      } catch (e) {}
     }
 
     setEditForm({
@@ -132,17 +171,50 @@ export default function AdminExamsPage() {
       isPremium: exam.isPremium,
       examType: exam.examType,
       psikotestCategory: exam.examType === "PSIKOTEST" ? psiCat : "KECERDASAN",
-      skdCategory: "",
+      skdCategory: exam.skdCategory || "",
       psikotestSoalKecerdasan: kecerdasan,
       psikotestSoalKecermatan: kecermatan,
       psikotestSoalKepribadian: kepribadian,
       tniCategory,
-      tniJumlahSoal,
+      tniSoalVerbal,
+      tniSoalMatematika,
+      tniSoalLogika,
+      tniSoalDeretAngka,
+      tniSoalDeretGambar,
+      tniSoalKubus,
+      tniJumlahSoalSingle,
+      pauliIntervalSec,
+      pauliAngkaPerKolom,
       akademikCategory: exam.akademikCategory || "",
       akademikTotalSoal: exam.akademikTotalSoal ? String(exam.akademikTotalSoal) : "",
     });
     
     setEditModal(true);
+  };
+
+  const buildTniConfig = (f: typeof form | typeof editForm) => {
+    if (f.tniCategory === "GABUNGAN_TNI") {
+      return JSON.stringify({
+        VERBAL: Number(f.tniSoalVerbal) || 20,
+        MATEMATIKA_DASAR: Number(f.tniSoalMatematika) || 20,
+        LOGIKA: Number(f.tniSoalLogika) || 20,
+        DERET_ANGKA: Number(f.tniSoalDeretAngka) || 20,
+        DERET_GAMBAR: Number(f.tniSoalDeretGambar) || 20,
+        KUBUS: Number(f.tniSoalKubus) || 20,
+      });
+    } else if (f.tniCategory === "PAULI") {
+      return JSON.stringify({
+        PAULI: true,
+        signal_interval_sec: Number(f.pauliIntervalSec) || 180,
+        angka_per_kolom: Number(f.pauliAngkaPerKolom) || 45,
+        digit_min: 0,
+        digit_max: 9,
+      });
+    } else {
+      return JSON.stringify({
+        [f.tniCategory]: Number(f.tniJumlahSoalSingle) || 50,
+      });
+    }
   };
 
   const handleEdit = async () => {
@@ -153,7 +225,6 @@ export default function AdminExamsPage() {
     }
     setEditSaving(true);
 
-    // Susun psikotestConfig untuk edit
     let psikotestConfig: string | null = null;
     if (editForm.examType === "PSIKOTEST") {
       if (editForm.psikotestCategory === "GABUNGAN") {
@@ -168,9 +239,7 @@ export default function AdminExamsPage() {
         });
       }
     } else if (editForm.examType === "PSIKOTEST_TNI") {
-      psikotestConfig = JSON.stringify({
-        [editForm.tniCategory]: Number(editForm.tniJumlahSoal),
-      });
+      psikotestConfig = buildTniConfig(editForm);
     }
 
     const res = await fetch(`/api/exams/${editExam.id}`, {
@@ -214,7 +283,6 @@ export default function AdminExamsPage() {
     }
     setSaving(true);
 
-    // Susun psikotestConfig
     let psikotestConfig: string | null = null;
     if (form.examType === "PSIKOTEST") {
       if (form.psikotestCategory === "GABUNGAN") {
@@ -229,9 +297,7 @@ export default function AdminExamsPage() {
         });
       }
     } else if (form.examType === "PSIKOTEST_TNI") {
-      psikotestConfig = JSON.stringify({
-        [form.tniCategory]: Number(form.tniJumlahSoal),
-      });
+      psikotestConfig = buildTniConfig(form);
     }
 
     try {
@@ -532,22 +598,77 @@ export default function AdminExamsPage() {
                       ))}
                     </select>
                   </div>
-                  {form.tniCategory !== "PAULI" && (
+
+                  {form.tniCategory === "GABUNGAN_TNI" && (
+                    <div className="bg-gray-50 rounded-lg p-3 flex flex-col gap-2">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">Jumlah Soal per Sub-kategori TNI</p>
+                      {[
+                        { key: "tniSoalVerbal", label: "Verbal" },
+                        { key: "tniSoalMatematika", label: "Matematika Dasar" },
+                        { key: "tniSoalLogika", label: "Logika" },
+                        { key: "tniSoalDeretAngka", label: "Deret Angka" },
+                        { key: "tniSoalDeretGambar", label: "Deret Gambar" },
+                        { key: "tniSoalKubus", label: "Kubus" },
+                      ].map(({ key, label }) => (
+                        <div key={key} className="flex items-center gap-3">
+                          <span className="text-sm text-gray-600 w-36">{label}</span>
+                          <input
+                            type="number" min="1"
+                            value={form[key as keyof typeof form] as string}
+                            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                            className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <span className="text-xs text-gray-400">soal</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {form.tniCategory === "PAULI" && (
+                    <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-4 flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Real-Time Generator</span>
+                        <p className="text-xs font-bold text-blue-900">Konfigurasi Lembar Kerja Tes Pauli</p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Durasi per Kolom / Garis (Detik)</label>
+                          <input
+                            type="number" min="10"
+                            value={form.pauliIntervalSec}
+                            onChange={(e) => setForm({ ...form, pauliIntervalSec: e.target.value })}
+                            className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                          />
+                          <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 180 detik (3 menit)</span>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Jumlah Angka per Kolom</label>
+                          <input
+                            type="number" min="10"
+                            value={form.pauliAngkaPerKolom}
+                            onChange={(e) => setForm({ ...form, pauliAngkaPerKolom: e.target.value })}
+                            className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                          />
+                          <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 45 angka per kolom</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-blue-800 bg-blue-100/60 rounded-lg px-3 py-2 border border-blue-200/50">
+                        ℹ️ <strong>Informasi:</strong> Angka 0-9 untuk Tes Pauli di-generate secara acak oleh sistem saat siswa mengerjakan ujian. Admin <strong>tidak perlu menginputkan soal secara manual</strong>.
+                      </p>
+                    </div>
+                  )}
+
+                  {form.tniCategory !== "GABUNGAN_TNI" && form.tniCategory !== "PAULI" && (
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-600">Jumlah Soal</span>
+                      <span className="text-sm text-gray-600">Jumlah Soal Target</span>
                       <input
                         type="number" min="1"
-                        value={form.tniJumlahSoal}
-                        onChange={(e) => setForm({ ...form, tniJumlahSoal: e.target.value })}
+                        value={form.tniJumlahSoalSingle}
+                        onChange={(e) => setForm({ ...form, tniJumlahSoalSingle: e.target.value })}
                         className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <span className="text-xs text-gray-400">soal</span>
                     </div>
-                  )}
-                  {form.tniCategory === "PAULI" && (
-                    <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                      ⚠️ Tes Pauli menggunakan format <strong>input angka real-time</strong>. Pastikan soal dibuat dengan format deret angka per kolom.
-                    </p>
                   )}
                 </>
               )}
@@ -746,22 +867,77 @@ export default function AdminExamsPage() {
                       ))}
                     </select>
                   </div>
-                  {editForm.tniCategory !== "PAULI" && (
+
+                  {editForm.tniCategory === "GABUNGAN_TNI" && (
+                    <div className="bg-gray-50 rounded-lg p-3 flex flex-col gap-2">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">Jumlah Soal per Sub-kategori TNI</p>
+                      {[
+                        { key: "tniSoalVerbal", label: "Verbal" },
+                        { key: "tniSoalMatematika", label: "Matematika Dasar" },
+                        { key: "tniSoalLogika", label: "Logika" },
+                        { key: "tniSoalDeretAngka", label: "Deret Angka" },
+                        { key: "tniSoalDeretGambar", label: "Deret Gambar" },
+                        { key: "tniSoalKubus", label: "Kubus" },
+                      ].map(({ key, label }) => (
+                        <div key={key} className="flex items-center gap-3">
+                          <span className="text-sm text-gray-600 w-36">{label}</span>
+                          <input
+                            type="number" min="1"
+                            value={editForm[key as keyof typeof editForm] as string}
+                            onChange={(e) => setEditForm({ ...editForm, [key]: e.target.value })}
+                            className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <span className="text-xs text-gray-400">soal</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {editForm.tniCategory === "PAULI" && (
+                    <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-4 flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Real-Time Generator</span>
+                        <p className="text-xs font-bold text-blue-900">Konfigurasi Lembar Kerja Tes Pauli</p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Durasi per Kolom / Garis (Detik)</label>
+                          <input
+                            type="number" min="10"
+                            value={editForm.pauliIntervalSec}
+                            onChange={(e) => setEditForm({ ...editForm, pauliIntervalSec: e.target.value })}
+                            className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                          />
+                          <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 180 detik (3 menit)</span>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Jumlah Angka per Kolom</label>
+                          <input
+                            type="number" min="10"
+                            value={editForm.pauliAngkaPerKolom}
+                            onChange={(e) => setEditForm({ ...editForm, pauliAngkaPerKolom: e.target.value })}
+                            className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                          />
+                          <span className="text-[10px] text-gray-500 mt-0.5 block">Default: 45 angka per kolom</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-blue-800 bg-blue-100/60 rounded-lg px-3 py-2 border border-blue-200/50">
+                        ℹ️ <strong>Informasi:</strong> Angka 0-9 untuk Tes Pauli di-generate secara acak oleh sistem saat siswa mengerjakan ujian. Admin <strong>tidak perlu menginputkan soal secara manual</strong>.
+                      </p>
+                    </div>
+                  )}
+
+                  {editForm.tniCategory !== "GABUNGAN_TNI" && editForm.tniCategory !== "PAULI" && (
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-600">Jumlah Soal</span>
+                      <span className="text-sm text-gray-600">Jumlah Soal Target</span>
                       <input
                         type="number" min="1"
-                        value={editForm.tniJumlahSoal}
-                        onChange={(e) => setEditForm({ ...editForm, tniJumlahSoal: e.target.value })}
+                        value={editForm.tniJumlahSoalSingle}
+                        onChange={(e) => setEditForm({ ...editForm, tniJumlahSoalSingle: e.target.value })}
                         className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <span className="text-xs text-gray-400">soal</span>
                     </div>
-                  )}
-                  {editForm.tniCategory === "PAULI" && (
-                    <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                      ⚠️ Tes Pauli menggunakan format <strong>input angka real-time</strong>.
-                    </p>
                   )}
                 </>
               )}

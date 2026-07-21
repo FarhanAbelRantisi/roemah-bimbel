@@ -157,11 +157,12 @@ export async function PATCH(
       } else if (examData.examType === "PSIKOTEST_TNI") {
         const cat = examData.psikotestCategory?.toUpperCase() ?? "";
         if (cat === "PAULI") {
-          // Pauli: validasi minimal ada 1 soal (deret angka per kolom)
-          const total = await prisma.question.count({ where: { examId: id } });
-          if (total === 0) publishErrors.push("Tes Pauli belum memiliki soal (deret angka)");
+          // Pauli: Angka di-generate otomatis, hanya perlu pastikan config ada
+          if (!examData.psikotestConfig) {
+            publishErrors.push("Konfigurasi Tes Pauli belum diatur");
+          }
         } else if (cat === "GABUNGAN_TNI") {
-          // Gabungan TNI: validasi config
+          // Gabungan TNI: validasi config per sub-kategori
           if (!examData.psikotestConfig) {
             publishErrors.push("Konfigurasi soal TNI Gabungan belum diatur");
           } else {
@@ -172,16 +173,25 @@ export async function PATCH(
               _count: { id: true },
             });
             const countMap: Record<string, number> = {};
-            counts.forEach((c: any) => { if (c.subCategory) countMap[c.subCategory] = c._count.id; });
+            counts.forEach((c: any) => {
+              if (c.subCategory) countMap[c.subCategory.toUpperCase()] = c._count.id;
+            });
             for (const [subCat, required] of Object.entries(config)) {
-              const actual = countMap[subCat] ?? 0;
+              const actual = countMap[subCat.toUpperCase()] ?? 0;
               if (actual < required) publishErrors.push(`TNI ${subCat} kurang ${required - actual} soal (${actual}/${required})`);
             }
           }
         } else if (cat) {
           // Sub tunggal TNI
+          let required = 1;
+          if (examData.psikotestConfig) {
+            try {
+              const cfg = JSON.parse(examData.psikotestConfig);
+              required = cfg[cat] ?? cfg[examData.psikotestCategory || ""] ?? 1;
+            } catch {}
+          }
           const total = await prisma.question.count({ where: { examId: id } });
-          if (total === 0) publishErrors.push(`Belum ada soal untuk sub-kategori ${cat}`);
+          if (total < required) publishErrors.push(`TNI ${cat} kurang ${required - total} soal (${total}/${required})`);
         }
 
       } else if (examData.examType === "AKADEMIK") {
