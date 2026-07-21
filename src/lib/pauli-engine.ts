@@ -253,8 +253,8 @@ export async function classifyPauliSession(
     let z = sd > 0 ? (rawValue - mean) / sd : 0;
     if (!higherIsBetter) z = -z; // balik arah: z besar = lebih baik
 
-    const kategori = z >= 1.0 ? "Tinggi" : z <= -1.0 ? "Rendah" : "Sedang";
-    const item = { raw: rawValue, z: Math.round(z * 100) / 100, kategori };
+    const kategori: "Tinggi" | "Rendah" | "Sedang" = z >= 1.0 ? "Tinggi" : z <= -1.0 ? "Rendah" : "Sedang";
+    const item: PauliClassification = { raw: rawValue, z: Math.round(z * 100) / 100, kategori };
     result[snakeKey] = item;
     result[camelKey] = item;
   }
