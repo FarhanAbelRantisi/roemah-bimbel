@@ -93,22 +93,22 @@ export default function ResultPage() {
   const passed = examType === "SKD" ? skdPassed : true; // Psikotest & Akademik tidak ada passing grade
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-12 font-sans">
       <div className="w-full max-w-lg">
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 ${
-            examType === "SKD" && passed ? "bg-green-100" : "bg-blue-50"
+          <div className={`w-20 h-20 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-4 border shadow-sm ${
+            examType === "SKD" && passed ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-blue-50 text-blue-600 border-blue-200"
           }`}>
             {examType === "SKD" && passed ? <IconTrophy /> : <IconFileText />}
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Hasil Ujian</h1>
-          <p className="text-gray-500 text-sm mt-1">{result.exam.title}</p>
-          <span className={`inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full ${
-            examType === "SKD" ? "bg-blue-50 text-blue-500" :
-            examType === "PSIKOTEST" ? "bg-blue-50 text-blue-500" :
-            "bg-blue-50 text-blue-500"
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Hasil Ujian Selesai</h1>
+          <p className="text-slate-500 text-xs sm:text-sm mt-1 font-medium">{result.exam.title}</p>
+          <span className={`inline-block mt-3 text-[10px] font-bold px-3 py-1 rounded-full border ${
+            examType === "SKD" ? "bg-blue-50 text-blue-700 border-blue-200" :
+            examType === "PSIKOTEST" ? "bg-purple-50 text-purple-700 border-purple-200" :
+            "bg-amber-50 text-amber-700 border-amber-200"
           }`}>
             {examType}
             {examType === "SKD" && result.exam.skdCategory &&
@@ -121,54 +121,50 @@ export default function ResultPage() {
         </div>
 
         {/* Total Score */}
-        <div className={`rounded-2xl p-6 text-center mb-5 ${
-          examType === "SKD" ? (passed ? "bg-green-500" : "bg-blue-500") :
-          "bg-blue-500"
+        <div className={`rounded-3xl p-6 sm:p-8 text-center mb-6 shadow-md transition-all ${
+          examType === "SKD" ? (passed ? "bg-emerald-600 shadow-emerald-500/20" : "bg-blue-600 shadow-blue-500/20") :
+          "bg-blue-600 shadow-blue-500/20"
         }`}>
-          <p className="text-white/80 text-sm uppercase tracking-wide mb-1">Total Skor</p>
-          <p className="text-white text-6xl font-bold">{result.totalScore}</p>
+          <p className="text-white/80 text-xs font-bold uppercase tracking-wider mb-1">Total Skor Kamu</p>
+          <p className="text-white text-5xl sm:text-6xl font-black">{result.totalScore}</p>
           {examType === "SKD" && (
-            <p className="text-sm mt-2 font-semibold text-white/80">
+            <p className="text-xs sm:text-sm mt-3 font-semibold text-white/90 flex items-center justify-center gap-1.5 bg-white/10 py-1.5 px-4 rounded-full max-w-fit mx-auto backdrop-blur-sm">
               {passed ? <><IconCheckCircle /> Memenuhi Semua Passing Grade</> : <><IconXCircle /> Belum Memenuhi Passing Grade</>}
             </p>
           )}
         </div>
 
         {/* Rincian Skor */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-5">
-          <h2 className="text-sm font-semibold text-gray-700 mb-4">Rincian Skor</h2>
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-6 mb-6 shadow-sm">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-5">Rincian Skor Per Komponen</h2>
 
           {/* SKD */}
           {examType === "SKD" && (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               {[
-                { label: "TWK", score: result.twkScore, max: 150, passing: 65, passed: passedTWK, color: "bg-blue-500" },
-                { label: "TIU", score: result.tiuScore, max: 175, passing: 80, passed: passedTIU, color: "bg-purple-500" },
-                { label: "TKP", score: result.tkpScore, max: 225, passing: 156, passed: passedTKP, color: "bg-green-500" },
+                { label: "TWK", score: result.twkScore, max: 150, passing: 65, passed: passedTWK, color: "bg-blue-600" },
+                { label: "TIU", score: result.tiuScore, max: 175, passing: 80, passed: passedTIU, color: "bg-purple-600" },
+                { label: "TKP", score: result.tkpScore, max: 225, passing: 156, passed: passedTKP, color: "bg-emerald-600" },
               ]
                 .filter(item => !result.exam.skdCategory || result.exam.skdCategory === item.label)
                 .map((item) => (
-                <div key={item.label}>
-                  <div className="flex justify-between text-sm mb-1">
+                <div key={item.label} className="space-y-1.5">
+                  <div className="flex justify-between items-center text-xs sm:text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-700">{item.label}</span>
-                      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
-                        item.passed ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+                      <span className="font-bold text-slate-800">{item.label}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        item.passed ? "bg-emerald-100 text-emerald-800 border border-emerald-200" : "bg-rose-100 text-rose-700 border border-rose-200"
                       }`}>
-                        {item.passed ? <><IconCheckCircle className="w-3 h-3 inline-block mr-1 -mt-0.5" />Lulus</> : `Min. ${item.passing}`}
+                        {item.passed ? "LULUS" : `MIN. ${item.passing}`}
                       </span>
                     </div>
-                    <span className="text-gray-500">{item.score} / {item.max}</span>
+                    <span className="font-extrabold text-slate-800">{item.score} <span className="font-medium text-slate-400 text-xs">/ {item.max}</span></span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2.5">
-                    <div className={`h-2.5 rounded-full ${item.passed ? item.color : "bg-red-400"}`}
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div className={`h-2.5 rounded-full transition-all duration-500 ${item.passed ? item.color : "bg-rose-500"}`}
                       style={{ width: `${Math.min((item.score / item.max) * 100, 100)}%` }} />
                   </div>
-                  <div className="relative mt-1">
-                    <div className="absolute top-0 w-0.5 h-2 bg-gray-400"
-                      style={{ left: `${(item.passing / item.max) * 100}%` }} />
-                    <p className="text-xs text-gray-400 mt-1">Passing grade: {item.passing}</p>
-                  </div>
+                  <p className="text-[10px] text-slate-400 font-medium">Passing grade minimum: {item.passing} poin</p>
                 </div>
               ))}
             </div>
@@ -176,10 +172,9 @@ export default function ResultPage() {
 
           {/* Psikotest */}
           {examType === "PSIKOTEST" && (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               {Object.keys(psikotestConfig).length > 0 ? (
                 Object.entries(psikotestConfig).map(([sub]) => {
-                  // Map subCategory ke field score yang benar
                   const scoreMap: Record<string, number> = {
                     KECERDASAN: result.kecerdasanScore,
                     KECERMATAN: result.kecermatanScore,
@@ -195,21 +190,20 @@ export default function ResultPage() {
                   const pct = Math.round((score / maxScore) * 100);
 
                   return (
-                    <div key={sub}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="font-medium text-gray-700">{sub}</span>
-                        <span className="text-gray-500">{score} / {maxScore}</span>
+                    <div key={sub} className="space-y-1.5">
+                      <div className="flex justify-between items-center text-xs sm:text-sm">
+                        <span className="font-bold text-slate-800">{sub.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}</span>
+                        <span className="font-extrabold text-slate-800">{score} <span className="font-medium text-slate-400 text-xs">/ {maxScore}</span></span>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2.5">
-                        <div className="h-2.5 rounded-full bg-purple-500"
+                      <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                        <div className="h-2.5 rounded-full bg-purple-600 transition-all duration-500"
                           style={{ width: `${pct}%` }} />
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">{pct}% dari nilai maksimal</p>
+                      <p className="text-[10px] text-slate-400 font-medium">{pct}% dari skor maksimal</p>
                     </div>
                   );
                 })
               ) : (
-                // Single kategori
                 (() => {
                   const singleCat = result.exam.psikotestCategory ?? "";
                   const maxScoreMap: Record<string, number> = {
@@ -224,16 +218,16 @@ export default function ResultPage() {
                   const maxScore = maxScoreMap[singleCat] ?? 100;
                   const pct = Math.round((score / maxScore) * 100);
                   return (
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="font-medium text-gray-700">{singleCat}</span>
-                        <span className="text-gray-500">{score} / {maxScore}</span>
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center text-xs sm:text-sm">
+                        <span className="font-bold text-slate-800">{singleCat.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}</span>
+                        <span className="font-extrabold text-slate-800">{score} <span className="font-medium text-slate-400 text-xs">/ {maxScore}</span></span>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2.5">
-                        <div className="h-2.5 rounded-full bg-purple-500"
+                      <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                        <div className="h-2.5 rounded-full bg-purple-600 transition-all duration-500"
                           style={{ width: `${pct}%` }} />
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">{pct}% dari nilai maksimal</p>
+                      <p className="text-[10px] text-slate-400 font-medium">{pct}% dari skor maksimal</p>
                     </div>
                   );
                 })()
@@ -243,49 +237,50 @@ export default function ResultPage() {
 
           {/* Akademik */}
           {examType === "AKADEMIK" && (
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="font-medium text-gray-700">
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="font-bold text-slate-800">
                   {result.exam.akademikCategory?.replace(/_/g, " ")}
                 </span>
-                <span className="text-gray-500">{result.akademikScore} / 100</span>
+                <span className="font-extrabold text-slate-800">{result.akademikScore} <span className="font-medium text-slate-400 text-xs">/ 100</span></span>
               </div>
-              <div className="w-full bg-gray-100 rounded-full h-2.5">
-                <div className="h-2.5 rounded-full bg-orange-500"
+              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div className="h-2.5 rounded-full bg-amber-600 transition-all duration-500"
                   style={{ width: `${result.akademikScore}%` }} />
               </div>
-              <p className="text-xs text-gray-400 mt-1">
-                {result.akademikScore}% dari nilai maksimal
+              <p className="text-[10px] text-slate-400 font-medium">
+                {result.akademikScore}% dari skor maksimal
               </p>
             </div>
           )}
         </div>
 
-        {/* Statistik */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">{answered}</p>
-            <p className="text-xs text-gray-500 mt-0.5">Soal Dijawab</p>
+        {/* Statistik singkat */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 text-center shadow-sm">
+            <p className="text-2xl font-black text-slate-900">{answered}</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Soal Dijawab</p>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">{total - answered}</p>
-            <p className="text-xs text-gray-500 mt-0.5">Soal Kosong</p>
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 text-center shadow-sm">
+            <p className="text-2xl font-black text-slate-900">{total - answered}</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Soal Kosong</p>
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex flex-col gap-3">
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-2.5">
           <Link href={`/history/${attemptId}`}
-            className="w-full text-center bg-blue-500 text-white font-medium py-3 rounded-xl hover:bg-blue-600 transition-colors">
-            <IconBarChart /> Lihat Detail Jawaban
+            className="w-full text-center bg-blue-600 text-white font-semibold text-xs sm:text-sm py-3.5 rounded-2xl hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2">
+            <IconBarChart />
+            <span>Lihat Detail Pembahasan Jawaban</span>
           </Link>
-          <div className="flex gap-3">
+          <div className="flex gap-2.5">
             <Link href="/catalog"
-              className="flex-1 text-center border border-gray-200 text-gray-700 font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors">
-              Kembali ke Katalog
+              className="flex-1 text-center bg-white border border-slate-200 text-slate-700 font-semibold text-xs sm:text-sm py-3 rounded-2xl hover:bg-slate-50 transition-colors">
+              Ke Katalog
             </Link>
             <Link href="/"
-              className="flex-1 text-center border border-gray-200 text-gray-700 font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors">
+              className="flex-1 text-center bg-white border border-slate-200 text-slate-700 font-semibold text-xs sm:text-sm py-3 rounded-2xl hover:bg-slate-50 transition-colors">
               Ke Beranda
             </Link>
           </div>

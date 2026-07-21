@@ -205,32 +205,38 @@ export default function HistoryDetailPage() {
     : null;
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
-        <Link href="/history" className="hover:text-blue-600">Riwayat</Link>
-        <span>›</span>
-        <span className="text-gray-600 line-clamp-1">{attempt.exam.title}</span>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 font-sans">
+      {/* Top Navigation */}
+      <div className="mb-6">
+        <Link
+          href="/history"
+          className="inline-flex items-center gap-2 text-xs md:text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors group"
+        >
+          <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Kembali ke Riwayat Ujian</span>
+        </Link>
       </div>
 
       {/* Header Card */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
-        <div className="flex items-start justify-between gap-4 mb-5">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 mb-1">{attempt.exam.title}</h1>
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 mb-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+          <div className="space-y-2">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{attempt.exam.title}</h1>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${examType === "SKD" ? "bg-blue-50 text-blue-600" :
-                examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
-                  "bg-orange-50 text-orange-600"
+              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${examType === "SKD" ? "bg-blue-50 text-blue-700 border-blue-200" :
+                  examType === "PSIKOTEST" ? "bg-purple-50 text-purple-700 border-purple-200" :
+                    "bg-amber-50 text-amber-700 border-amber-200"
                 }`}>
                 {examType}
                 {examType === "SKD" && skdCat && ` · ${skdCat}`}
                 {examType === "PSIKOTEST" && attempt.exam.psikotestCategory &&
-                  ` · ${attempt.exam.psikotestCategory}`}
+                  ` · ${attempt.exam.psikotestCategory.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}`}
                 {examType === "AKADEMIK" && attempt.exam.akademikCategory &&
                   ` · ${attempt.exam.akademikCategory.replace(/_/g, " ")}`}
               </span>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-slate-400 font-medium">
                 {new Date(attempt.finishedAt).toLocaleDateString("id-ID", {
                   day: "numeric", month: "long", year: "numeric",
                   hour: "2-digit", minute: "2-digit",
@@ -240,36 +246,36 @@ export default function HistoryDetailPage() {
           </div>
 
           {passed !== null && (
-            <span className={`text-sm font-bold px-4 py-2 rounded-xl shrink-0 ${passed ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+            <span className={`text-xs font-bold px-4 py-2 rounded-2xl shrink-0 self-start sm:self-auto border ${passed ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-rose-100 text-rose-700 border-rose-200"
               }`}>
-              {passed ? "Lulus" : "Belum Lulus"}
+              {passed ? "LULUS PASSING GRADE" : "BELUM LULUS PASSING GRADE"}
             </span>
           )}
         </div>
 
         {/* Score Grid per examType */}
         {examType === "SKD" && (
-          <div className={`grid gap-3 ${skdCat ? "grid-cols-2" : "grid-cols-4"}`}>
+          <div className={`grid gap-3 ${skdCat ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4"}`}>
             {skdCat ? (
               <>
-                <div className={`rounded-xl p-3 text-center ${skdCat === "TWK" ? "bg-blue-50 text-blue-700" :
-                  skdCat === "TIU" ? "bg-purple-50 text-purple-700" :
-                    "bg-green-50 text-green-700"
+                <div className={`rounded-2xl p-4 text-center border ${skdCat === "TWK" ? "bg-blue-50 text-blue-800 border-blue-200" :
+                    skdCat === "TIU" ? "bg-purple-50 text-purple-800 border-purple-200" :
+                      "bg-emerald-50 text-emerald-800 border-emerald-200"
                   }`}>
-                  <p className="text-xs mb-0.5 opacity-70">{skdCat}</p>
-                  <p className="text-xl font-bold">
+                  <p className="text-xs font-semibold opacity-75">{skdCat}</p>
+                  <p className="text-2xl font-black mt-1">
                     {skdCat === "TWK" ? attempt.twkScore :
                       skdCat === "TIU" ? attempt.tiuScore :
                         attempt.tkpScore}
                   </p>
-                  <p className="text-xs opacity-60">
+                  <p className="text-[10px] opacity-60 font-medium">
                     /{skdCat === "TWK" ? 150 : skdCat === "TIU" ? 175 : 225}
                   </p>
                 </div>
-                <div className={`rounded-xl p-3 text-center ${passed ? "bg-green-600" : "bg-blue-600"} text-white`}>
-                  <p className="text-xs mb-0.5 opacity-80">Total</p>
-                  <p className="text-xl font-bold">{attempt.totalScore}</p>
-                  <p className="text-xs opacity-60">
+                <div className={`rounded-2xl p-4 text-center text-white ${passed ? "bg-emerald-600 shadow-sm shadow-emerald-500/20" : "bg-blue-600 shadow-sm shadow-blue-500/20"}`}>
+                  <p className="text-xs font-semibold text-white/80">Total Skor</p>
+                  <p className="text-2xl font-black mt-1">{attempt.totalScore}</p>
+                  <p className="text-[10px] text-white/70 font-medium">
                     /{skdCat === "TWK" ? 150 : skdCat === "TIU" ? 175 : 225}
                   </p>
                 </div>
@@ -277,20 +283,20 @@ export default function HistoryDetailPage() {
             ) : (
               <>
                 {[
-                  { label: "TWK", score: attempt.twkScore, max: 150, color: "bg-blue-50 text-blue-700" },
-                  { label: "TIU", score: attempt.tiuScore, max: 175, color: "bg-purple-50 text-purple-700" },
-                  { label: "TKP", score: attempt.tkpScore, max: 225, color: "bg-green-50 text-green-700" },
+                  { label: "TWK", score: attempt.twkScore, max: 150, color: "bg-blue-50 text-blue-800 border-blue-200" },
+                  { label: "TIU", score: attempt.tiuScore, max: 175, color: "bg-purple-50 text-purple-800 border-purple-200" },
+                  { label: "TKP", score: attempt.tkpScore, max: 225, color: "bg-emerald-50 text-emerald-800 border-emerald-200" },
                 ].map((item) => (
-                  <div key={item.label} className={`rounded-xl p-3 text-center ${item.color}`}>
-                    <p className="text-xs mb-0.5 opacity-70">{item.label}</p>
-                    <p className="text-xl font-bold">{item.score}</p>
-                    <p className="text-xs opacity-60">/{item.max}</p>
+                  <div key={item.label} className={`rounded-2xl p-4 text-center border ${item.color}`}>
+                    <p className="text-xs font-semibold opacity-75">{item.label}</p>
+                    <p className="text-2xl font-black mt-1">{item.score}</p>
+                    <p className="text-[10px] opacity-60 font-medium">/{item.max}</p>
                   </div>
                 ))}
-                <div className={`rounded-xl p-3 text-center ${passed ? "bg-green-600" : "bg-blue-600"} text-white`}>
-                  <p className="text-xs mb-0.5 opacity-80">Total</p>
-                  <p className="text-xl font-bold">{attempt.totalScore}</p>
-                  <p className="text-xs opacity-60">/550</p>
+                <div className={`rounded-2xl p-4 text-center text-white ${passed ? "bg-emerald-600 shadow-sm shadow-emerald-500/20" : "bg-blue-600 shadow-sm shadow-blue-500/20"}`}>
+                  <p className="text-xs font-semibold text-white/80">Total Skor</p>
+                  <p className="text-2xl font-black mt-1">{attempt.totalScore}</p>
+                  <p className="text-[10px] text-white/70 font-medium">/550</p>
                 </div>
               </>
             )}
@@ -298,7 +304,7 @@ export default function HistoryDetailPage() {
         )}
 
         {examType === "PSIKOTEST" && (
-          <div className={`grid gap-3 ${Object.keys(psikotestConfig).length > 1 ? "grid-cols-4" : "grid-cols-2"}`}>
+          <div className={`grid gap-3 ${Object.keys(psikotestConfig).length > 1 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2"}`}>
             {Object.keys(psikotestConfig).length > 1 ? (
               <>
                 {[
@@ -306,20 +312,19 @@ export default function HistoryDetailPage() {
                   { label: "Kecermatan", score: attempt.kecermatanScore, max: 80 },
                   { label: "Kepribadian", score: attempt.kepribadianScore, max: 80 },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-xl p-3 text-center bg-purple-50 text-purple-700">
-                    <p className="text-xs mb-0.5 opacity-70">{item.label}</p>
-                    <p className="text-xl font-bold">{item.score}</p>
-                    <p className="text-xs opacity-60">/{item.max}</p>
+                  <div key={item.label} className="rounded-2xl p-4 text-center bg-purple-50 text-purple-800 border border-purple-200">
+                    <p className="text-xs font-semibold opacity-75">{item.label}</p>
+                    <p className="text-2xl font-black mt-1">{item.score}</p>
+                    <p className="text-[10px] opacity-60 font-medium">/{item.max}</p>
                   </div>
                 ))}
-                <div className="rounded-xl p-3 text-center bg-purple-600 text-white">
-                  <p className="text-xs mb-0.5 opacity-80">Total</p>
-                  <p className="text-xl font-bold">{attempt.totalScore}</p>
-                  <p className="text-xs opacity-60">/260</p>
+                <div className="rounded-2xl p-4 text-center bg-purple-600 text-white shadow-sm shadow-purple-500/20">
+                  <p className="text-xs font-semibold text-white/80">Total Skor</p>
+                  <p className="text-2xl font-black mt-1">{attempt.totalScore}</p>
+                  <p className="text-[10px] text-white/70 font-medium">/260</p>
                 </div>
               </>
             ) : (
-              // Single kategori
               (() => {
                 const cat = attempt.exam.psikotestCategory ?? "";
                 const maxScore = cat === "KECERDASAN" ? 100 : 80;
@@ -331,14 +336,14 @@ export default function HistoryDetailPage() {
                 const score = scoreMap[cat] ?? attempt.totalScore;
                 return (
                   <>
-                    <div className="rounded-xl p-3 text-center bg-purple-50 text-purple-700">
-                      <p className="text-xs mb-0.5 opacity-70">{cat}</p>
-                      <p className="text-xl font-bold">{score}</p>
-                      <p className="text-xs opacity-60">/{maxScore}</p>
+                    <div className="rounded-2xl p-4 text-center bg-purple-50 text-purple-800 border border-purple-200">
+                      <p className="text-xs font-semibold opacity-75">{cat.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}</p>
+                      <p className="text-2xl font-black mt-1">{score}</p>
+                      <p className="text-[10px] opacity-60 font-medium">/{maxScore}</p>
                     </div>
-                    <div className="rounded-xl p-3 text-center bg-purple-600 text-white">
-                      <p className="text-xs mb-0.5 opacity-80">% Nilai</p>
-                      <p className="text-xl font-bold">{Math.round((score / maxScore) * 100)}%</p>
+                    <div className="rounded-2xl p-4 text-center bg-purple-600 text-white shadow-sm shadow-purple-500/20">
+                      <p className="text-xs font-semibold text-white/80">Akurasi Nilai</p>
+                      <p className="text-2xl font-black mt-1">{Math.round((score / maxScore) * 100)}%</p>
                     </div>
                   </>
                 );
@@ -349,77 +354,86 @@ export default function HistoryDetailPage() {
 
         {examType === "AKADEMIK" && (
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl p-3 text-center bg-orange-50 text-orange-700">
-              <p className="text-xs mb-0.5 opacity-70">
+            <div className="rounded-2xl p-4 text-center bg-amber-50 text-amber-800 border border-amber-200">
+              <p className="text-xs font-semibold opacity-75">
                 {attempt.exam.akademikCategory?.replace(/_/g, " ")}
               </p>
-              {/* Ini sudah skala 100 */}
-              <p className="text-xl font-bold">{attempt.akademikScore}</p>
-              <p className="text-xs opacity-60">/100</p>
+              <p className="text-2xl font-black mt-1">{attempt.akademikScore}</p>
+              <p className="text-[10px] opacity-60 font-medium">/100</p>
             </div>
-            <div className="rounded-xl p-3 text-center bg-orange-500 text-white">
-              <p className="text-xs mb-0.5 opacity-80">% Benar</p>
-              <p className="text-xl font-bold">
-                {attempt.akademikScore}%
-              </p>
+            <div className="rounded-2xl p-4 text-center bg-amber-600 text-white shadow-sm shadow-amber-500/20">
+              <p className="text-xs font-semibold text-white/80">Persentase Benar</p>
+              <p className="text-2xl font-black mt-1">{attempt.akademikScore}%</p>
             </div>
           </div>
         )}
 
-        {/* Statistik benar/salah/kosong */}
-        <div className="grid grid-cols-3 gap-2 mt-3">
+        {/* Statistik jawaban */}
+        <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100">
           {[
-            { label: "Benar", value: stats.correct, color: "bg-green-50 text-green-700 border-green-100" },
-            { label: "Salah", value: stats.wrong, color: "bg-red-50 text-red-600 border-red-100" },
-            { label: "Kosong", value: stats.empty, color: "bg-gray-50 text-gray-500 border-gray-100" },
+            { label: "Jawaban Benar", value: stats.correct, color: "bg-emerald-50 text-emerald-800 border-emerald-200" },
+            { label: "Jawaban Salah", value: stats.wrong, color: "bg-rose-50 text-rose-800 border-rose-200" },
+            { label: "Tidak Dijawab", value: stats.empty, color: "bg-slate-50 text-slate-700 border-slate-200" },
           ].map((item) => (
-            <div key={item.label} className={`rounded-xl p-3 text-center border ${item.color}`}>
-              <p className="text-lg font-bold">{item.value}</p>
-              <p className="text-xs mt-0.5">{item.label}</p>
+            <div key={item.label} className={`rounded-2xl p-3 text-center border ${item.color}`}>
+              <p className="text-lg sm:text-xl font-black">{item.value}</p>
+              <p className="text-[10px] sm:text-xs font-semibold opacity-80">{item.label}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Tab filter */}
-      <div className="flex gap-2 mb-3 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      {/* Tab Navigasi Kategori Soal */}
+      <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
         {tabOptions.map((tab) => {
           const count = tab === "ALL" ? attempt.answers.length :
             examType === "SKD"
               ? attempt.answers.filter((a) => a.question.category === tab).length
               : attempt.answers.filter((a) => a.question.subCategory === tab).length;
           return (
-            <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeTab === tab ? "bg-blue-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-                }`}>
-              {tab === "ALL" ? "Semua" : tab}
-              <span className="ml-1.5 opacity-70">({count})</span>
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 ${activeTab === tab
+                ? "bg-slate-900 text-white shadow-md shadow-slate-900/10"
+                : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+            >
+              <span>{tab === "ALL" ? "Semua Kategori" : tab}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-md ${activeTab === tab ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
+                {count}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Filter status */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      {/* Filter Status Jawaban */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
         {[
-          { value: "all", label: "Semua" },
-          { value: "correct", label: "Benar" },
-          { value: "wrong", label: "Salah" },
-          { value: "empty", label: "Kosong" },
+          { value: "all", label: "Semua Jawaban" },
+          { value: "correct", label: "Jawaban Benar" },
+          { value: "wrong", label: "Jawaban Salah" },
+          { value: "empty", label: "Tidak Dijawab" },
         ].map((f) => (
-          <button key={f.value} onClick={() => setFilter(f.value as typeof filter)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${filter === f.value ? "bg-gray-800 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}>
+          <button
+            key={f.value}
+            onClick={() => setFilter(f.value as typeof filter)}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${filter === f.value
+              ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
+              : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+          >
             {f.label}
           </button>
         ))}
       </div>
 
-      {/* Daftar Soal */}
+      {/* Daftar Soal & Pembahasan */}
       <div className="flex flex-col gap-4">
         {filteredAnswers.length === 0 && (
-          <div className="text-center py-12 text-gray-400 bg-white border border-gray-200 rounded-2xl">
-            Tidak ada soal yang sesuai filter
+          <div className="text-center py-12 text-slate-400 bg-white border border-slate-200/80 rounded-3xl p-6 text-xs sm:text-sm font-medium">
+            Tidak ada soal yang sesuai dengan filter pilihan kamu.
           </div>
         )}
 
@@ -430,61 +444,70 @@ export default function HistoryDetailPage() {
           const isPsikotest = examType === "PSIKOTEST";
 
           return (
-            <div key={answer.id} className={`bg-white border rounded-2xl p-6 ${answerStatus === "correct" ? "border-green-200" :
-              answerStatus === "wrong" ? "border-red-200" :
-                answerStatus === "empty" ? "border-gray-200" :
-                  "border-blue-200"
-              }`}>
-
+            <div
+              key={answer.id}
+              className={`bg-white border rounded-3xl p-5 sm:p-6 shadow-sm transition-all ${answerStatus === "correct" ? "border-emerald-200" :
+                answerStatus === "wrong" ? "border-rose-200" :
+                  answerStatus === "empty" ? "border-slate-200/80" :
+                    "border-blue-200"
+                }`}
+            >
               {/* Header soal */}
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* Badge kategori */}
                   {examType === "SKD" && (
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${q.category === "TWK" ? "bg-blue-100 text-blue-700" :
-                      q.category === "TIU" ? "bg-purple-100 text-purple-700" :
-                        "bg-green-100 text-green-700"
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${q.category === "TWK" ? "bg-blue-50 text-blue-700 border-blue-200" :
+                        q.category === "TIU" ? "bg-purple-50 text-purple-700 border-purple-200" :
+                          "bg-emerald-50 text-emerald-700 border-emerald-200"
                       }`}>
                       {q.category}
                     </span>
                   )}
                   {(examType === "PSIKOTEST" || examType === "AKADEMIK") && q.subCategory && (
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
                       {q.subCategory}
                     </span>
                   )}
-                  <span className="text-xs text-gray-400">Soal #{idx + 1}</span>
+                  <span className="text-xs text-slate-400 font-mono">Soal #{idx + 1}</span>
+
                   {answer.isFlagged && (
-                    <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">
-                      🚩 Flagged
+                    <span className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <svg className="w-3 h-3 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 0l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 7H7v2h7.586l-1.293 1.293a1 1 0 000 1.414z" />
+                      </svg>
+                      Ragu-ragu
                     </span>
                   )}
-                  {/* Psikotest: hint 2 jawaban */}
+
                   {isPsikotest && q.correctOption2 && (
-                    <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
-                      2 Jawaban
+                    <span className="text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                      2 Jawaban Pilihan
                     </span>
                   )}
                 </div>
 
-                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${answerStatus === "correct" ? "bg-green-100 text-green-700" :
-                  answerStatus === "wrong" ? "bg-red-100 text-red-600" :
-                    answerStatus === "empty" ? "bg-gray-100 text-gray-500" :
-                      "bg-blue-100 text-blue-600"
+                <span className={`text-[10px] font-extrabold px-3 py-1 rounded-full shrink-0 border ${answerStatus === "correct" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                    answerStatus === "wrong" ? "bg-rose-50 text-rose-700 border-rose-200" :
+                      answerStatus === "empty" ? "bg-slate-100 text-slate-600 border-slate-200" :
+                        "bg-blue-50 text-blue-700 border-blue-200"
                   }`}>
-                  {answerStatus === "correct" ? "Benar" :
-                    answerStatus === "wrong" ? "Salah" :
-                      answerStatus === "empty" ? "Kosong" : "TKP"}
+                  {answerStatus === "correct" ? "BENAR" :
+                    answerStatus === "wrong" ? "SALAH" :
+                      answerStatus === "empty" ? "KOSONG" : "SKOR TKP"}
                 </span>
               </div>
 
               {/* Teks soal */}
-              <p className="text-gray-800 text-sm leading-relaxed mb-3">{q.content}</p>
+              <p className="text-slate-800 text-xs sm:text-sm font-medium leading-relaxed mb-3 whitespace-pre-wrap">{q.content}</p>
 
               {q.imageUrl && (
                 <div className="mb-4">
-                  <img src={q.imageUrl} alt="Gambar soal"
-                    className="max-h-48 object-contain rounded-xl border border-gray-100 bg-gray-50" />
+                  <img
+                    src={q.imageUrl}
+                    alt="Gambar soal"
+                    className="max-h-48 object-contain rounded-xl border border-slate-200 bg-slate-50 p-1"
+                  />
                 </div>
               )}
 
@@ -498,55 +521,53 @@ export default function HistoryDetailPage() {
                   const isCorrect2 = q.correctOption2 === opt;
                   const isAnyCorrect = isCorrect1 || (isPsikotest && isCorrect2);
 
-                  // Deteksi apakah soal ini punya 2 jawaban benar (khusus psikotest)
                   const hasDualAnswer = isPsikotest && !!(q.correctOption2 && q.correctOption2.trim() !== "");
 
-                  let style = "border-gray-100 bg-gray-50 text-gray-600";
+                  let style = "border-slate-100 bg-slate-50 text-slate-700";
                   if (!isTKP) {
-                    if (isAnyCorrect && (isSelected || isSelected2)) style = "border-green-400 bg-green-50 text-green-800";
-                    else if (isAnyCorrect) style = "border-green-300 bg-green-50 text-green-700";
-                    else if (isSelected || isSelected2) style = "border-red-300 bg-red-50 text-red-700";
+                    if (isAnyCorrect && (isSelected || isSelected2)) style = "border-emerald-300 bg-emerald-50 text-emerald-900 font-semibold shadow-sm";
+                    else if (isAnyCorrect) style = "border-emerald-200 bg-emerald-50/70 text-emerald-800 font-medium";
+                    else if (isSelected || isSelected2) style = "border-rose-300 bg-rose-50 text-rose-900 font-medium";
                   } else {
-                    if (isSelected) style = "border-blue-300 bg-blue-50 text-blue-700";
+                    if (isSelected) style = "border-blue-300 bg-blue-50 text-blue-900 font-semibold shadow-sm";
                   }
 
                   return (
-                    <div key={opt} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border text-sm ${style}`}>
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isSelected ? "bg-blue-500 text-white" :
-                        isSelected2 ? "bg-green-400 text-white" :
-                          isAnyCorrect && !isTKP ? "bg-green-500 text-white" :
-                            "bg-gray-200 text-gray-600"
+                    <div key={opt} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border text-xs sm:text-sm transition-all ${style}`}>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 ${isSelected ? "bg-blue-600 text-white" :
+                          isSelected2 ? "bg-emerald-500 text-white" :
+                            isAnyCorrect && !isTKP ? "bg-emerald-600 text-white" :
+                              "bg-slate-200 text-slate-700"
                         }`}>
                         {opt}
                       </span>
-                      <span className="flex-1">{optText}</span>
+                      <span className="flex-1 leading-normal">{optText}</span>
 
                       <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                         {isTKP && (
-                          <span className="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-medium">
-                            +{q[`score${opt}` as keyof Question] ?? 0}
+                          <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                            +{q[`score${opt}` as keyof Question] ?? 0} poin
                           </span>
                         )}
 
-                        {/* Teks dinamis berdasarkan hasDualAnswer */}
                         {isSelected && (
-                          <span className="text-xs font-semibold text-blue-500">
-                            ← {hasDualAnswer ? "Jawaban 1" : "Jawaban"}
+                          <span className="text-[10px] font-bold text-blue-600">
+                            ← {hasDualAnswer ? "Pilihan 1" : "Pilihan Kamu"}
                           </span>
                         )}
                         {isSelected2 && (
-                          <span className="text-xs font-semibold text-green-500">
-                            ← Jawaban 2
+                          <span className="text-[10px] font-bold text-emerald-600">
+                            ← Pilihan 2
                           </span>
                         )}
                         {isCorrect1 && !isTKP && (
-                          <span className="text-xs font-semibold text-green-600">
-                            ← {hasDualAnswer ? "Benar 1" : "Benar"}
+                          <span className="text-[10px] font-bold text-emerald-700">
+                            ← {hasDualAnswer ? "Kunci 1" : "Kunci Jawaban"}
                           </span>
                         )}
                         {isCorrect2 && isPsikotest && (
-                          <span className="text-xs font-semibold text-green-600">
-                            ← Benar 2
+                          <span className="text-[10px] font-bold text-emerald-700">
+                            ← Kunci 2
                           </span>
                         )}
                       </div>
@@ -557,9 +578,9 @@ export default function HistoryDetailPage() {
 
               {/* Skor TKP */}
               {isTKP && answer.selected && (
-                <div className="mt-3 bg-blue-50 rounded-xl px-4 py-2.5 flex items-center justify-between">
-                  <span className="text-sm text-blue-700">Skor yang didapat:</span>
-                  <span className="text-sm font-bold text-blue-700">
+                <div className="mt-3 bg-blue-50/80 border border-blue-200/80 rounded-2xl px-4 py-2.5 flex items-center justify-between">
+                  <span className="text-xs text-blue-800 font-medium">Skor Poin yang Diperoleh:</span>
+                  <span className="text-xs font-black text-blue-700">
                     +{q[`score${answer.selected}` as keyof Question] ?? 0} poin
                   </span>
                 </div>
@@ -569,9 +590,15 @@ export default function HistoryDetailPage() {
         })}
       </div>
 
-      <div className="mt-8">
-        <Link href="/history" className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline">
-          ← Kembali ke Riwayat
+      <div className="mt-8 pt-6 border-t border-slate-100">
+        <Link
+          href="/history"
+          className="inline-flex items-center gap-2 text-xs md:text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors group"
+        >
+          <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Kembali ke Riwayat Ujian</span>
         </Link>
       </div>
     </div>

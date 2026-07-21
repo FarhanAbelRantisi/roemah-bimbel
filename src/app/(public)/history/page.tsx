@@ -147,28 +147,44 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 font-sans">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Riwayat Ujian</h1>
-          <p className="text-gray-500 text-sm mt-1">Semua ujian yang telah kamu selesaikan</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Riwayat Ujian</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">Daftar seluruh ujian yang telah kamu selesaikan</p>
         </div>
-        <Link href="/catalog" className="text-sm text-blue-500 font-medium hover:underline">
-          ← Kembali ke Katalog
+        <Link
+          href="/catalog"
+          className="inline-flex items-center gap-2 text-xs md:text-sm font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 px-4 py-2.5 rounded-xl transition-colors shrink-0 self-start sm:self-auto"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Kembali ke Katalog</span>
         </Link>
       </div>
 
       {loading ? (
-        <div className="text-center py-20">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+        <div className="text-center py-20 bg-white border border-slate-200/80 rounded-3xl">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-xs text-slate-400 font-medium">Memuat riwayat ujian...</p>
         </div>
       ) : attempts.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
-          <IconClipboard />
-          <p className="text-lg font-medium">Belum ada riwayat ujian</p>
-          <Link href="/catalog"
-            className="inline-block mt-4 bg-blue-500 text-white text-sm font-medium px-6 py-2.5 rounded-xl hover:bg-blue-600 transition-colors">
-            Lihat Katalog
+        <div className="text-center py-20 bg-white border border-slate-200/80 rounded-3xl p-6">
+          <div className="w-16 h-16 rounded-3xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4 border border-slate-200">
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <p className="text-base font-bold text-slate-800">Belum Ada Riwayat Ujian</p>
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+            Kamu belum pernah mengerjakan ujian. Silakan pilih simulasi ujian dari katalog.
+          </p>
+          <Link
+            href="/catalog"
+            className="inline-flex items-center gap-2 mt-5 bg-blue-600 text-white text-xs sm:text-sm font-semibold px-6 py-3 rounded-2xl hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20"
+          >
+            <span>Buka Katalog Ujian</span>
           </Link>
         </div>
       ) : (
@@ -182,88 +198,85 @@ export default function HistoryPage() {
             const isPauli = attempt.exam.psikotestCategory === "PAULI" || (examType === "PSIKOTEST_TNI" && attempt.exam.psikotestCategory === "PAULI");
 
             return (
-              <div key={attempt.id}
-                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-sm transition-shadow">
-
-                {/* Header */}
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h2 className="text-base font-bold text-gray-900">{attempt.exam.title}</h2>
+              <div
+                key={attempt.id}
+                className="bg-white border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-sm hover:border-slate-300 hover:shadow-md transition-all space-y-4"
+              >
+                {/* Header Card */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-base sm:text-lg font-bold text-slate-900">{attempt.exam.title}</h2>
 
                       {/* Badge examType */}
-                      <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                        examType === "SKD" ? "bg-blue-50 text-blue-600 border border-blue-100" :
-                        examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600 border border-purple-100" :
-                        examType === "PSIKOTEST_TNI" ? "bg-green-50 text-green-700 border border-green-200 font-bold" :
-                        "bg-orange-50 text-orange-600 border border-orange-100"
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                        examType === "SKD" ? "bg-blue-50 text-blue-700 border-blue-200" :
+                        examType === "PSIKOTEST" ? "bg-purple-50 text-purple-700 border-purple-200" :
+                        examType === "PSIKOTEST_TNI" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                        "bg-amber-50 text-amber-700 border-amber-200"
                       }`}>
                         {examType.replace(/_/g, " ")}
-                        {examType === "SKD" && attempt.exam.skdCategory &&
-                          ` · ${attempt.exam.skdCategory}`}
+                        {examType === "SKD" && attempt.exam.skdCategory && ` · ${attempt.exam.skdCategory}`}
                         {(examType === "PSIKOTEST" || examType === "PSIKOTEST_TNI") && attempt.exam.psikotestCategory &&
-                          ` · ${attempt.exam.psikotestCategory.replace(/_/g, " ")}`}
+                          ` · ${attempt.exam.psikotestCategory.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ")}`}
                         {examType === "AKADEMIK" && attempt.exam.akademikCategory &&
                           ` · ${attempt.exam.akademikCategory.replace(/_/g, " ")}`}
                       </span>
 
-                      {/* Passed badge — hanya SKD */}
+                      {/* Passed badge */}
                       {passed !== null && (
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          passed ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                          passed ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-rose-100 text-rose-700 border border-rose-200"
                         }`}>
-                          {passed ? "Lulus" : "Belum Lulus"}
+                          {passed ? "LULUS" : "BELUM LULUS"}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400">{formatDate(attempt.finishedAt)}</p>
+                    <p className="text-xs text-slate-400 font-medium">{formatDate(attempt.finishedAt)}</p>
                   </div>
 
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 bg-slate-50 border border-slate-100 px-3.5 py-2 rounded-2xl">
                     {isPauli ? (
                       <>
-                        <p className="text-2xl font-bold text-gray-900">{attempt.pauliScore ?? attempt.totalScore}%</p>
-                        <p className="text-xs text-gray-400">Ketelitian</p>
+                        <p className="text-xl sm:text-2xl font-black text-slate-900">{attempt.pauliScore ?? attempt.totalScore}%</p>
+                        <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Ketelitian</p>
                       </>
                     ) : (
                       <>
-                        <p className="text-2xl font-bold text-gray-900">{answered}</p>
-                        <p className="text-xs text-gray-400">dari {total} dijawab</p>
+                        <p className="text-xl sm:text-2xl font-black text-slate-900">{answered}</p>
+                        <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">dari {total} dijawab</p>
                       </>
                     )}
                   </div>
                 </div>
 
                 {/* Score Grid */}
-                <div className={`grid gap-3 ${scoreGrid.length === 4 ? "grid-cols-4" : scoreGrid.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+                <div className={`grid gap-2.5 ${scoreGrid.length === 4 ? "grid-cols-2 sm:grid-cols-4" : scoreGrid.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
                   {scoreGrid.map((item) => {
                     const isFailedTotal = item.isTotal && passed === false;
                     return (
-                      <div key={item.label} className={`rounded-xl p-3 text-center ${
-                        item.isTotal
-                          ? (isFailedTotal ? "bg-red-50 border border-red-100" :
-                            passed === true ? "bg-green-500 text-white" :
-                            "bg-blue-500 text-white")
-                          : "bg-gray-50 border border-gray-100"
-                      }`}>
-                        <p className={`text-xs mb-0.5 ${
-                          item.isTotal 
-                            ? (isFailedTotal ? "text-red-400" : "text-white/80") 
-                            : "text-gray-500"
+                      <div
+                        key={item.label}
+                        className={`rounded-2xl p-3 text-center transition-colors ${
+                          item.isTotal
+                            ? (isFailedTotal ? "bg-rose-500 text-white shadow-sm shadow-rose-500/20" :
+                              passed === true ? "bg-emerald-600 text-white shadow-sm shadow-emerald-500/20" :
+                              "bg-blue-600 text-white shadow-sm shadow-blue-500/20")
+                            : "bg-slate-50 border border-slate-200/60"
+                        }`}
+                      >
+                        <p className={`text-[11px] font-semibold mb-0.5 ${
+                          item.isTotal ? "text-white/80" : "text-slate-500"
                         }`}>
                           {item.label}
                         </p>
-                        <p className={`text-lg font-bold ${
-                          item.isTotal 
-                            ? (isFailedTotal ? "text-red-600" : "text-white") 
-                            : "text-gray-900"
+                        <p className={`text-lg sm:text-xl font-extrabold ${
+                          item.isTotal ? "text-white" : "text-slate-900"
                         }`}>
                           {item.score}
                         </p>
-                        <p className={`text-xs ${
-                          item.isTotal 
-                            ? (isFailedTotal ? "text-red-300" : "text-white/60") 
-                            : "text-gray-400"
+                        <p className={`text-[10px] font-medium ${
+                          item.isTotal ? "text-white/70" : "text-slate-400"
                         }`}>
                           /{item.max}
                         </p>
@@ -273,10 +286,15 @@ export default function HistoryPage() {
                 </div>
 
                 {/* Detail link */}
-                <div className="border-t border-gray-100 pt-4 mt-4">
-                  <Link href={`/history/${attempt.id}`}
-                    className="inline-flex items-center gap-2 text-sm text-blue-500 font-medium hover:underline">
-                    Lihat Detail Jawaban →
+                <div className="border-t border-slate-100 pt-3 flex justify-end">
+                  <Link
+                    href={`/history/${attempt.id}`}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 group"
+                  >
+                    <span>Lihat Detail Jawaban & Pembahasan</span>
+                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
                   </Link>
                 </div>
               </div>

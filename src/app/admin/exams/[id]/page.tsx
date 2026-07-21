@@ -920,8 +920,7 @@ export default function AdminExamDetailPage() {
 
       {/* Progress Bar per Kategori SKD */}
       {exam?.examType === "SKD" && (
-        <div className={`grid gap-4 mb-6 ${exam?.skdCategory ? "grid-cols-1" : "grid-cols-3"
-          }`}>
+        <div className={`grid gap-4 mb-6 ${exam?.skdCategory ? "grid-cols-1" : "grid-cols-1 md:grid-cols-3"}`}>
           {(exam?.skdCategory
             ? [exam.skdCategory as Category]
             : ["TWK", "TIU", "TKP"] as Category[]
@@ -929,17 +928,25 @@ export default function AdminExamDetailPage() {
             const count = categoryCount(cat);
             const limit = categoryLimits[cat];
             const pct = Math.round((count / limit) * 100);
+            const isFilled = count >= limit;
             return (
-              <div key={cat} className="bg-white border border-gray-200 rounded-xl p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-semibold text-gray-700">{cat}</span>
-                  <span className="text-sm text-gray-500">{count}/{limit}</span>
+              <div key={cat} className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-sm hover:border-slate-300 transition-colors">
+                <div className="flex justify-between items-center mb-2.5">
+                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{cat}</span>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${isFilled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-blue-50 text-blue-700"}`}>
+                    {count}/{limit} Soal
+                  </span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-2">
-                  <div className={`h-2 rounded-full transition-all ${count >= limit ? "bg-green-500" : "bg-blue-500"
-                    }`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-500 ${isFilled ? "bg-emerald-500" : "bg-blue-600"}`}
+                    style={{ width: `${Math.min(pct, 100)}%` }}
+                  />
                 </div>
-                <p className="text-xs text-gray-400 mt-1">{pct}% terpenuhi</p>
+                <p className="text-[10px] text-slate-400 font-medium mt-2 flex items-center justify-between">
+                  <span>Target Soal</span>
+                  <span>{pct}% Terpenuhi</span>
+                </p>
               </div>
             );
           })}
@@ -948,12 +955,12 @@ export default function AdminExamDetailPage() {
 
       {/* Progress Bar per Sub-Kategori Psikotest / Psikotest TNI */}
       {(exam?.examType === "PSIKOTEST" || (exam?.examType === "PSIKOTEST_TNI" && exam?.psikotestCategory !== "PAULI")) && (
-        <div className={`grid gap-4 mb-6 ${getSubCategories().length > 1 ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1"
-          }`}>
+        <div className={`grid gap-4 mb-6 ${getSubCategories().length > 1 ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3" : "grid-cols-1"}`}>
           {getSubCategories().map((sub) => {
             const count = subCategoryCount(sub);
             const limit = getLimit(sub);
             const pct = limit === Infinity || limit === 0 ? 0 : Math.round((count / limit) * 100);
+            const isFilled = limit !== Infinity && count >= limit;
 
             const labelMap: Record<string, string> = {
               GABUNGAN_TNI: "Gabungan TNI",
@@ -967,21 +974,23 @@ export default function AdminExamDetailPage() {
             const formattedSub = labelMap[sub] || (sub.charAt(0).toUpperCase() + sub.slice(1).toLowerCase());
 
             return (
-              <div key={sub} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-bold text-gray-700">{formattedSub}</span>
-                  <span className={`text-sm font-medium ${limit !== Infinity && count >= limit ? "text-green-600" : "text-gray-500"}`}>
-                    {count}/{limit === Infinity ? "∞" : limit}
+              <div key={sub} className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-sm hover:border-slate-300 transition-colors">
+                <div className="flex justify-between items-center mb-2.5">
+                  <span className="text-xs font-bold text-slate-800">{formattedSub}</span>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${isFilled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-purple-50 text-purple-700"}`}>
+                    {count}/{limit === Infinity ? "∞" : limit} Soal
                   </span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-2">
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                   <div
-                    className={`h-2 rounded-full transition-all duration-500 ${limit !== Infinity && count >= limit ? "bg-green-500" : exam?.examType === "PSIKOTEST_TNI" ? "bg-green-500" : "bg-purple-500"
-                      }`}
+                    className={`h-2 rounded-full transition-all duration-500 ${isFilled ? "bg-emerald-500" : exam?.examType === "PSIKOTEST_TNI" ? "bg-blue-600" : "bg-purple-600"}`}
                     style={{ width: `${Math.min(pct, 100)}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1 uppercase">{pct}% Terpenuhi</p>
+                <p className="text-[10px] text-slate-400 font-medium mt-2 flex items-center justify-between">
+                  <span>Progres Pengisian</span>
+                  <span>{pct}% Terpenuhi</span>
+                </p>
               </div>
             );
           })}
@@ -990,53 +999,59 @@ export default function AdminExamDetailPage() {
 
       {/* Progress Bar Akademik */}
       {exam?.examType === "AKADEMIK" && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-semibold text-gray-700">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 mb-6 shadow-sm">
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="text-xs font-bold text-slate-800">
               {exam?.akademikCategory?.replace(/_/g, " ")}
             </span>
-            <span className="text-sm text-gray-500">
-              {questions.length}/{exam?.akademikTotalSoal ?? "∞"}
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+              {questions.length}/{exam?.akademikTotalSoal ?? "∞"} Soal
             </span>
           </div>
           {exam?.akademikTotalSoal && (
             <>
-              <div className="w-full bg-gray-100 rounded-full h-2">
+              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                 <div
-                  className={`h-2 rounded-full transition-all ${questions.length >= exam.akademikTotalSoal ? "bg-green-500" : "bg-orange-500"
-                    }`}
+                  className={`h-2 rounded-full transition-all duration-500 ${questions.length >= exam.akademikTotalSoal ? "bg-emerald-500" : "bg-amber-500"}`}
                   style={{ width: `${Math.min((questions.length / exam.akademikTotalSoal) * 100, 100)}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-1">
-                {Math.round((questions.length / exam.akademikTotalSoal) * 100)}% terpenuhi
+              <p className="text-[10px] text-slate-400 font-medium mt-2 flex items-center justify-between">
+                <span>Kebutuhan Soal Akademik</span>
+                <span>{Math.round((questions.length / exam.akademikTotalSoal) * 100)}% Terpenuhi</span>
               </p>
             </>
           )}
         </div>
       )}
 
-      {/* Tab SKD */}
+      {/* Tab Navigasi Kategori (SKD) */}
       {exam?.examType === "SKD" && (
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
           {(exam?.skdCategory
             ? [exam.skdCategory as Category]
             : ["TWK", "TIU", "TKP"] as Category[]
           ).map((cat) => (
-            <button key={cat} onClick={() => setActiveTab(cat)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === cat
-                ? "bg-blue-600 text-white"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-                }`}>
-              {cat} ({categoryCount(cat)})
+            <button
+              key={cat}
+              onClick={() => setActiveTab(cat)}
+              className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-1.5 ${activeTab === cat
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+            >
+              <span>{cat}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-md ${activeTab === cat ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
+                {categoryCount(cat)}
+              </span>
             </button>
           ))}
         </div>
       )}
 
-      {/* Tab Psikotest / Psikotest TNI / Akademik */}
+      {/* Tab Navigasi Sub-Kategori (Psikotest / Psikotest TNI / Akademik) */}
       {(exam?.examType === "PSIKOTEST" || exam?.examType === "PSIKOTEST_TNI" || exam?.examType === "AKADEMIK") && exam?.psikotestCategory !== "PAULI" && (
-        <div className="flex gap-2 mb-4 flex-wrap">
+        <div className="flex gap-2 mb-5 flex-wrap">
           {getSubCategories().map((sub) => {
             const isActive = activeSubTab?.toUpperCase() === sub.toUpperCase();
             const isAkademik = exam?.examType === "AKADEMIK";
@@ -1054,21 +1069,24 @@ export default function AdminExamDetailPage() {
             const formattedSub = labelMap[sub] || (sub.charAt(0).toUpperCase() + sub.slice(1).toLowerCase());
 
             const activeClass = isAkademik
-              ? "bg-orange-50 text-orange-600 border-orange-200"
+              ? "bg-amber-600 text-white shadow-md shadow-amber-500/20"
               : isTni
-                ? "bg-green-600 text-white"
-                : "bg-purple-600 text-white";
+                ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20"
+                : "bg-purple-600 text-white shadow-md shadow-purple-500/20";
 
             return (
               <button
                 key={sub}
                 onClick={() => setActiveSubTab(sub)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${isActive
+                className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold border transition-all flex items-center gap-1.5 ${isActive
                   ? activeClass
-                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
               >
-                {formattedSub} ({subCategoryCount(sub)}/{getLimit(sub) === Infinity ? "∞" : getLimit(sub)})
+                <span>{formattedSub}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-md ${isActive ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
+                  {subCategoryCount(sub)}/{getLimit(sub) === Infinity ? "∞" : getLimit(sub)}
+                </span>
               </button>
             );
           })}
@@ -1078,18 +1096,22 @@ export default function AdminExamDetailPage() {
       {/* Daftar Soal */}
       <div className="flex flex-col gap-3">
         {filtered.length === 0 && exam?.psikotestCategory !== "PAULI" && (
-          <div className="bg-white border border-gray-200 rounded-xl py-12 text-center text-gray-400">
+          <div className="bg-white border border-slate-200/80 rounded-3xl py-12 px-4 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+            </div>
             {(() => {
               const rawLabel = exam?.examType === "SKD" ? activeTab : activeSubTab;
-
               const formattedLabel = rawLabel
                 ? rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1).toLowerCase()
                 : "";
 
               return (
-                <>
-                  Belum ada soal {formattedLabel}. Klik &quot;Tambah Soal&quot; untuk mulai.
-                </>
+                <p className="text-xs md:text-sm font-medium text-slate-500">
+                  Belum ada soal {formattedLabel}. Klik tombol <span className="font-semibold text-slate-800">&quot;Tambah Soal&quot;</span> untuk mulai menambahkan.
+                </p>
               );
             })()}
           </div>
@@ -1098,63 +1120,64 @@ export default function AdminExamDetailPage() {
         {filtered.map((q, idx) => (
           <div
             key={q.id}
-            className="bg-white border border-gray-200 rounded-xl p-5"
+            className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:border-slate-300 transition-all"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  {/* Badge kategori — tampilkan subCategory untuk Psikotest/Akademik */}
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  {/* Badge kategori */}
                   {exam?.examType === "SKD" ? (
-                    <span className="text-xs font-semibold bg-blue-50 text-blue-600 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full border border-blue-200">
                       {q.category}
                     </span>
                   ) : exam?.examType === "AKADEMIK" ? (
-                    <span className="text-xs font-semibold bg-orange-50 text-orange-600 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded-full border border-amber-200">
                       {q.subCategory ?? exam?.akademikCategory ?? "-"}
                     </span>
                   ) : (
-                    <span className="text-xs font-semibold bg-purple-50 text-purple-600 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-200">
                       {q.subCategory ?? exam?.akademikCategory ?? "-"}
                     </span>
                   )}
+
                   {q.category === "TKP" && q.aspect && (
-                    <span className="text-xs font-medium bg-purple-50 text-purple-600 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-semibold bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full">
                       {q.aspect}
                     </span>
                   )}
-                  <span className="text-xs text-gray-400">Soal #{idx + 1}</span>
+                  <span className="text-xs text-slate-400 font-mono">Soal #{idx + 1}</span>
                 </div>
 
-                <p className="text-sm text-gray-800 mb-3">{q.content}</p>
+                <p className="text-sm font-medium text-slate-800 mb-3 whitespace-pre-wrap leading-relaxed">{q.content}</p>
 
-                {/* Tampilkan gambar kalau ada */}
+                {/* Gambar soal */}
                 {q.imageUrl && q.imageUrl.trim() !== "" && (
                   <div className="mb-3">
                     <img
                       src={q.imageUrl}
                       alt="Gambar soal"
-                      className="max-h-40 w-auto object-contain rounded-lg border border-gray-200 bg-gray-50"
+                      className="max-h-48 w-auto object-contain rounded-xl border border-slate-200 bg-slate-50 p-1"
                       onError={(e) => {
-                        // Jika gambar gagal dimuat (broken link), sembunyikan elemennya
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}
                     />
                   </div>
                 )}
 
+                {/* Option Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                   {OPTIONS.map((opt) => (
                     <div
                       key={opt}
-                      className={`text-xs px-2 py-1 rounded border ${q.category !== "TKP" && q.correctOption === opt
-                        ? "border-green-300 bg-green-50 text-green-700 font-medium"
-                        : "border-gray-100 bg-gray-50 text-gray-600"
+                      className={`text-xs px-3 py-2 rounded-xl border transition-colors ${q.category !== "TKP" && q.correctOption === opt
+                        ? "border-emerald-300 bg-emerald-50 text-emerald-800 font-semibold shadow-sm"
+                        : "border-slate-100 bg-slate-50 text-slate-600"
                         }`}
                     >
-                      <span className="font-semibold">{opt}.</span>{" "}
+                      <span className="font-bold text-slate-800">{opt}.</span>{" "}
                       {q[`option${opt}` as keyof Question] as string}
                       {q.category === "TKP" && (
-                        <span className="ml-1 text-blue-500">
+                        <span className="ml-1 font-bold text-blue-600">
                           ({q[`score${opt}` as keyof Question]})
                         </span>
                       )}
@@ -1163,18 +1186,25 @@ export default function AdminExamDetailPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2 shrink-0">
+              {/* Action Buttons */}
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   onClick={() => openEdit(q)}
-                  className="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600"
+                  className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-xl transition-colors"
+                  title="Edit Soal"
                 >
-                  Edit
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                  </svg>
                 </button>
                 <button
                   onClick={() => handleDelete(q.id)}
-                  className="text-xs border border-red-100 px-3 py-1.5 rounded-lg hover:bg-red-50 text-red-500"
+                  className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 border border-slate-200 rounded-xl transition-colors"
+                  title="Hapus Soal"
                 >
-                  Hapus
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                  </svg>
                 </button>
               </div>
             </div>
