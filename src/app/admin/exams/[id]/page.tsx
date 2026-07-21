@@ -65,6 +65,10 @@ type Category = "TWK" | "TIU" | "TKP";
 
 interface ExamDetail {
   id: string;
+  title: string;
+  duration: number;
+  isPremium?: boolean;
+  isPublished?: boolean;
   examType: "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
   skdCategory?: string;
   psikotestCategory?: string;
@@ -173,7 +177,7 @@ export default function AdminExamDetailPage() {
         const filteredRows: Record<string, string>[] = [];
 
         if (exam?.examType === "SKD") {
-          const allowedCategories = exam.skdCategory
+          const allowedCategories = exam?.skdCategory
             ? [exam.skdCategory]
             : ["TWK", "TIU", "TKP"];
 
@@ -188,7 +192,7 @@ export default function AdminExamDetailPage() {
           if (wrongCatRows.length > 0) {
             const wrongCats = [...new Set(wrongCatRows.map((r) => r.category))].join(", ");
             alert(
-              exam.skdCategory
+              exam?.skdCategory
                 ? `Ujian ini hanya menerima soal ${exam.skdCategory}. Ditemukan kategori: ${wrongCats}`
                 : `Kategori tidak valid: ${wrongCats}. Hanya TWK, TIU, TKP yang diperbolehkan.`
             );
@@ -302,15 +306,14 @@ export default function AdminExamDetailPage() {
               correctOption2: row.correctOption2 || null,
             };
 
-            // Tambah field sesuai examType
             if (exam?.examType === "SKD") {
-              payload.category = exam.skdCategory || row.category;
-            } else if (exam?.examType === "PSIKOTEST") {
+              payload.category = exam?.skdCategory || row.category;
+            } else if (exam?.examType === "PSIKOTEST" || exam?.examType === "PSIKOTEST_TNI") {
               payload.category = "TWK"; // placeholder
-              payload.subCategory = row.subCategory;
+              payload.subCategory = row.subCategory || (exam?.psikotestCategory !== "GABUNGAN_TNI" ? exam?.psikotestCategory : "");
             } else if (exam?.examType === "AKADEMIK") {
               payload.category = "TWK"; // placeholder
-              payload.subCategory = exam.akademikCategory || null;
+              payload.subCategory = exam?.akademikCategory || null;
             }
 
             const res = await fetch(`/api/exams/${id}/questions`, {
@@ -410,7 +413,7 @@ export default function AdminExamDetailPage() {
       return Infinity;
     }
     if (exam?.examType === "AKADEMIK") {
-      return exam.akademikTotalSoal ?? Infinity;
+      return exam?.akademikTotalSoal ?? Infinity;
     }
     return Infinity;
   };
@@ -657,9 +660,9 @@ export default function AdminExamDetailPage() {
               {(exam?.skdCategory || exam?.psikotestCategory || exam?.akademikCategory) && (
                 <span className="bg-gray-100 text-gray-700 text-xs font-medium px-2 py-0.5 rounded">
                   Sub: {
-                    exam.examType === "PSIKOTEST_TNI" 
-                      ? (exam.psikotestCategory === "GABUNGAN_TNI" ? "Gabungan TNI" : exam.psikotestCategory)
-                      : (exam.skdCategory || exam.psikotestCategory || exam.akademikCategory)
+                    exam?.examType === "PSIKOTEST_TNI" 
+                      ? (exam?.psikotestCategory === "GABUNGAN_TNI" ? "Gabungan TNI" : exam?.psikotestCategory)
+                      : (exam?.skdCategory || exam?.psikotestCategory || exam?.akademikCategory)
                   }
                 </span>
               )}
@@ -702,7 +705,7 @@ export default function AdminExamDetailPage() {
       </div>
 
       {/* Special Pauli Banner Config */}
-      {exam?.examType === "PSIKOTEST_TNI" && exam.psikotestCategory === "PAULI" && (
+      {exam?.examType === "PSIKOTEST_TNI" && exam?.psikotestCategory === "PAULI" && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-6 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -722,7 +725,7 @@ export default function AdminExamDetailPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white/80 p-4 rounded-lg border border-blue-100 text-xs">
                 <div>
                   <span className="text-gray-500 block">Total Durasi</span>
-                  <strong className="text-gray-900 text-sm">{exam.duration} Menit ({exam.duration * 60} dtk)</strong>
+                  <strong className="text-gray-900 text-sm">{exam?.duration ?? 0} Menit ({(exam?.duration ?? 0) * 60} dtk)</strong>
                 </div>
                 <div>
                   <span className="text-gray-500 block">Interval Garis (Switch)</span>
@@ -730,7 +733,7 @@ export default function AdminExamDetailPage() {
                 </div>
                 <div>
                   <span className="text-gray-500 block">Jumlah Kolom</span>
-                  <strong className="text-gray-900 text-sm">{Math.floor((exam.duration * 60) / (getPsikotestConfig().signal_interval_sec ?? 180))} Kolom</strong>
+                  <strong className="text-gray-900 text-sm">{Math.floor(((exam?.duration ?? 0) * 60) / (getPsikotestConfig().signal_interval_sec ?? 180))} Kolom</strong>
                 </div>
                 <div>
                   <span className="text-gray-500 block">Kapasitas per Kolom</span>
@@ -745,9 +748,9 @@ export default function AdminExamDetailPage() {
       {/* Progress Bar per Kategori SKD */}
       {exam?.examType === "SKD" && (
         <div className={`grid gap-4 mb-6 ${
-          exam.skdCategory ? "grid-cols-1" : "grid-cols-3"
+          exam?.skdCategory ? "grid-cols-1" : "grid-cols-3"
         }`}>
-          {(exam.skdCategory
+          {(exam?.skdCategory
             ? [exam.skdCategory as Category]
             : ["TWK", "TIU", "TKP"] as Category[]
           ).map((cat) => {
@@ -821,13 +824,13 @@ export default function AdminExamDetailPage() {
         <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-semibold text-gray-700">
-              {exam.akademikCategory?.replace(/_/g, " ")}
+              {exam?.akademikCategory?.replace(/_/g, " ")}
             </span>
             <span className="text-sm text-gray-500">
-              {questions.length}/{exam.akademikTotalSoal ?? "∞"}
+              {questions.length}/{exam?.akademikTotalSoal ?? "∞"}
             </span>
           </div>
-          {exam.akademikTotalSoal && (
+          {exam?.akademikTotalSoal && (
             <>
               <div className="w-full bg-gray-100 rounded-full h-2">
                 <div
@@ -848,7 +851,7 @@ export default function AdminExamDetailPage() {
       {/* Tab SKD */}
       {exam?.examType === "SKD" && (
         <div className="flex gap-2 mb-4">
-          {(exam.skdCategory
+          {(exam?.skdCategory
             ? [exam.skdCategory as Category]
             : ["TWK", "TIU", "TKP"] as Category[]
           ).map((cat) => (
@@ -1030,13 +1033,13 @@ export default function AdminExamDetailPage() {
                         }`
                       : `TWK ${categoryCount("TWK")}/30 · TIU ${categoryCount("TIU")}/35 · TKP ${categoryCount("TKP")}/45`
                   )}
-                  {exam?.examType === "PSIKOTEST" && (
+                  {(exam?.examType === "PSIKOTEST" || exam?.examType === "PSIKOTEST_TNI") && (
                     Object.entries(getPsikotestConfig())
                       .map(([sub, limit]) => `${sub} ${subCategoryCount(sub)}/${limit}`)
                       .join(" · ")
                   )}
                   {exam?.examType === "AKADEMIK" && (
-                    `${exam.akademikCategory?.replace(/_/g, " ")} ${questions.length}/${exam.akademikTotalSoal ?? "∞"}`
+                    `${exam?.akademikCategory?.replace(/_/g, " ")} ${questions.length}/${exam?.akademikTotalSoal ?? "∞"}`
                   )}
                 </p>
               </div>
@@ -1055,7 +1058,7 @@ export default function AdminExamDetailPage() {
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
                     Kategori
                   </label>
-                  {exam.skdCategory ? (
+                  {exam?.skdCategory ? (
                     // Sub-kategori: tampilkan info saja, tidak bisa diubah
                     <div className="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
                       <p className="text-xs text-blue-600 font-semibold">
@@ -1089,7 +1092,7 @@ export default function AdminExamDetailPage() {
                 </div>
               )}
 
-              {exam?.examType === "PSIKOTEST" && (
+              {(exam?.examType === "PSIKOTEST" || exam?.examType === "PSIKOTEST_TNI") && (
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
                     Sub-Kategori
@@ -1102,11 +1105,22 @@ export default function AdminExamDetailPage() {
                     {getSubCategories().map((sub) => {
                       const count = subCategoryCount(sub);
                       const limit = getLimit(sub);
-                      const isFull = count >= limit && !editId;
+                      const isFull = limit !== Infinity && count >= limit && !editId;
+
+                      const labelMap: Record<string, string> = {
+                        GABUNGAN_TNI: "Gabungan TNI",
+                        VERBAL: "Verbal",
+                        MATEMATIKA_DASAR: "Matematika Dasar",
+                        LOGIKA: "Logika",
+                        DERET_ANGKA: "Deret Angka",
+                        DERET_GAMBAR: "Deret Gambar",
+                        KUBUS: "Kubus",
+                      };
+                      const formattedSub = labelMap[sub] || (sub.charAt(0).toUpperCase() + sub.slice(1).toLowerCase());
 
                       return (
                         <option key={sub} value={sub} disabled={isFull}>
-                          {sub} ({count}/{limit}) {isFull ? "— PENUH" : ""}
+                          {formattedSub} ({count}/{limit === Infinity ? "∞" : limit}) {isFull ? "— PENUH" : ""}
                         </option>
                       );
                     })}
@@ -1117,7 +1131,7 @@ export default function AdminExamDetailPage() {
               {exam?.examType === "AKADEMIK" && (
                 <div className="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
                   <p className="text-xs text-blue-600 font-semibold">
-                    Kategori: {exam.akademikCategory?.replace(/_/g, " ")}
+                    Kategori: {exam?.akademikCategory?.replace(/_/g, " ")}
                   </p>
                 </div>
               )}
