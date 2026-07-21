@@ -177,25 +177,27 @@ export default function PauliReportView({ attemptId }: { attemptId: string }) {
           3. Grafik Perkembangan Kolom
         </h3>
         <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-          <div className="h-44 flex items-end gap-2 sm:gap-3 pt-6 pb-2 overflow-x-auto">
+          <div className="h-48 flex items-end gap-2 sm:gap-3 pt-8 pb-2 overflow-x-auto min-h-[160px]">
             {cols.map((c) => {
-              const heightPct = Math.round((c.jumlah_dikerjakan / maxColumnWork) * 100);
+              const heightPct = Math.max(10, Math.round((c.jumlah_dikerjakan / maxColumnWork) * 100));
               return (
-                <div key={c.kolom} className="flex-1 min-w-[28px] flex flex-col items-center gap-1 group">
-                  <span className="text-[10px] text-gray-400 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
+                <div key={c.kolom} className="flex-1 min-w-[32px] flex flex-col items-center gap-1.5 group">
+                  <span className="text-[11px] font-bold text-indigo-600 font-mono">
                     {c.jumlah_dikerjakan}
                   </span>
-                  <div className="w-full bg-indigo-100 rounded-t-lg relative flex flex-col justify-end" style={{ height: `${heightPct}%` }}>
-                    <div className="bg-indigo-600 rounded-t-lg w-full transition-all duration-300" style={{ height: `100%` }} />
-                    {c.jumlah_salah > 0 && (
-                      <div
-                        className="bg-red-500 w-full rounded-t-lg absolute top-0 left-0"
-                        style={{ height: `${Math.min(100, (c.jumlah_salah / c.jumlah_dikerjakan) * 100)}%` }}
-                        title={`Salah: ${c.jumlah_salah}`}
-                      />
-                    )}
+                  <div className="w-full bg-indigo-50 rounded-t-lg relative flex flex-col justify-end h-32 border-b border-indigo-200">
+                    <div className="w-full relative rounded-t-lg overflow-hidden transition-all duration-300" style={{ height: `${heightPct}%` }}>
+                      <div className="bg-indigo-600 w-full h-full" />
+                      {c.jumlah_salah > 0 && (
+                        <div
+                          className="bg-red-500 w-full absolute top-0 left-0"
+                          style={{ height: `${Math.min(100, (c.jumlah_salah / (c.jumlah_dikerjakan || 1)) * 100)}%` }}
+                          title={`Salah: ${c.jumlah_salah}`}
+                        />
+                      )}
+                    </div>
                   </div>
-                  <span className="text-[10px] font-mono text-gray-500">K{c.kolom}</span>
+                  <span className="text-[10px] font-mono text-gray-500 font-semibold">K{c.kolom}</span>
                 </div>
               );
             })}

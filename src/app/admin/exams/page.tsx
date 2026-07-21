@@ -40,7 +40,7 @@ export default function AdminExamsPage() {
     isPremium: false,
     examType: "SKD" as "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI",
     skdCategory: "",
-    psikotestCategory: "",
+    psikotestCategory: "KECERDASAN",
     psikotestSoalKecerdasan: "40",
     psikotestSoalKecermatan: "30",
     psikotestSoalKepribadian: "30",
@@ -344,7 +344,7 @@ export default function AdminExamsPage() {
           skdCategory: form.examType === "SKD" ? (form.skdCategory || null) : null,
           psikotestCategory:
             form.examType === "PSIKOTEST"
-              ? form.psikotestCategory
+              ? (form.psikotestCategory || "KECERDASAN")
               : form.examType === "PSIKOTEST_TNI"
               ? form.tniCategory
               : null,
@@ -519,7 +519,7 @@ export default function AdminExamsPage() {
                             ? "bg-green-100 text-green-700 border border-green-200"
                             : "bg-gray-100 text-gray-600 border border-gray-200"
                         }`}>
-                          {exam.isPublished ? "Published" : "Draft"}
+                          {exam.isPublished ? "Diterbitkan" : "Draf"}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -538,19 +538,30 @@ export default function AdminExamsPage() {
                           </button>
                           <button
                             onClick={() => handleTogglePublish(exam.id, exam.isPublished)}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                               exam.isPublished
                                 ? "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
-                                : "border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
+                                : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                             }`}
                           >
-                            {exam.isPublished ? "Draftkan" : "Publish"}
+                            {exam.isPublished ? (
+                              <>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                                <span>Jadikan Draf</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14.89 9 20l11-11"/></svg>
+                                <span>Terbitkan</span>
+                              </>
+                            )}
                           </button>
                           <button
                             onClick={() => handleDelete(exam.id)}
-                            className="text-red-500 hover:text-red-700 text-xs px-2 py-1 rounded hover:bg-red-50 font-medium"
+                            className="inline-flex items-center gap-1 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
                           >
-                            Hapus
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            <span>Hapus</span>
                           </button>
                         </div>
                       </td>

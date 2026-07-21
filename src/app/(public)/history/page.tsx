@@ -235,7 +235,7 @@ export default function HistoryPage() {
                 </div>
 
                 {/* Score Grid */}
-                <div className={`grid gap-3 ${scoreGrid.length === 4 ? "grid-cols-4" : "grid-cols-2"}`}>
+                <div className={`grid gap-3 ${scoreGrid.length === 4 ? "grid-cols-4" : scoreGrid.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
                   {scoreGrid.map((item) => {
                     const isFailedTotal = item.isTotal && passed === false;
                     return (

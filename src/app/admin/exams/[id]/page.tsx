@@ -898,7 +898,7 @@ export default function AdminExamDetailPage() {
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full transition-all duration-500 ${limit !== Infinity && count >= limit ? "bg-green-500" : "bg-purple-500"
+                    className={`h-2 rounded-full transition-all duration-500 ${limit !== Infinity && count >= limit ? "bg-green-500" : exam?.examType === "PSIKOTEST_TNI" ? "bg-green-500" : "bg-purple-500"
                       }`}
                     style={{ width: `${Math.min(pct, 100)}%` }}
                   />
@@ -962,6 +962,7 @@ export default function AdminExamDetailPage() {
           {getSubCategories().map((sub) => {
             const isActive = activeSubTab?.toUpperCase() === sub.toUpperCase();
             const isAkademik = exam?.examType === "AKADEMIK";
+            const isTni = exam?.examType === "PSIKOTEST_TNI";
 
             const labelMap: Record<string, string> = {
               GABUNGAN_TNI: "Gabungan TNI",
@@ -976,6 +977,8 @@ export default function AdminExamDetailPage() {
 
             const activeClass = isAkademik
               ? "bg-orange-50 text-orange-600 border-orange-200"
+              : isTni
+              ? "bg-green-600 text-white"
               : "bg-purple-600 text-white";
 
             return (

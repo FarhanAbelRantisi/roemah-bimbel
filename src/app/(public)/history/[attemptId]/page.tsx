@@ -96,6 +96,14 @@ export default function HistoryDetailPage() {
   if (attempt.exam.psikotestCategory === "PAULI") {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-4">
+          <Link
+            href="/history"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            ← Kembali ke Riwayat
+          </Link>
+        </div>
         <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-lg">
           <PauliReportView attemptId={attempt.id} />
           <div className="mt-8 pt-6 border-t border-gray-100 flex justify-center">

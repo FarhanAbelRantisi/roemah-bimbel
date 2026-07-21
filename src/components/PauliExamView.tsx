@@ -120,11 +120,11 @@ export default function PauliExamView({
       if (kolomTimeLeftRef.current <= 0) {
         kolomTimeLeftRef.current = signalIntervalSec;
         nextColumnRef.current();
-      }
-
-      if (totalTimeLeftRef.current <= 0) {
+      } else if (totalTimeLeftRef.current <= 0) {
         clearInterval(timer);
-        onFinishRef.current();
+        nextColumnRef.current().then(() => {
+          onFinishRef.current();
+        });
       }
     }, 1000);
 
