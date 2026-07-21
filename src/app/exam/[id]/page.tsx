@@ -998,7 +998,7 @@ export default function ExamPage() {
         </div>
 
         {/* Sidebar */}
-        <aside className="w-full landscape:w-60 lg:w-96 xl:w-[420px] 2xl:w-[460px] bg-white border-b landscape:border-b-0 lg:border-b-0 landscape:border-l lg:border-l border-slate-200/80 p-4 sm:p-5 lg:p-7 landscape:overflow-y-auto lg:overflow-y-auto flex flex-col gap-4 sm:gap-6 lg:gap-7 order-1 landscape:order-2 lg:order-2 shrink-0 shadow-sm">
+        <aside className="w-full max-lg:landscape:w-60 lg:w-96 xl:w-[420px] 2xl:w-[460px] bg-white border-b landscape:border-b-0 lg:border-b-0 landscape:border-l lg:border-l border-slate-200/80 p-4 sm:p-5 lg:p-7 landscape:overflow-y-auto lg:overflow-y-auto flex flex-col gap-4 sm:gap-6 lg:gap-7 order-1 landscape:order-2 lg:order-2 shrink-0 shadow-sm">
           {/* Timer */}
           <div className="bg-slate-50 rounded-2xl p-4 lg:p-6 text-center border border-slate-200/80 shadow-xs">
             <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Time Remaining</p>
@@ -1014,14 +1014,14 @@ export default function ExamPage() {
               <span className="text-[10px] sm:text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">{shuffledAnswers.length} Total</span>
             </div>
 
-            <div className="grid grid-cols-4 landscape:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-2.5 lg:gap-3 max-h-44 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-1 landscape:pr-0 lg:pr-0">
+            <div className="grid grid-cols-6 max-lg:landscape:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2.5 lg:gap-3 max-h-44 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-1 landscape:pr-0 lg:pr-0">
               {shuffledAnswers.map((ans, idx) => {
                 const s = getStatus(ans, idx);
                 return (
                   <button
                     key={ans.questionId}
                     onClick={() => setCurrentIdx(idx)}
-                    className={`w-full aspect-square rounded-xl lg:rounded-2xl text-xs sm:text-sm lg:text-base font-extrabold transition-all shadow-xs flex items-center justify-center ${s === "current"
+                    className={`w-full aspect-square rounded-lg sm:rounded-xl lg:rounded-2xl text-[11px] sm:text-sm lg:text-base font-extrabold transition-all shadow-xs flex items-center justify-center ${s === "current"
                       ? "bg-white border-2 lg:border-3 border-blue-600 text-blue-600 shadow-md ring-2 ring-blue-600/20"
                       : s === "answered"
                         ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
