@@ -310,7 +310,7 @@ export default function AdminExamDetailPage() {
               payload.category = exam?.skdCategory || row.category;
             } else if (exam?.examType === "PSIKOTEST" || exam?.examType === "PSIKOTEST_TNI") {
               payload.category = "TWK"; // placeholder
-              payload.subCategory = row.subCategory || (exam?.psikotestCategory !== "GABUNGAN_TNI" ? exam?.psikotestCategory : "");
+              payload.subCategory = row.subCategory || (exam?.psikotestCategory && exam.psikotestCategory !== "GABUNGAN_TNI" ? exam.psikotestCategory : null);
             } else if (exam?.examType === "AKADEMIK") {
               payload.category = "TWK"; // placeholder
               payload.subCategory = exam?.akademikCategory || null;
