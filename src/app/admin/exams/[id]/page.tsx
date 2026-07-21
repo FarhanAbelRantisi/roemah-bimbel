@@ -648,9 +648,10 @@ export default function AdminExamDetailPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/admin/exams"
-            className="text-gray-400 hover:text-gray-600 text-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 text-xs md:text-sm font-medium hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
           >
-            ← Kembali
+            <span>←</span>
+            <span>Kembali</span>
           </Link>
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -668,7 +669,7 @@ export default function AdminExamDetailPage() {
               )}
             </div>
             <h1 className="text-lg md:text-2xl font-bold text-gray-900">
-              Input Soal — {exam?.title || "..."}
+              {exam?.title || "..."}
             </h1>
             <p className="text-xs text-gray-500">Exam ID: {id}</p>
           </div>
@@ -908,7 +909,7 @@ export default function AdminExamDetailPage() {
 
       {/* Daftar Soal */}
       <div className="flex flex-col gap-3">
-        {filtered.length === 0 && (
+        {filtered.length === 0 && exam?.psikotestCategory !== "PAULI" && (
             <div className="bg-white border border-gray-200 rounded-xl py-12 text-center text-gray-400">
               {(() => {
                 const rawLabel = exam?.examType === "SKD" ? activeTab : activeSubTab;

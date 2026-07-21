@@ -7,6 +7,8 @@ const IconAlertTriangle = ({ className = "shrink-0 mt-0.5" }: { className?: stri
 const IconLock = ({ className = "shrink-0 mt-0.5" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
 const IconFlag = ({ className = "w-4 h-4" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>);
 
+import PauliExamView from "@/components/PauliExamView";
+
 type Category = "TWK" | "TIU" | "TKP";
 type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
 
@@ -658,8 +660,21 @@ export default function ExamPage() {
 
   if (!attempt) return null;
 
+  if (attempt.exam.psikotestCategory === "PAULI") {
+    return (
+      <PauliExamView
+        attemptId={attempt.id}
+        durationMinutes={attempt.exam.duration}
+        psikotestConfig={attempt.exam.psikotestConfig}
+        candidateName={session?.user?.name || "Peserta"}
+        onFinish={() => handleFinish(true)}
+      />
+    );
+  }
+
   const currentAnswer = shuffledAnswers[currentIdx];
   const currentQuestion = currentAnswer?.question;
+  if (!currentQuestion) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 exam-active" style={{ position: "relative" }}>

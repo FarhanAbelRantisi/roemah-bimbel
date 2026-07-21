@@ -50,8 +50,12 @@ class TestConfigInput:
     signal_interval_sec: int     # contoh: 180  = 3 menit
     digit_min: int = 0
     digit_max: int = 9
-    angka_per_kolom: int = 60    # kapasitas maksimum baris per kolom
     instruksi_teks: str = ""
+    # Catatan: TIDAK ada angka_per_kolom. Soal digenerate on-demand
+    # (lazy) tanpa batas kapasitas -- lihat digit_at() di bawah.
+    # Ini meniru desain asli: testee tidak pernah didesain untuk
+    # "menghabiskan" kolom, jadi tidak boleh ada limit soal yang
+    # bisa membatasi orang yang sangat cepat.
 
     @property
     def jumlah_kolom(self) -> int:
@@ -67,10 +71,10 @@ def create_config(conn: sqlite3.Connection, cfg: TestConfigInput) -> int:
     cur = conn.execute(
         """INSERT INTO test_configs
            (nama_config, total_duration_sec, signal_interval_sec,
-            digit_min, digit_max, angka_per_kolom, instruksi_teks)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            digit_min, digit_max, instruksi_teks)
+           VALUES (?, ?, ?, ?, ?, ?)""",
         (cfg.nama_config, cfg.total_duration_sec, cfg.signal_interval_sec,
-         cfg.digit_min, cfg.digit_max, cfg.angka_per_kolom, cfg.instruksi_teks),
+         cfg.digit_min, cfg.digit_max, cfg.instruksi_teks),
     )
     conn.commit()
     return cur.lastrowid
@@ -89,14 +93,41 @@ def create_norm_group(conn: sqlite3.Connection, jenis_seleksi: str,
 
 
 # =========================================================
-# 2. GENERATOR SOAL PER KOLOM
+# 2. GENERATOR SOAL (LAZY, TANPA BATAS KAPASITAS)
 # =========================================================
+#
+# Tidak ada list angka yang di-pregenerate dengan panjang tertentu.
+# Sebagai gantinya, setiap digit dihitung deterministik dari
+# (seed, kolom_index, posisi_index):
+#   - Testee bisa "meminta" digit sebanyak apapun dalam satu kolom,
+#     tidak akan pernah kehabisan soal.
+#   - Digit yang sama selalu bisa direproduksi ulang (untuk audit/
+#     replay) tanpa perlu menyimpan seluruh deretnya di database.
+#   - Memory-nya O(1) -- tidak perlu simpan array besar di server.
 
-def generate_kolom_digits(cfg_row: sqlite3.Row, seed: Optional[int] = None) -> list[int]:
-    """Menghasilkan deret angka acak untuk satu kolom."""
-    rng = random.Random(seed)
-    return [rng.randint(cfg_row["digit_min"], cfg_row["digit_max"])
-            for _ in range(cfg_row["angka_per_kolom"])]
+def digit_at(seed: int, kolom_index: int, posisi_index: int,
+             digit_min: int = 0, digit_max: int = 9) -> int:
+    """Menghitung satu digit soal secara deterministik berdasarkan posisinya.
+
+    Posisi yang sama (seed, kolom_index, posisi_index) akan selalu
+    menghasilkan digit yang sama -- ini yang membuatnya reproducible
+    tanpa perlu menyimpan seluruh deret angka di database.
+    """
+    combined = hash((seed, kolom_index, posisi_index))
+    rng = random.Random(combined)
+    return rng.randint(digit_min, digit_max)
+
+
+def generate_batch(seed: int, kolom_index: int, start_pos: int, count: int,
+                    digit_min: int = 0, digit_max: int = 9) -> list[int]:
+    """Ambil `count` digit berikutnya mulai dari start_pos.
+
+    Dipanggil berulang oleh frontend setiap kali testee mendekati
+    ujung batch yang sedang ditampilkan (mis. minta 20 digit lagi),
+    bukan sekali di awal dengan panjang fixed.
+    """
+    return [digit_at(seed, kolom_index, start_pos + i, digit_min, digit_max)
+            for i in range(count)]
 
 
 # =========================================================

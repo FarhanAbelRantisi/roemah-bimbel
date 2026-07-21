@@ -33,7 +33,7 @@ export async function POST(
 
     const count = await prisma.question.count({ where: { examId: id } });
     const isTKP = body.category === "TKP";
-    const isPsikotest = exam?.examType === "PSIKOTEST";
+    const isPsikotest = exam?.examType === "PSIKOTEST" || exam?.examType === "PSIKOTEST_TNI";
     const isAkademik = exam?.examType === "AKADEMIK";
 
     const question = await prisma.question.create({

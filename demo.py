@@ -15,7 +15,7 @@ import datetime as dt
 from engine import (
     init_db, TestConfigInput, create_config, create_norm_group,
     start_session, record_column_result, finalize_session,
-    recompute_norm_stats, classify_session, generate_kolom_digits,
+    recompute_norm_stats, classify_session, digit_at, generate_batch,
 )
 
 DB_FILE = "pauli.db"
@@ -33,12 +33,24 @@ cfg = TestConfigInput(
     signal_interval_sec=180,     # aba-aba tiap 3 menit
     digit_min=0,
     digit_max=9,
-    angka_per_kolom=80,
+    # tidak ada angka_per_kolom -- soal digenerate lazy tanpa batas
 )
 print(f"Jumlah kolom otomatis: {cfg.jumlah_kolom}")  # -> 20 kolom
 
 config_id = create_config(conn, cfg)
 cfg_row = conn.execute("SELECT * FROM test_configs WHERE id = ?", (config_id,)).fetchone()
+
+# --- Contoh pemakaian generator lazy: frontend minta digit sedikit demi
+#     sedikit sesuai kebutuhan tampilan, bukan sekaligus dengan batas fixed ---
+print("\n=== Contoh Generator Lazy (kolom ke-0, seed=42) ===")
+batch_1 = generate_batch(seed=42, kolom_index=0, start_pos=0, count=10)
+print(f"Batch pertama (posisi 0-9)  : {batch_1}")
+batch_2 = generate_batch(seed=42, kolom_index=0, start_pos=10, count=10)
+print(f"Batch kedua   (posisi 10-19): {batch_2}")
+# Reproducibility check: minta ulang posisi yang sama -> hasil harus identik
+ulang = generate_batch(seed=42, kolom_index=0, start_pos=0, count=10)
+assert ulang == batch_1, "Generator harus deterministik untuk posisi yang sama!"
+print("Reproducibility check: OK (posisi sama -> digit sama)")
 
 
 def simulate_session(testee_ref: str, rata2_kerja: int, variasi: int, tingkat_error: float):
