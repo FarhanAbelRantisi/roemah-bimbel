@@ -346,14 +346,35 @@ export default function PauliExamView({
       )}
 
       {/* Header Bar */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-20">
-        <div>
+      <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex flex-wrap items-center justify-between sticky top-0 z-50 shadow-sm">
+        <div className="flex items-center gap-2">
           <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
             Tes Pauli
           </span>
-          <h1 className="text-sm font-bold text-gray-800 mt-1">
-            Peserta: {candidateName}
-          </h1>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 md:gap-4 justify-end">
+          {/* Indikator pelanggaran */}
+          {tabWarning > 0 && (
+            <div className="flex items-center gap-1.5 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg">
+              <span className="text-red-500 text-xs font-semibold">Pelanggaran:</span>
+              <div className="flex gap-1">
+                {Array.from({ length: MAX_VIOLATIONS }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-2.5 h-2.5 rounded-full ${i < tabWarning ? "bg-red-500" : "bg-gray-200"}`}
+                  />
+                ))}
+              </div>
+              <span className="text-red-500 text-xs font-semibold">
+                {tabWarning}/{MAX_VIOLATIONS}
+              </span>
+            </div>
+          )}
+
+          <span className="text-sm text-gray-500">
+            Candidate ID: <span className="font-semibold text-gray-800">{candidateName}</span>
+          </span>
         </div>
       </header>
 

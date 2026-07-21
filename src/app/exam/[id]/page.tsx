@@ -3,9 +3,9 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-const IconAlertTriangle = ({ className = "shrink-0 mt-0.5" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>);
-const IconLock = ({ className = "shrink-0 mt-0.5" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
-const IconFlag = ({ className = "w-4 h-4" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>);
+const IconAlertTriangle = ({ className = "shrink-0 mt-0.5" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>);
+const IconLock = ({ className = "shrink-0 mt-0.5" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>);
+const IconFlag = ({ className = "w-4 h-4" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" x2="4" y1="22" y2="15" /></svg>);
 
 import PauliExamView from "@/components/PauliExamView";
 
@@ -97,35 +97,48 @@ export default function ExamPage() {
     setTimeout(() => setErrorMsg(""), 4000);
   }, []);
 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [unansweredCount, setUnansweredCount] = useState(0);
+
+  const openFinishModal = useCallback(() => {
+    const count = shuffledAnswersRef.current.filter(
+      (a) => !a.selected && !selected2MapRef.current[a.questionId]
+    ).length;
+    setUnansweredCount(count);
+    setShowConfirmModal(true);
+  }, []);
+
+  const executeFinish = useCallback(async () => {
+    if (!attemptId) return;
+    setShowConfirmModal(false);
+    setFinishing(true);
+    clearInterval(timerRef.current!);
+
+    try {
+      const res = await fetch(`/api/attempts/${attemptId}/finish`, { method: "POST" });
+      const data = await res.json();
+
+      if (res.ok) {
+        router.push(`/exam/${id}/result?attemptId=${attemptId}`);
+      } else {
+        showError(data.error || "Gagal menyelesaikan ujian");
+        setFinishing(false);
+      }
+    } catch {
+      showError("Terjadi kesalahan koneksi saat menyelesaikan ujian");
+      setFinishing(false);
+    }
+  }, [attemptId, id, router, showError]);
+
   const handleFinish = useCallback(async (auto = false) => {
     if (!attemptId) return;
 
     if (!auto) {
-      const unansweredCount = shuffledAnswersRef.current.filter(
-        (a) => !a.selected && !selected2MapRef.current[a.questionId]
-      ).length;
-
-      let confirmMsg = "Yakin ingin menyelesaikan ujian?";
-      if (unansweredCount > 0) {
-        confirmMsg = `Masih ada ${unansweredCount} soal yang belum dijawab.\n\n${confirmMsg}`;
-      }
-
-      if (!confirm(confirmMsg)) return;
-    }
-
-    setFinishing(true);
-    clearInterval(timerRef.current!);
-
-    const res = await fetch(`/api/attempts/${attemptId}/finish`, { method: "POST" });
-    const data = await res.json();
-
-    if (res.ok) {
-      router.push(`/exam/${id}/result?attemptId=${attemptId}`);
+      openFinishModal();
     } else {
-      alert(data.error);
-      setFinishing(false);
+      executeFinish();
     }
-  }, [attemptId, id, router]);
+  }, [attemptId, openFinishModal, executeFinish]);
 
   const triggerScreenshotViolation = useCallback(() => {
     navigator.clipboard?.writeText("").catch(() => { });
@@ -745,6 +758,54 @@ export default function ExamPage() {
           </div>
         </div>
       )}
+      {/* ===== CUSTOM CONFIRM FINISH MODAL ===== */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] px-4 animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-gray-100 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4 border border-blue-100">
+              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-1">Selesaikan Ujian?</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Apakah Anda yakin ingin mengakhiri sesi ujian ini? Jawaban Anda akan dihitung secara otomatis.
+            </p>
+
+            {unansweredCount > 0 ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mb-6 text-left flex items-start gap-3">
+                <IconAlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="text-xs text-amber-800 font-medium">
+                  <p className="font-bold text-amber-900">Perhatian!</p>
+                  <p className="mt-0.5">Masih ada <span className="font-extrabold text-amber-900">{unansweredCount} soal</span> yang belum Anda jawab.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 mb-6 text-center text-xs text-emerald-800 font-medium flex items-center justify-center gap-2">
+                <svg className="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                <span>Seluruh soal ({shuffledAnswers.length}) telah dijawab dengan lengkap.</span>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 font-semibold text-sm rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Kembali
+              </button>
+              <button
+                onClick={executeFinish}
+                disabled={finishing}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold text-sm rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-all shadow-md shadow-blue-500/20"
+              >
+                {finishing ? "Memproses..." : "Ya, Selesaikan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex flex-wrap items-center justify-between lg:justify-end gap-3 sticky top-0 z-50">
         <div className="flex flex-wrap items-center gap-3 md:gap-4 w-full lg:w-auto justify-between lg:justify-end">
@@ -883,21 +944,21 @@ export default function ExamPage() {
                     }
                   }}
                   className={`flex items-center gap-4 w-full text-left px-5 py-4 rounded-xl border-2 transition-all ${isFirst
-                      ? "border-blue-500 bg-blue-50"
-                      : isSecond
-                        ? "border-green-500 bg-green-50"
-                        : "border-gray-200 bg-white hover:border-blue-200 hover:bg-gray-50"
+                    ? "border-blue-500 bg-blue-50"
+                    : isSecond
+                      ? "border-green-500 bg-green-50"
+                      : "border-gray-200 bg-white hover:border-blue-200 hover:bg-gray-50"
                     }`}
                 >
                   <span className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-bold shrink-0 ${isFirst ? "border-blue-500 bg-blue-500 text-white" :
-                      isSecond ? "border-green-500 bg-green-500 text-white" :
-                        "border-gray-300 text-gray-500"
+                    isSecond ? "border-green-500 bg-green-500 text-white" :
+                      "border-gray-300 text-gray-500"
                     }`}>
                     {opt}
                   </span>
                   <span className={`text-sm flex-1 ${isFirst ? "text-blue-700 font-medium" :
-                      isSecond ? "text-blue-700 font-medium" :
-                        "text-gray-700"
+                    isSecond ? "text-blue-700 font-medium" :
+                      "text-gray-700"
                     }`}>
                     {optionText}
                   </span>
@@ -919,8 +980,8 @@ export default function ExamPage() {
             <button
               onClick={handleFlag}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium border transition-colors ${currentAnswer.isFlagged
-                  ? "bg-orange-50 border-orange-300 text-orange-600"
-                  : "bg-white border-gray-200 text-gray-600 hover:bg-orange-50"
+                ? "bg-orange-50 border-orange-300 text-orange-600"
+                : "bg-white border-gray-200 text-gray-600 hover:bg-orange-50"
                 }`}
             >
               <IconFlag className="mr-1 w-4 h-4" /> {currentAnswer.isFlagged ? "Flagged" : "Flag for Review"}
@@ -953,7 +1014,7 @@ export default function ExamPage() {
               <span className="text-xs text-gray-400">{shuffledAnswers.length} Total</span>
             </div>
 
-            <div className="grid grid-cols-6 sm:grid-cols-10 landscape:grid-cols-3 lg:grid-cols-5 gap-1.5 max-h-32 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-2 landscape:pr-0 lg:pr-0">
+            <div className="grid grid-cols-3 sm:grid-cols-4 landscape:grid-cols-4 lg:grid-cols-4 gap-2 max-h-32 landscape:max-h-none lg:max-h-none overflow-y-auto landscape:overflow-y-visible lg:overflow-y-visible pr-2 landscape:pr-0 lg:pr-0">
               {shuffledAnswers.map((ans, idx) => {
                 const s = getStatus(ans, idx);
                 return (
@@ -961,12 +1022,12 @@ export default function ExamPage() {
                     key={ans.questionId}
                     onClick={() => setCurrentIdx(idx)}
                     className={`w-full aspect-square rounded-lg text-xs font-semibold transition-colors ${s === "current"
-                        ? "bg-white border-2 border-blue-500 text-blue-500"
-                        : s === "answered"
-                          ? "bg-blue-500 text-white"
-                          : s === "flagged"
-                            ? "bg-orange-400 text-white"
-                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                      ? "bg-white border-2 border-blue-500 text-blue-500"
+                      : s === "answered"
+                        ? "bg-blue-500 text-white"
+                        : s === "flagged"
+                          ? "bg-orange-400 text-white"
+                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                       }`}
                   >
                     {idx + 1}

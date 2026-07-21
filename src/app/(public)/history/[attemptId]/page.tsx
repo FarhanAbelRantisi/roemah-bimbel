@@ -216,8 +216,8 @@ export default function HistoryDetailPage() {
             <h1 className="text-xl font-bold text-gray-900 mb-1">{attempt.exam.title}</h1>
             <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${examType === "SKD" ? "bg-blue-50 text-blue-600" :
-                  examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
-                    "bg-orange-50 text-orange-600"
+                examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
+                  "bg-orange-50 text-orange-600"
                 }`}>
                 {examType}
                 {examType === "SKD" && skdCat && ` · ${skdCat}`}
@@ -249,8 +249,8 @@ export default function HistoryDetailPage() {
             {skdCat ? (
               <>
                 <div className={`rounded-xl p-3 text-center ${skdCat === "TWK" ? "bg-blue-50 text-blue-700" :
-                    skdCat === "TIU" ? "bg-purple-50 text-purple-700" :
-                      "bg-green-50 text-green-700"
+                  skdCat === "TIU" ? "bg-purple-50 text-purple-700" :
+                    "bg-green-50 text-green-700"
                   }`}>
                   <p className="text-xs mb-0.5 opacity-70">{skdCat}</p>
                   <p className="text-xl font-bold">
@@ -399,9 +399,9 @@ export default function HistoryDetailPage() {
       <div className="flex gap-2 mb-6 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {[
           { value: "all", label: "Semua" },
-          { value: "correct", label: "✓ Benar" },
-          { value: "wrong", label: "✗ Salah" },
-          { value: "empty", label: "— Kosong" },
+          { value: "correct", label: "Benar" },
+          { value: "wrong", label: "Salah" },
+          { value: "empty", label: "Kosong" },
         ].map((f) => (
           <button key={f.value} onClick={() => setFilter(f.value as typeof filter)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${filter === f.value ? "bg-gray-800 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
@@ -427,9 +427,9 @@ export default function HistoryDetailPage() {
 
           return (
             <div key={answer.id} className={`bg-white border rounded-2xl p-6 ${answerStatus === "correct" ? "border-green-200" :
-                answerStatus === "wrong" ? "border-red-200" :
-                  answerStatus === "empty" ? "border-gray-200" :
-                    "border-blue-200"
+              answerStatus === "wrong" ? "border-red-200" :
+                answerStatus === "empty" ? "border-gray-200" :
+                  "border-blue-200"
               }`}>
 
               {/* Header soal */}
@@ -438,8 +438,8 @@ export default function HistoryDetailPage() {
                   {/* Badge kategori */}
                   {examType === "SKD" && (
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${q.category === "TWK" ? "bg-blue-100 text-blue-700" :
-                        q.category === "TIU" ? "bg-purple-100 text-purple-700" :
-                          "bg-green-100 text-green-700"
+                      q.category === "TIU" ? "bg-purple-100 text-purple-700" :
+                        "bg-green-100 text-green-700"
                       }`}>
                       {q.category}
                     </span>
@@ -464,9 +464,9 @@ export default function HistoryDetailPage() {
                 </div>
 
                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${answerStatus === "correct" ? "bg-green-100 text-green-700" :
-                    answerStatus === "wrong" ? "bg-red-100 text-red-600" :
-                      answerStatus === "empty" ? "bg-gray-100 text-gray-500" :
-                        "bg-blue-100 text-blue-600"
+                  answerStatus === "wrong" ? "bg-red-100 text-red-600" :
+                    answerStatus === "empty" ? "bg-gray-100 text-gray-500" :
+                      "bg-blue-100 text-blue-600"
                   }`}>
                   {answerStatus === "correct" ? "Benar" :
                     answerStatus === "wrong" ? "Salah" :
@@ -509,9 +509,9 @@ export default function HistoryDetailPage() {
                   return (
                     <div key={opt} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border text-sm ${style}`}>
                       <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isSelected ? "bg-blue-500 text-white" :
-                          isSelected2 ? "bg-green-400 text-white" :
-                            isAnyCorrect && !isTKP ? "bg-green-500 text-white" :
-                              "bg-gray-200 text-gray-600"
+                        isSelected2 ? "bg-green-400 text-white" :
+                          isAnyCorrect && !isTKP ? "bg-green-500 text-white" :
+                            "bg-gray-200 text-gray-600"
                         }`}>
                         {opt}
                       </span>

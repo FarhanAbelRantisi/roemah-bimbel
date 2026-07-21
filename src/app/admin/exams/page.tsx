@@ -26,7 +26,7 @@ const TNI_SUB_CATEGORIES = [
   { value: "DERET_ANGKA", label: "Deret Angka" },
   { value: "DERET_GAMBAR", label: "Deret Gambar" },
   { value: "KUBUS", label: "Kubus" },
-  { value: "PAULI", label: "Pauli (Input Angka Real-time)" },
+  { value: "PAULI", label: "Pauli" },
 ] as const;
 
 const IconAlertTriangle = () => (
@@ -697,7 +697,7 @@ export default function AdminExamsPage() {
                   onChange={(e) => setForm({ ...form, examType: e.target.value as any })}
                   className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="SKD">SKD — Seleksi Kompetensi Dasar</option>
+                  <option value="SKD">SKD</option>
                   <option value="PSIKOTEST">Psikotest</option>
                   <option value="PSIKOTEST_TNI">Psikotest TNI</option>
                   <option value="AKADEMIK">Akademik</option>
@@ -1038,7 +1038,7 @@ export default function AdminExamsPage() {
                   onChange={(e) => setEditForm({ ...editForm, examType: e.target.value as any })}
                   className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="SKD">SKD — Seleksi Kompetensi Dasar</option>
+                  <option value="SKD">SKD</option>
                   <option value="PSIKOTEST">Psikotest</option>
                   <option value="PSIKOTEST_TNI">Psikotest TNI</option>
                   <option value="AKADEMIK">Akademik</option>

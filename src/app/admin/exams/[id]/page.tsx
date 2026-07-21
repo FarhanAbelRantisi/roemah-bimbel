@@ -1276,25 +1276,6 @@ export default function AdminExamDetailPage() {
                 </div>
               )}
 
-              {/* correctOption2 — hanya Psikotest */}
-              {exam?.examType === "PSIKOTEST" && (
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                    Jawaban Benar Ke-2 <span className="text-gray-300 font-normal normal-case">(opsional)</span>
-                  </label>
-                  <select
-                    value={form.correctOption2 ?? ""}
-                    onChange={(e) => setForm({ ...form, correctOption2: e.target.value })}
-                    className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">— Tidak ada —</option>
-                    {OPTIONS.filter((o) => o !== form.correctOption).map((o) => (
-                      <option key={o} value={o}>{o}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
               {/* Konten Soal */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
@@ -1450,6 +1431,25 @@ export default function AdminExamDetailPage() {
                   <p className="text-xs text-gray-400 mt-1">
                     ● Nilai tetap A=1, B=2, C=3, D=4, E=5 — urutan diacak saat ujian
                   </p>
+                )}
+
+                {/* correctOption2 — hanya Psikotest */}
+                {exam?.examType === "PSIKOTEST" && (
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                      Jawaban Benar Ke-2 <span className="text-gray-400 font-normal normal-case">(opsional)</span>
+                    </label>
+                    <select
+                      value={form.correctOption2 ?? ""}
+                      onChange={(e) => setForm({ ...form, correctOption2: e.target.value })}
+                      className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">— Tidak ada (1 Jawaban) —</option>
+                      {OPTIONS.filter((o) => o !== form.correctOption).map((o) => (
+                        <option key={o} value={o}>Opsi {o}</option>
+                      ))}
+                    </select>
+                  </div>
                 )}
               </div>
             </div>

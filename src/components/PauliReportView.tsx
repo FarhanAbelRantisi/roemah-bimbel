@@ -47,7 +47,7 @@ export default function PauliReportView({ attemptId }: { attemptId: string }) {
   if (loading) {
     return (
       <div className="p-8 text-center">
-        <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+        <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
         <p className="text-xs text-gray-400">Memuat Laporan Tes Pauli...</p>
       </div>
     );
@@ -75,15 +75,15 @@ export default function PauliReportView({ attemptId }: { attemptId: string }) {
   return (
     <div className="space-y-6 w-full text-left font-sans">
       {/* Header Info */}
-      <div className="bg-indigo-900 text-white rounded-2xl p-6 shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="bg-green-900 text-white rounded-2xl p-6 shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <span className="bg-indigo-700 text-indigo-200 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">
-            Laporan Sesi Tes Pauli ({data.jenis_seleksi})
+          <span className="bg-green-700 text-green-200 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">
+            Laporan Sesi Tes Pauli
           </span>
           <h2 className="text-xl font-bold mt-2">{data.testee_ref}</h2>
-          <p className="text-xs text-indigo-300 mt-1">Ref ID: {data.session_id}</p>
+          {/* <p className="text-xs text-green-300 mt-1">Ref ID: {data.session_id}</p> */}
         </div>
-        <div className="text-left sm:text-right text-xs text-indigo-200 space-y-1">
+        <div className="text-left sm:text-right text-xs text-green-200 space-y-1">
           <p>Mulai: {data.waktu_mulai ? new Date(data.waktu_mulai).toLocaleString("id-ID") : "—"}</p>
           <p>Selesai: {data.waktu_selesai ? new Date(data.waktu_selesai).toLocaleString("id-ID") : "—"}</p>
         </div>
@@ -92,7 +92,7 @@ export default function PauliReportView({ attemptId }: { attemptId: string }) {
       {/* 1. Skor Mentah */}
       <div>
         <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-3">
-          1. Ringkasan Skor Mentah
+          Ringkasan Skor Mentah
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm">
@@ -107,7 +107,7 @@ export default function PauliReportView({ attemptId }: { attemptId: string }) {
           </div>
           <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm">
             <p className="text-xs text-gray-500 font-medium">Rasio Ketelitian</p>
-            <p className="text-2xl font-bold text-indigo-600 mt-1">
+            <p className="text-2xl font-bold text-green-600 mt-1">
               {(raw.rasio_ketelitian * 100).toFixed(1)}%
             </p>
             <p className="text-[10px] text-gray-400 mt-0.5">rasio benar</p>
@@ -135,7 +135,7 @@ export default function PauliReportView({ attemptId }: { attemptId: string }) {
         </div>
       </div>
 
-      {/* 2. Klasifikasi Norma TNI */}
+      {/* 2. Klasifikasi Norma TNI
       {norm && (
         <div>
           <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-3">
@@ -169,12 +169,12 @@ export default function PauliReportView({ attemptId }: { attemptId: string }) {
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* 3. Grafik Perkembangan Per Kolom */}
       <div>
         <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-3">
-          3. Grafik Perkembangan Kolom
+          Grafik Perkembangan Kolom
         </h3>
         <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
           <div className="h-48 flex items-end gap-2 sm:gap-3 pt-8 pb-2 overflow-x-auto min-h-[160px]">
@@ -182,12 +182,12 @@ export default function PauliReportView({ attemptId }: { attemptId: string }) {
               const heightPct = Math.max(10, Math.round((c.jumlah_dikerjakan / maxColumnWork) * 100));
               return (
                 <div key={c.kolom} className="flex-1 min-w-[32px] flex flex-col items-center gap-1.5 group">
-                  <span className="text-[11px] font-bold text-indigo-600 font-mono">
+                  <span className="text-[11px] font-bold text-green-600 font-mono">
                     {c.jumlah_dikerjakan}
                   </span>
-                  <div className="w-full bg-indigo-50 rounded-t-lg relative flex flex-col justify-end h-32 border-b border-indigo-200">
+                  <div className="w-full bg-green-50 rounded-t-lg relative flex flex-col justify-end h-32 border-b border-green-200">
                     <div className="w-full relative rounded-t-lg overflow-hidden transition-all duration-300" style={{ height: `${heightPct}%` }}>
-                      <div className="bg-indigo-600 w-full h-full" />
+                      <div className="bg-green-400 w-full h-full" />
                       {c.jumlah_salah > 0 && (
                         <div
                           className="bg-red-500 w-full absolute top-0 left-0"
@@ -204,10 +204,10 @@ export default function PauliReportView({ attemptId }: { attemptId: string }) {
           </div>
           <div className="flex items-center justify-center gap-6 mt-4 pt-3 border-t border-gray-100 text-xs text-gray-500">
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 bg-indigo-600 rounded-sm" /> Dikerjakan
+              <span className="w-3 h-3 bg-green-400 rounded-sm" /> Dikerjakan
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 bg-red-500 rounded-sm" /> Salah
+              <span className="w-3 h-3 bg-red-300 rounded-sm" /> Salah
             </span>
           </div>
         </div>
