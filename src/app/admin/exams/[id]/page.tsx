@@ -639,6 +639,7 @@ export default function AdminExamDetailPage() {
   };
 
   return (
+    <div>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
