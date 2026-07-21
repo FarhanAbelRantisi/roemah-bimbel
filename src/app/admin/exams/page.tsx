@@ -101,6 +101,8 @@ export default function AdminExamsPage() {
     let kecerdasan = "";
     let kecermatan = "";
     let kepribadian = "";
+    let tniCategory = "GABUNGAN_TNI";
+    let tniJumlahSoal = "";
     const psiCat = exam.psikotestCategory || "KECERDASAN";
 
     if (exam.examType === "PSIKOTEST" && exam.psikotestConfig) {
@@ -114,6 +116,14 @@ export default function AdminExamsPage() {
           kecerdasan = String(config[psiCat] || "");
         }
       } catch (e) {}
+    } else if (exam.examType === "PSIKOTEST_TNI") {
+      tniCategory = exam.psikotestCategory || "GABUNGAN_TNI";
+      if (exam.psikotestConfig) {
+        try {
+          const config = JSON.parse(exam.psikotestConfig);
+          tniJumlahSoal = String(config[tniCategory] || "");
+        } catch (e) {}
+      }
     }
 
     setEditForm({
@@ -121,11 +131,13 @@ export default function AdminExamsPage() {
       duration: String(exam.duration),
       isPremium: exam.isPremium,
       examType: exam.examType,
-      psikotestCategory: psiCat,
+      psikotestCategory: exam.examType === "PSIKOTEST" ? psiCat : "KECERDASAN",
       skdCategory: "",
       psikotestSoalKecerdasan: kecerdasan,
       psikotestSoalKecermatan: kecermatan,
       psikotestSoalKepribadian: kepribadian,
+      tniCategory,
+      tniJumlahSoal,
       akademikCategory: exam.akademikCategory || "",
       akademikTotalSoal: exam.akademikTotalSoal ? String(exam.akademikTotalSoal) : "",
     });
