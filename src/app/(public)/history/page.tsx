@@ -21,6 +21,7 @@ interface Attempt {
   kecerdasanScore: number;
   kecermatanScore: number;
   kepribadianScore: number;
+  pauliScore: number;
   akademikScore: number;
   totalScore: number;
   exam: {
@@ -61,6 +62,15 @@ export default function HistoryPage() {
 
   const getScoreGrid = (attempt: Attempt) => {
     const type = attempt.exam.examType ?? "SKD";
+    const isPauli = attempt.exam.psikotestCategory === "PAULI" || (type === "PSIKOTEST_TNI" && attempt.exam.psikotestCategory === "PAULI");
+
+    if (isPauli) {
+      const acc = attempt.pauliScore ?? attempt.totalScore;
+      return [
+        { label: "Rasio Ketelitian", score: `${acc}%`, max: "100%", isTotal: true },
+      ];
+    }
+
     const config = attempt.exam.psikotestConfig
       ? JSON.parse(attempt.exam.psikotestConfig) as Record<string, number>
       : {};
@@ -95,7 +105,7 @@ export default function HistoryPage() {
       ];
     }
 
-    if (type === "PSIKOTEST") {
+    if (type === "PSIKOTEST" || type === "PSIKOTEST_TNI") {
       const subs = Object.entries(config);
       if (subs.length > 1) {
         return [
@@ -113,7 +123,7 @@ export default function HistoryPage() {
         KEPRIBADIAN: attempt.kepribadianScore,
       };
       return [
-        { label: cat, score: scoreMap[cat] ?? attempt.totalScore, max: maxScore },
+        { label: cat.replace(/_/g, " "), score: scoreMap[cat] ?? attempt.totalScore, max: maxScore },
         { label: "Total", score: attempt.totalScore, max: maxScore, isTotal: true },
       ];
     }
@@ -169,6 +179,7 @@ export default function HistoryPage() {
             const passed = isPassed(attempt);
             const examType = attempt.exam.examType ?? "SKD";
             const scoreGrid = getScoreGrid(attempt);
+            const isPauli = attempt.exam.psikotestCategory === "PAULI" || (examType === "PSIKOTEST_TNI" && attempt.exam.psikotestCategory === "PAULI");
 
             return (
               <div key={attempt.id}
@@ -181,16 +192,17 @@ export default function HistoryPage() {
                       <h2 className="text-base font-bold text-gray-900">{attempt.exam.title}</h2>
 
                       {/* Badge examType */}
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        examType === "SKD" ? "bg-blue-50 text-blue-500" :
-                        examType === "PSIKOTEST" ? "bg-blue-50 text-blue-500" :
-                        "bg-blue-50 text-blue-500"
+                      <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                        examType === "SKD" ? "bg-blue-50 text-blue-600 border border-blue-100" :
+                        examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600 border border-purple-100" :
+                        examType === "PSIKOTEST_TNI" ? "bg-green-50 text-green-700 border border-green-200 font-bold" :
+                        "bg-orange-50 text-orange-600 border border-orange-100"
                       }`}>
-                        {examType}
+                        {examType.replace(/_/g, " ")}
                         {examType === "SKD" && attempt.exam.skdCategory &&
                           ` · ${attempt.exam.skdCategory}`}
-                        {examType === "PSIKOTEST" && attempt.exam.psikotestCategory &&
-                          ` · ${attempt.exam.psikotestCategory}`}
+                        {(examType === "PSIKOTEST" || examType === "PSIKOTEST_TNI") && attempt.exam.psikotestCategory &&
+                          ` · ${attempt.exam.psikotestCategory.replace(/_/g, " ")}`}
                         {examType === "AKADEMIK" && attempt.exam.akademikCategory &&
                           ` · ${attempt.exam.akademikCategory.replace(/_/g, " ")}`}
                       </span>
@@ -208,8 +220,17 @@ export default function HistoryPage() {
                   </div>
 
                   <div className="text-right shrink-0">
-                    <p className="text-2xl font-bold text-gray-900">{answered}</p>
-                    <p className="text-xs text-gray-400">dari {total} dijawab</p>
+                    {isPauli ? (
+                      <>
+                        <p className="text-2xl font-bold text-gray-900">{attempt.pauliScore ?? attempt.totalScore}%</p>
+                        <p className="text-xs text-gray-400">Ketelitian</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold text-gray-900">{answered}</p>
+                        <p className="text-xs text-gray-400">dari {total} dijawab</p>
+                      </>
+                    )}
                   </div>
                 </div>
 

@@ -222,6 +222,13 @@ export async function classifyPauliSession(
     norms.map((n) => [n.metricName, { mean: n.meanValue, sd: n.sdValue }])
   );
 
+  // Default TNI norm fallback if database table is empty
+  const defaultNorms: Record<string, { mean: number; sd: number }> = {
+    jumlah_total: { mean: 900, sd: 100 },
+    rasio_ketelitian: { mean: 0.95, sd: 0.03 },
+    deviasi_konsistensi: { mean: 3.5, sd: 1.0 },
+  };
+
   const camelToSnake: Record<string, string> = {
     jumlahTotal: "jumlah_total",
     rasioKetelitian: "rasio_ketelitian",
@@ -230,26 +237,26 @@ export async function classifyPauliSession(
 
   const result: Record<string, PauliClassification> = {};
 
-  for (const [camelKey, higherIsBetter] of Object.entries(NORMED_METRICS).map(
-    ([snakeKey, val]) => [
-      Object.keys(camelToSnake).find((k) => camelToSnake[k] === snakeKey) ?? snakeKey,
-      val,
-    ] as [string, boolean]
-  )) {
-    const snakeKey = camelToSnake[camelKey] ?? camelKey;
+  for (const [snakeKey, higherIsBetter] of Object.entries(NORMED_METRICS)) {
+    const camelKey = Object.keys(camelToSnake).find((k) => camelToSnake[k] === snakeKey) ?? snakeKey;
     const rawValue = metrics[camelKey as keyof PauliSessionMetrics] as number;
 
-    if (!normMap[snakeKey]) {
-      result[camelKey] = { raw: rawValue, z: 0, kategori: "NORMA_BELUM_TERSEDIA" };
+    const norm = normMap[snakeKey] || defaultNorms[snakeKey];
+    if (!norm) {
+      const fallback = { raw: rawValue, z: 0, kategori: "NORMA_BELUM_TERSEDIA" as const };
+      result[snakeKey] = fallback;
+      result[camelKey] = fallback;
       continue;
     }
 
-    const { mean, sd } = normMap[snakeKey];
+    const { mean, sd } = norm;
     let z = sd > 0 ? (rawValue - mean) / sd : 0;
     if (!higherIsBetter) z = -z; // balik arah: z besar = lebih baik
 
     const kategori = z >= 1.0 ? "Tinggi" : z <= -1.0 ? "Rendah" : "Sedang";
-    result[camelKey] = { raw: rawValue, z: Math.round(z * 100) / 100, kategori };
+    const item = { raw: rawValue, z: Math.round(z * 100) / 100, kategori };
+    result[snakeKey] = item;
+    result[camelKey] = item;
   }
 
   return result;

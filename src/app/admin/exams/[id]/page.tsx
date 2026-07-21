@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import * as XLSX from "xlsx";
+import CustomModal, { ModalState } from "@/components/CustomModal";
 
 const downloadTemplate = () => {
   const templateData = [
@@ -139,6 +140,35 @@ export default function AdminExamDetailPage() {
   const [exam, setExam] = useState<ExamDetail | null>(null);
 
   const [activeSubTab, setActiveSubTab] = useState<string>("");
+  const [modalConfig, setModalConfig] = useState<ModalState>({ isOpen: false, title: "" });
+
+  const showAlert = (title: string, message?: string, details?: string[], type: "info" | "success" | "warning" | "danger" = "warning") => {
+    setModalConfig({
+      isOpen: true,
+      type,
+      title,
+      message,
+      details,
+      confirmText: "Tutup",
+      onConfirm: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+    });
+  };
+
+  const showConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setModalConfig({
+      isOpen: true,
+      type: "danger",
+      title,
+      message,
+      confirmText: "Hapus Permanen",
+      cancelText: "Batal",
+      onConfirm: () => {
+        setModalConfig((prev) => ({ ...prev, isOpen: false }));
+        onConfirm();
+      },
+      onCancel: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+    });
+  };
 
   const filtered = exam?.examType === "SKD"
     ? questions.filter((q) => q.category === activeTab)
@@ -158,7 +188,7 @@ export default function AdminExamDetailPage() {
         const rows = XLSX.utils.sheet_to_json(sheet) as Record<string, string>[];
 
         if (rows.length === 0) {
-          alert("File kosong atau format tidak sesuai!");
+          showAlert("File Kosong", "File yang diunggah tidak memiliki data soal.", undefined, "warning");
           return;
         }
 
@@ -167,7 +197,7 @@ export default function AdminExamDetailPage() {
         const firstRow = rows[0];
         const missing = required.filter((col) => !(col in firstRow));
         if (missing.length > 0) {
-          alert(`Kolom tidak lengkap: ${missing.join(", ")}`);
+          showAlert("Format File Salah", `Kolom wajib tidak lengkap: ${missing.join(", ")}`, undefined, "danger");
           return;
         }
 
@@ -183,7 +213,7 @@ export default function AdminExamDetailPage() {
 
           // Validasi kolom category wajib ada untuk SKD
           if (!("category" in firstRow)) {
-            alert("Kolom 'category' wajib ada untuk ujian SKD!");
+            showAlert("Kolom Belum Lengkap", "Kolom 'category' wajib ada untuk ujian SKD!", undefined, "warning");
             return;
           }
 
@@ -191,10 +221,13 @@ export default function AdminExamDetailPage() {
           const wrongCatRows = rows.filter((r) => !allowedCategories.includes(r.category));
           if (wrongCatRows.length > 0) {
             const wrongCats = [...new Set(wrongCatRows.map((r) => r.category))].join(", ");
-            alert(
+            showAlert(
+              "Kategori Tidak Sesuai",
               exam?.skdCategory
                 ? `Ujian ini hanya menerima soal ${exam.skdCategory}. Ditemukan kategori: ${wrongCats}`
-                : `Kategori tidak valid: ${wrongCats}. Hanya TWK, TIU, TKP yang diperbolehkan.`
+                : `Kategori tidak valid: ${wrongCats}. Hanya TWK, TIU, TKP yang diperbolehkan.`,
+              undefined,
+              "danger"
             );
             return;
           }
@@ -225,7 +258,7 @@ export default function AdminExamDetailPage() {
               .filter(([, v]) => v > 0)
               .map(([k, v]) => `${k}: ${v} soal`)
               .join(", ");
-            alert(`⚠️ ${totalSkipped} soal dilewati karena melebihi batas:\n${skipMsg}`);
+            showAlert("Soal Dilewati", `${totalSkipped} soal dilewati karena kuota sudah penuh:`, [skipMsg], "warning");
           }
 
         } else if (exam?.examType === "PSIKOTEST") {
@@ -234,20 +267,20 @@ export default function AdminExamDetailPage() {
           const allowedSubs = Object.keys(config);
 
           if (allowedSubs.length === 0) {
-            alert("Konfigurasi psikotest belum diatur!");
+            showAlert("Konfigurasi Belum Diatur", "Konfigurasi psikotest belum diatur di ujian ini.", undefined, "warning");
             return;
           }
 
           // Validasi kolom subCategory
           if (!("subCategory" in firstRow)) {
-            alert("Kolom 'subCategory' wajib ada untuk ujian Psikotest!\nIsi dengan: " + allowedSubs.join(", "));
+            showAlert("Kolom Belum Lengkap", `Kolom 'subCategory' wajib ada untuk ujian Psikotest!\nIsi dengan: ${allowedSubs.join(", ")}`, undefined, "warning");
             return;
           }
 
           const wrongSubRows = rows.filter((r) => !allowedSubs.includes(r.subCategory));
           if (wrongSubRows.length > 0) {
             const wrongSubs = [...new Set(wrongSubRows.map((r) => r.subCategory))].join(", ");
-            alert(`Sub-kategori tidak valid: ${wrongSubs}\nYang diperbolehkan: ${allowedSubs.join(", ")}`);
+            showAlert("Sub-Kategori Tidak Sesuai", `Sub-kategori tidak valid: ${wrongSubs}\nYang diperbolehkan: ${allowedSubs.join(", ")}`, undefined, "danger");
             return;
           }
 
@@ -274,7 +307,7 @@ export default function AdminExamDetailPage() {
               .filter(([, v]) => v > 0)
               .map(([k, v]) => `${k}: ${v} soal`)
               .join(", ");
-            alert(`⚠️ ${totalSkipped} soal dilewati karena melebihi batas:\n${skipMsg}`);
+            showAlert("Soal Dilewati", `${totalSkipped} soal dilewati karena kuota sudah penuh:`, [skipMsg], "warning");
           }
 
         } else if (exam?.examType === "AKADEMIK") {
@@ -282,58 +315,71 @@ export default function AdminExamDetailPage() {
         }
 
         if (filteredRows.length === 0) {
-          alert("Tidak ada soal yang bisa diimport — semua kategori sudah penuh!");
+          showAlert("Kuota Penuh", "Tidak ada soal yang dapat diimport karena kuota seluruh kategori/sub-kategori telah terisi penuh.", undefined, "warning");
           return;
         }
 
-        const confirm_import = confirm(`Akan mengimport ${filteredRows.length} soal. Lanjutkan?`);
-        if (!confirm_import) return;
+        const processImport = async () => {
+          setImporting(true);
+          let success = 0;
+          let failed = 0;
 
-        setImporting(true);
-        let success = 0;
-        let failed = 0;
+          for (const row of filteredRows) {
+            try {
+              const payload: Record<string, string | null> = {
+                content: row.content,
+                optionA: row.optionA,
+                optionB: row.optionB,
+                optionC: row.optionC,
+                optionD: row.optionD,
+                optionE: row.optionE,
+                correctOption: row.correctOption || null,
+                correctOption2: row.correctOption2 || null,
+              };
 
-        for (const row of filteredRows) {
-          try {
-            const payload: Record<string, string | null> = {
-              content: row.content,
-              optionA: row.optionA,
-              optionB: row.optionB,
-              optionC: row.optionC,
-              optionD: row.optionD,
-              optionE: row.optionE,
-              correctOption: row.correctOption || null,
-              correctOption2: row.correctOption2 || null,
-            };
+              if (exam?.examType === "SKD") {
+                payload.category = exam?.skdCategory || row.category;
+              } else if (exam?.examType === "PSIKOTEST" || exam?.examType === "PSIKOTEST_TNI") {
+                payload.category = "TWK"; // placeholder
+                payload.subCategory = row.subCategory || (exam?.psikotestCategory && exam.psikotestCategory !== "GABUNGAN_TNI" ? exam.psikotestCategory : null);
+              } else if (exam?.examType === "AKADEMIK") {
+                payload.category = "TWK"; // placeholder
+                payload.subCategory = exam?.akademikCategory || null;
+              }
 
-            if (exam?.examType === "SKD") {
-              payload.category = exam?.skdCategory || row.category;
-            } else if (exam?.examType === "PSIKOTEST" || exam?.examType === "PSIKOTEST_TNI") {
-              payload.category = "TWK"; // placeholder
-              payload.subCategory = row.subCategory || (exam?.psikotestCategory && exam.psikotestCategory !== "GABUNGAN_TNI" ? exam.psikotestCategory : null);
-            } else if (exam?.examType === "AKADEMIK") {
-              payload.category = "TWK"; // placeholder
-              payload.subCategory = exam?.akademikCategory || null;
+              const res = await fetch(`/api/exams/${id}/questions`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+              if (res.ok) success++;
+              else failed++;
+            } catch {
+              failed++;
             }
-
-            const res = await fetch(`/api/exams/${id}/questions`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
-            });
-            if (res.ok) success++;
-            else failed++;
-          } catch {
-            failed++;
           }
-        }
 
-        await fetchQuestions();
-        setImporting(false);
-        alert(`Import selesai!\n✅ Berhasil: ${success} soal\n❌ Gagal: ${failed} soal`);
+          await fetchQuestions();
+          setImporting(false);
+          showAlert("Import Selesai", `Proses import telah selesai.`, [`Berhasil: ${success} soal`, `Gagal: ${failed} soal`], "success");
+        };
+
+        setModalConfig({
+          isOpen: true,
+          type: "info",
+          title: "Konfirmasi Import",
+          message: `Sistem akan memasukkan ${filteredRows.length} soal ke dalam ujian ini. Lanjutkan?`,
+          confirmText: "Ya, Import",
+          cancelText: "Batal",
+          onConfirm: () => {
+            setModalConfig((prev) => ({ ...prev, isOpen: false }));
+            processImport();
+          },
+          onCancel: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+        });
 
       } catch {
-        alert("Gagal membaca file. Pastikan format Excel sesuai template.");
+        showAlert("Gagal Membaca File", "Terjadi kesalahan saat membaca file Excel. Pastikan format file sesuai dengan template.", undefined, "danger");
         setImporting(false);
       }
     };
@@ -420,15 +466,15 @@ export default function AdminExamDetailPage() {
 
   const openCreate = () => {
     setEditId(null);
-    
+
     let defaultCat: Category = "TWK";
     let defaultSub = "";
 
     if (exam?.examType === "SKD") {
-      defaultCat = activeTab; 
+      defaultCat = activeTab;
     } else {
       const subs = getSubCategories();
-      defaultSub = (activeSubTab && activeSubTab !== "ALL") ? activeSubTab : (subs[0] || exam?.psikotestCategory || ""); 
+      defaultSub = (activeSubTab && activeSubTab !== "ALL") ? activeSubTab : (subs[0] || exam?.psikotestCategory || "");
     }
 
     setForm({
@@ -436,7 +482,7 @@ export default function AdminExamDetailPage() {
       category: defaultCat,
       subCategory: defaultSub,
     });
-    
+
     setImageFile(null);
     setImagePreview(null);
     setShowModal(true);
@@ -502,7 +548,7 @@ export default function AdminExamDetailPage() {
               try {
                 const config = JSON.parse(examData.psikotestConfig);
                 defaultSub = Object.keys(config)[0] || "";
-              } catch {}
+              } catch { }
             }
             if (!defaultSub && examData.psikotestCategory) {
               defaultSub = examData.psikotestCategory;
@@ -551,7 +597,7 @@ export default function AdminExamDetailPage() {
   const handleSave = async () => {
     if (!form.content) return;
     if (isQuestionLimitReached()) {
-      alert(`Jumlah soal sudah mencapai batas maksimal!`);
+      showAlert("Batas Maksimal Tercapai", "Jumlah soal untuk kategori ini sudah mencapai batas maksimal.");
       return;
     }
 
@@ -572,7 +618,7 @@ export default function AdminExamDetailPage() {
       });
       if (!res.ok) {
         const data = await res.json();
-        alert(`Gagal menyimpan: ${data.error}`);
+        showAlert("Gagal Menyimpan", data.error || "Gagal memperbarui soal.", undefined, "danger");
         setSaving(false);
         return;
       }
@@ -584,7 +630,7 @@ export default function AdminExamDetailPage() {
       });
       if (!res.ok) {
         const data = await res.json();
-        alert(`Gagal menyimpan: ${data.error}`);
+        showAlert("Gagal Menyimpan", data.error || "Gagal menambahkan soal.", undefined, "danger");
         setSaving(false);
         return;
       }
@@ -600,7 +646,7 @@ export default function AdminExamDetailPage() {
   const handleSaveAndNext = async () => {
     if (!form.content) return;
     if (isQuestionLimitReached()) {
-      alert("Batas maksimal jumlah soal untuk sub-kategori ini telah tercapai!");
+      showAlert("Batas Maksimal Tercapai", "Batas maksimal jumlah soal untuk sub-kategori ini telah tercapai.");
       return;
     }
 
@@ -611,7 +657,7 @@ export default function AdminExamDetailPage() {
       const uploaded = await uploadImage(imageFile);
       if (uploaded) imageUrl = uploaded;
       else {
-        alert("Gagal mengupload gambar!");
+        showAlert("Gagal Upload", "Gagal mengupload gambar pendukung.", undefined, "danger");
         setSaving(false);
         return;
       }
@@ -625,7 +671,7 @@ export default function AdminExamDetailPage() {
 
     if (!res.ok) {
       const data = await res.json();
-      alert(`Gagal menyimpan soal: ${data.error}`);
+      showAlert("Gagal Menyimpan", data.error || "Gagal menyimpan soal.", undefined, "danger");
       setSaving(false);
       return;
     }
@@ -640,7 +686,7 @@ export default function AdminExamDetailPage() {
 
     if (limit !== Infinity && currentCount >= limit) {
       setShowModal(false);
-      alert("Soal berhasil disimpan! Kuota jumlah soal untuk sub-kategori ini telah terpenuhi.");
+      showAlert("Kuota Terpenuhi", "Soal berhasil disimpan! Kuota jumlah soal untuk sub-kategori ini telah terpenuhi.", undefined, "success");
     } else {
       // Reset form tapi pertahankan subCategory & category
       setForm({
@@ -653,10 +699,11 @@ export default function AdminExamDetailPage() {
     }
   };
 
-  const handleDelete = async (qid: string) => {
-    if (!confirm("Yakin hapus soal ini?")) return;
-    await fetch(`/api/exams/${id}/questions/${qid}`, { method: "DELETE" });
-    await fetchQuestions();
+  const handleDelete = (qid: string) => {
+    showConfirm("Hapus Soal", "Apakah Anda yakin ingin menghapus soal ini?", async () => {
+      await fetch(`/api/exams/${id}/questions/${qid}`, { method: "DELETE" });
+      await fetchQuestions();
+    });
   };
 
   const categoryLimits: Record<Category, number> = {
@@ -674,23 +721,50 @@ export default function AdminExamDetailPage() {
             href="/admin/exams"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 text-xs md:text-sm font-medium hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
           >
-            <span>←</span>
             <span>Kembali</span>
           </Link>
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded uppercase">
-                {exam?.examType === "PSIKOTEST_TNI" ? "PSIKOTEST TNI" : exam?.examType}
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded uppercase ${exam?.examType === "PSIKOTEST_TNI"
+                  ? "bg-green-100 text-green-700 font-bold border border-green-200"
+                  : "bg-blue-100 text-blue-700"
+                }`}>
+                {exam?.examType === "PSIKOTEST_TNI" ? "PSIKOTEST TNI" : exam?.examType?.replace(/_/g, " ")}
               </span>
-              {(exam?.skdCategory || exam?.psikotestCategory || exam?.akademikCategory) && (
-                <span className="bg-gray-100 text-gray-700 text-xs font-medium px-2 py-0.5 rounded">
-                  Sub: {
-                    exam?.examType === "PSIKOTEST_TNI" 
-                      ? (exam?.psikotestCategory === "GABUNGAN_TNI" ? "Gabungan TNI" : exam?.psikotestCategory)
-                      : (exam?.skdCategory || exam?.psikotestCategory || exam?.akademikCategory)
+              {(() => {
+                const subLabel = (() => {
+                  if (!exam) return null;
+                  if (exam.examType === "SKD") return exam.skdCategory || "Gabungan";
+                  if (exam.examType === "PSIKOTEST_TNI") {
+                    if (exam.psikotestCategory === "GABUNGAN_TNI") return "Gabungan TNI";
+                    if (exam.psikotestCategory === "PAULI") return "Pauli";
+                    return exam.psikotestCategory ? exam.psikotestCategory.replace(/_/g, " ") : "Gabungan TNI";
                   }
-                </span>
-              )}
+                  if (exam.examType === "PSIKOTEST") {
+                    if (exam.psikotestCategory === "GABUNGAN") return "Gabungan";
+                    if (exam.psikotestCategory) return exam.psikotestCategory;
+                    if (exam.psikotestConfig) {
+                      try {
+                        const keys = Object.keys(JSON.parse(exam.psikotestConfig));
+                        if (keys.length > 1) return "Gabungan";
+                        if (keys.length === 1) return keys[0];
+                      } catch { }
+                    }
+                    return "Kecerdasan";
+                  }
+                  if (exam.examType === "AKADEMIK") {
+                    return exam.akademikCategory ? exam.akademikCategory.replace(/_/g, " ") : "Akademik";
+                  }
+                  return null;
+                })();
+
+                if (!subLabel) return null;
+                return (
+                  <span className="bg-gray-100 text-gray-700 text-xs font-medium px-2 py-0.5 rounded">
+                    Sub: {subLabel}
+                  </span>
+                );
+              })()}
             </div>
             <h1 className="text-lg md:text-2xl font-bold text-gray-900">
               {exam?.title || "..."}
@@ -736,29 +810,29 @@ export default function AdminExamDetailPage() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
-                  Tes Pauli (Input Angka Real-time)
+                  Tes Pauli
                 </span>
-                <span className="text-xs text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full font-medium">
+                {/* <span className="text-xs text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full font-medium">
                   Auto-Generated System
-                </span>
+                </span> */}
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-1">Konfigurasi Lembar Kerja Pauli</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Soal Tes Pauli di-generate secara acak (0-9) oleh sistem saat ujian berlangsung. Admin tidak perlu menginputkan soal secara manual.
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white/80 p-4 rounded-lg border border-blue-100 text-xs">
                 <div>
                   <span className="text-gray-500 block">Total Durasi Ujian</span>
-                  <strong className="text-gray-900 text-sm">{exam?.duration ?? 0} Menit ({(exam?.duration ?? 0) * 60} dtk)</strong>
+                  <strong className="text-gray-900 text-sm">({(exam?.duration ?? 0) * 60} Detik) {exam?.duration ?? 0} Menit</strong>
                 </div>
                 <div>
                   <span className="text-gray-500 block">Interval Garis (Switch Kolom)</span>
-                  <strong className="text-gray-900 text-sm">{getPsikotestConfig().signal_interval_sec ?? 180} Detik ({(getPsikotestConfig().signal_interval_sec ?? 180)/60} Menit)</strong>
+                  <strong className="text-gray-900 text-sm">{getPsikotestConfig().signal_interval_sec ?? 180} Detik ({(getPsikotestConfig().signal_interval_sec ?? 180) / 60} Menit)</strong>
                 </div>
                 <div>
                   <span className="text-gray-500 block">Jumlah Kolom Kerja</span>
-                  <strong className="text-gray-900 text-sm">{Math.floor(((exam?.duration ?? 0) * 60) / (getPsikotestConfig().signal_interval_sec ?? 180))} Kolom (Lazy Generator Unlimited)</strong>
+                  <strong className="text-gray-900 text-sm">{Math.floor(((exam?.duration ?? 0) * 60) / (getPsikotestConfig().signal_interval_sec ?? 180))} Kolom</strong>
                 </div>
               </div>
             </div>
@@ -768,9 +842,8 @@ export default function AdminExamDetailPage() {
 
       {/* Progress Bar per Kategori SKD */}
       {exam?.examType === "SKD" && (
-        <div className={`grid gap-4 mb-6 ${
-          exam?.skdCategory ? "grid-cols-1" : "grid-cols-3"
-        }`}>
+        <div className={`grid gap-4 mb-6 ${exam?.skdCategory ? "grid-cols-1" : "grid-cols-3"
+          }`}>
           {(exam?.skdCategory
             ? [exam.skdCategory as Category]
             : ["TWK", "TIU", "TKP"] as Category[]
@@ -785,9 +858,8 @@ export default function AdminExamDetailPage() {
                   <span className="text-sm text-gray-500">{count}/{limit}</span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2">
-                  <div className={`h-2 rounded-full transition-all ${
-                    count >= limit ? "bg-green-500" : "bg-blue-500"
-                  }`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                  <div className={`h-2 rounded-full transition-all ${count >= limit ? "bg-green-500" : "bg-blue-500"
+                    }`} style={{ width: `${Math.min(pct, 100)}%` }} />
                 </div>
                 <p className="text-xs text-gray-400 mt-1">{pct}% terpenuhi</p>
               </div>
@@ -798,14 +870,13 @@ export default function AdminExamDetailPage() {
 
       {/* Progress Bar per Sub-Kategori Psikotest / Psikotest TNI */}
       {(exam?.examType === "PSIKOTEST" || (exam?.examType === "PSIKOTEST_TNI" && exam?.psikotestCategory !== "PAULI")) && (
-        <div className={`grid gap-4 mb-6 ${
-          getSubCategories().length > 1 ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1"
-        }`}>
+        <div className={`grid gap-4 mb-6 ${getSubCategories().length > 1 ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1"
+          }`}>
           {getSubCategories().map((sub) => {
             const count = subCategoryCount(sub);
             const limit = getLimit(sub);
             const pct = limit === Infinity || limit === 0 ? 0 : Math.round((count / limit) * 100);
-            
+
             const labelMap: Record<string, string> = {
               GABUNGAN_TNI: "Gabungan TNI",
               VERBAL: "Verbal",
@@ -826,11 +897,10 @@ export default function AdminExamDetailPage() {
                   </span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full transition-all duration-500 ${
-                      limit !== Infinity && count >= limit ? "bg-green-500" : "bg-purple-500"
-                    }`}
-                    style={{ width: `${Math.min(pct, 100)}%` }} 
+                  <div
+                    className={`h-2 rounded-full transition-all duration-500 ${limit !== Infinity && count >= limit ? "bg-green-500" : "bg-purple-500"
+                      }`}
+                    style={{ width: `${Math.min(pct, 100)}%` }}
                   />
                 </div>
                 <p className="text-[10px] text-gray-400 mt-1 uppercase">{pct}% Terpenuhi</p>
@@ -855,9 +925,8 @@ export default function AdminExamDetailPage() {
             <>
               <div className="w-full bg-gray-100 rounded-full h-2">
                 <div
-                  className={`h-2 rounded-full transition-all ${
-                    questions.length >= exam.akademikTotalSoal ? "bg-green-500" : "bg-orange-500"
-                  }`}
+                  className={`h-2 rounded-full transition-all ${questions.length >= exam.akademikTotalSoal ? "bg-green-500" : "bg-orange-500"
+                    }`}
                   style={{ width: `${Math.min((questions.length / exam.akademikTotalSoal) * 100, 100)}%` }}
                 />
               </div>
@@ -877,11 +946,10 @@ export default function AdminExamDetailPage() {
             : ["TWK", "TIU", "TKP"] as Category[]
           ).map((cat) => (
             <button key={cat} onClick={() => setActiveTab(cat)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === cat
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === cat
                   ? "bg-blue-600 text-white"
                   : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}>
+                }`}>
               {cat} ({categoryCount(cat)})
             </button>
           ))}
@@ -906,19 +974,18 @@ export default function AdminExamDetailPage() {
             };
             const formattedSub = labelMap[sub] || (sub.charAt(0).toUpperCase() + sub.slice(1).toLowerCase());
 
-            const activeClass = isAkademik 
-              ? "bg-orange-50 text-orange-600 border-orange-200" 
+            const activeClass = isAkademik
+              ? "bg-orange-50 text-orange-600 border-orange-200"
               : "bg-purple-600 text-white";
 
             return (
               <button
                 key={sub}
                 onClick={() => setActiveSubTab(sub)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                  isActive
+                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${isActive
                     ? activeClass
                     : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 {formattedSub} ({subCategoryCount(sub)}/{getLimit(sub) === Infinity ? "∞" : getLimit(sub)})
               </button>
@@ -930,21 +997,21 @@ export default function AdminExamDetailPage() {
       {/* Daftar Soal */}
       <div className="flex flex-col gap-3">
         {filtered.length === 0 && exam?.psikotestCategory !== "PAULI" && (
-            <div className="bg-white border border-gray-200 rounded-xl py-12 text-center text-gray-400">
-              {(() => {
-                const rawLabel = exam?.examType === "SKD" ? activeTab : activeSubTab;
-                
-                const formattedLabel = rawLabel
-                  ? rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1).toLowerCase()
-                  : "";
+          <div className="bg-white border border-gray-200 rounded-xl py-12 text-center text-gray-400">
+            {(() => {
+              const rawLabel = exam?.examType === "SKD" ? activeTab : activeSubTab;
 
-                return (
-                  <>
-                    Belum ada soal {formattedLabel}. Klik &quot;Tambah Soal&quot; untuk mulai.
-                  </>
-                );
-              })()}
-            </div>
+              const formattedLabel = rawLabel
+                ? rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1).toLowerCase()
+                : "";
+
+              return (
+                <>
+                  Belum ada soal {formattedLabel}. Klik &quot;Tambah Soal&quot; untuk mulai.
+                </>
+              );
+            })()}
+          </div>
         )}
 
         {filtered.map((q, idx) => (
@@ -981,28 +1048,27 @@ export default function AdminExamDetailPage() {
 
                 {/* Tampilkan gambar kalau ada */}
                 {q.imageUrl && q.imageUrl.trim() !== "" && (
-                <div className="mb-3">
-                  <img
-                    src={q.imageUrl}
-                    alt="Gambar soal"
-                    className="max-h-40 w-auto object-contain rounded-lg border border-gray-200 bg-gray-50"
-                    onError={(e) => {
-                      // Jika gambar gagal dimuat (broken link), sembunyikan elemennya
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
+                  <div className="mb-3">
+                    <img
+                      src={q.imageUrl}
+                      alt="Gambar soal"
+                      className="max-h-40 w-auto object-contain rounded-lg border border-gray-200 bg-gray-50"
+                      onError={(e) => {
+                        // Jika gambar gagal dimuat (broken link), sembunyikan elemennya
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                   {OPTIONS.map((opt) => (
                     <div
                       key={opt}
-                      className={`text-xs px-2 py-1 rounded border ${
-                        q.category !== "TKP" && q.correctOption === opt
+                      className={`text-xs px-2 py-1 rounded border ${q.category !== "TKP" && q.correctOption === opt
                           ? "border-green-300 bg-green-50 text-green-700 font-medium"
                           : "border-gray-100 bg-gray-50 text-gray-600"
-                      }`}
+                        }`}
                     >
                       <span className="font-semibold">{opt}.</span>{" "}
                       {q[`option${opt}` as keyof Question] as string}
@@ -1039,7 +1105,7 @@ export default function AdminExamDetailPage() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 overflow-y-auto py-8">
           <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4">
-            
+
             {/* Header Modal */}
             <div className="flex items-center justify-between mb-5">
               <div>
@@ -1049,9 +1115,8 @@ export default function AdminExamDetailPage() {
                 <p className="text-xs text-gray-400 mt-0.5">
                   {exam?.examType === "SKD" && (
                     exam?.skdCategory
-                      ? `${exam.skdCategory} ${categoryCount(exam.skdCategory as Category)}/${
-                          exam.skdCategory === "TWK" ? 30 : exam.skdCategory === "TIU" ? 35 : 45
-                        }`
+                      ? `${exam.skdCategory} ${categoryCount(exam.skdCategory as Category)}/${exam.skdCategory === "TWK" ? 30 : exam.skdCategory === "TIU" ? 35 : 45
+                      }`
                       : `TWK ${categoryCount("TWK")}/30 · TIU ${categoryCount("TIU")}/35 · TKP ${categoryCount("TKP")}/45`
                   )}
                   {(exam?.examType === "PSIKOTEST" || exam?.examType === "PSIKOTEST_TNI") && (
@@ -1085,8 +1150,8 @@ export default function AdminExamDetailPage() {
                       <p className="text-xs text-blue-600 font-semibold">
                         Kategori: {exam.skdCategory} — {
                           exam.skdCategory === "TWK" ? "Tes Wawasan Kebangsaan" :
-                          exam.skdCategory === "TIU" ? "Tes Intelegensia Umum" :
-                          "Tes Karakteristik Pribadi"
+                            exam.skdCategory === "TIU" ? "Tes Intelegensia Umum" :
+                              "Tes Karakteristik Pribadi"
                         }
                       </p>
                     </div>
@@ -1374,6 +1439,8 @@ export default function AdminExamDetailPage() {
           </div>
         </div>
       )}
+
+      <CustomModal {...modalConfig} />
     </div>
   );
 }

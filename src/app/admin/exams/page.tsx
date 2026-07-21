@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import CustomModal, { ModalState } from "@/components/CustomModal";
 
 interface Exam {
   id: string;
@@ -32,6 +33,7 @@ export default function AdminExamsPage() {
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [modalConfig, setModalConfig] = useState<ModalState>({ isOpen: false, title: "" });
   const [form, setForm] = useState({
     title: "",
     duration: "",
@@ -146,7 +148,7 @@ export default function AdminExamsPage() {
         } else {
           kecerdasan = getVal(psiCat);
         }
-      } catch (e) {}
+      } catch (e) { }
     } else if (exam.examType === "PSIKOTEST_TNI" && exam.psikotestConfig) {
       try {
         const config = JSON.parse(exam.psikotestConfig);
@@ -163,7 +165,7 @@ export default function AdminExamsPage() {
         } else {
           tniJumlahSoalSingle = String(config[tniCategory] || 50);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     setEditForm({
@@ -189,7 +191,7 @@ export default function AdminExamsPage() {
       akademikCategory: exam.akademikCategory || "",
       akademikTotalSoal: exam.akademikTotalSoal ? String(exam.akademikTotalSoal) : "",
     });
-    
+
     setEditModal(true);
   };
 
@@ -218,10 +220,38 @@ export default function AdminExamsPage() {
     }
   };
 
+  const showAlert = (title: string, message?: string, details?: string[], type: "info" | "success" | "warning" | "danger" = "warning") => {
+    setModalConfig({
+      isOpen: true,
+      type,
+      title,
+      message,
+      details,
+      confirmText: "Tutup",
+      onConfirm: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+    });
+  };
+
+  const showConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setModalConfig({
+      isOpen: true,
+      type: "danger",
+      title,
+      message,
+      confirmText: "Hapus Permanen",
+      cancelText: "Batal",
+      onConfirm: () => {
+        setModalConfig((prev) => ({ ...prev, isOpen: false }));
+        onConfirm();
+      },
+      onCancel: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+    });
+  };
+
   const handleEdit = async () => {
     if (!editExam || !editForm.title || !editForm.duration) return;
     if (editForm.examType === "AKADEMIK" && !editForm.akademikCategory) {
-      alert("Pilih kategori akademik!");
+      showAlert("Pilih Kategori Akademik", "Silakan pilih sub-kategori akademik terlebih dahulu.");
       return;
     }
     setEditSaving(true);
@@ -251,6 +281,7 @@ export default function AdminExamsPage() {
         duration: Number(editForm.duration),
         isPremium: editForm.isPremium,
         examType: editForm.examType,
+        skdCategory: editForm.examType === "SKD" ? (editForm.skdCategory || null) : null,
         psikotestCategory:
           editForm.examType === "PSIKOTEST"
             ? editForm.psikotestCategory
@@ -271,7 +302,7 @@ export default function AdminExamsPage() {
       setEditModal(false);
     } else {
       const data = await res.json();
-      alert(`Error: ${data.error}`);
+      showAlert("Gagal Menyimpan Ujian", data.error, data.details, "danger");
     }
     setEditSaving(false);
   };
@@ -279,7 +310,7 @@ export default function AdminExamsPage() {
   const handleCreate = async () => {
     if (!form.title || !form.duration) return;
     if (form.examType === "AKADEMIK" && !form.akademikCategory) {
-      alert("Pilih kategori akademik!");
+      showAlert("Pilih Kategori Akademik", "Silakan pilih sub-kategori akademik terlebih dahulu.");
       return;
     }
     setSaving(true);
@@ -307,7 +338,7 @@ export default function AdminExamsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: form.title,
-          duration: Number(form.duration), // Pastikan durasi juga dikonversi ke Number
+          duration: Number(form.duration),
           isPremium: form.isPremium,
           examType: form.examType,
           skdCategory: form.examType === "SKD" ? (form.skdCategory || null) : null,
@@ -331,34 +362,64 @@ export default function AdminExamsPage() {
         setShowModal(false);
       } else {
         const data = await res.json();
-        alert(`Error: ${data.error}`);
+        showAlert("Gagal Membuat Ujian", data.error, data.details, "danger");
       }
     } catch {
-      alert("Gagal terhubung ke server");
+      showAlert("Kesalahan Server", "Gagal terhubung ke server", undefined, "danger");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Yakin hapus ujian ini?")) return;
-    await fetch(`/api/exams/${id}`, { method: "DELETE" });
-    await fetchExams();
+  const handleDelete = (id: string) => {
+    showConfirm(
+      "Hapus Paket Ujian",
+      "Apakah Anda yakin ingin menghapus paket ujian ini? Seluruh soal dan riwayat pengerjaan peserta pada paket ujian ini akan terhapus secara permanen.",
+      async () => {
+        await fetch(`/api/exams/${id}`, { method: "DELETE" });
+        await fetchExams();
+      }
+    );
   };
 
   const handleTogglePublish = async (id: string, current: boolean) => {
+    if (current) {
+      setModalConfig({
+        isOpen: true,
+        type: "warning",
+        title: "Batalkan Publish Ujian",
+        message: "Ujian akan dikembalikan ke status Draft dan tidak dapat diakses oleh peserta.",
+        confirmText: "Jadikan Draft",
+        cancelText: "Batal",
+        onConfirm: async () => {
+          setModalConfig((prev) => ({ ...prev, isOpen: false }));
+          await fetch(`/api/exams/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isPublished: false }),
+          });
+          await fetchExams();
+        },
+        onCancel: () => setModalConfig((prev) => ({ ...prev, isOpen: false })),
+      });
+      return;
+    }
+
     const res = await fetch(`/api/exams/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isPublished: !current }),
+      body: JSON.stringify({ isPublished: true }),
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      // Tampilkan detail soal yang kurang
-      const details = data.details?.join("\n") ?? data.error;
-      alert(`❌ ${data.error}\n\n${details}`);
+      showAlert(
+        "Gagal Publish Ujian",
+        data.error || "Jumlah soal belum memenuhi syarat minimum untuk dipublish:",
+        data.details,
+        "danger"
+      );
       return;
     }
 
@@ -397,72 +458,109 @@ export default function AdminExamsPage() {
                 </tr>
               </thead>
               <tbody>
-                {exams.map((exam) => (
-                  <tr key={exam.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      <div className="flex items-center gap-2">
-                        {exam.title}
-                        <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
-                          exam.examType === "SKD" ? "bg-blue-50 text-blue-600" :
-                          exam.examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
-                          exam.examType === "PSIKOTEST_TNI" ? "bg-indigo-50 text-indigo-600" :
-                          "bg-orange-50 text-orange-600"
-                        }`}>
-                          {exam.examType === "PSIKOTEST_TNI" ? "PSIKOTEST TNI" : exam.examType}
+                {exams.map((exam) => {
+                  const subCatLabel = (() => {
+                    if (exam.examType === "SKD") return exam.skdCategory || "Gabungan";
+                    if (exam.examType === "PSIKOTEST") {
+                      if (exam.psikotestCategory === "GABUNGAN") return "Gabungan";
+                      if (exam.psikotestCategory) return exam.psikotestCategory;
+                      if (exam.psikotestConfig) {
+                        try {
+                          const keys = Object.keys(JSON.parse(exam.psikotestConfig));
+                          if (keys.length > 1) return "Gabungan";
+                          if (keys.length === 1) return keys[0];
+                        } catch { }
+                      }
+                      return "Kecerdasan";
+                    }
+                    if (exam.examType === "PSIKOTEST_TNI") {
+                      if (exam.psikotestCategory === "GABUNGAN_TNI") return "Gabungan TNI";
+                      if (exam.psikotestCategory === "PAULI") return "Pauli";
+                      return exam.psikotestCategory ? exam.psikotestCategory.replace(/_/g, " ") : "Gabungan TNI";
+                    }
+                    if (exam.examType === "AKADEMIK") {
+                      return exam.akademikCategory ? exam.akademikCategory.replace(/_/g, " ") : "Akademik";
+                    }
+                    return null;
+                  })();
+
+                  return (
+                    <tr key={exam.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span>{exam.title}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded font-medium ${exam.examType === "SKD" ? "bg-blue-50 text-blue-600 border border-blue-100" :
+                              exam.examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600 border border-purple-100" :
+                                exam.examType === "PSIKOTEST_TNI" ? "bg-green-50 text-green-700 border border-green-200 font-bold" :
+                                  "bg-orange-50 text-orange-600 border border-orange-100"
+                            }`}>
+                            {exam.examType === "PSIKOTEST_TNI" ? "PSIKOTEST TNI" : exam.examType}
+                          </span>
+                          {subCatLabel && (
+                            <span className="text-xs px-2 py-0.5 rounded font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                              Sub: {subCatLabel}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{exam.duration} menit</td>
+                      <td className="px-6 py-4 text-gray-600">{exam._count.questions} soal</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${exam.isPremium
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-gray-100 text-gray-600"
+                          }`}>
+                          {exam.isPremium ? "Premium" : "Gratis"}
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{exam.duration} menit</td>
-                    <td className="px-6 py-4 text-gray-600">{exam._count.questions} soal</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        exam.isPremium
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-gray-100 text-gray-600"
-                      }`}>
-                        {exam.isPremium ? "Premium" : "Gratis"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleTogglePublish(exam.id, exam.isPublished)}
-                        className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                           exam.isPublished
-                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                        }`}
-                      >
-                        {exam.isPublished ? "Published" : "Draft"}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <Link
-                          href={`/admin/exams/${exam.id}`}
-                          className="text-blue-600 hover:underline font-medium text-xs"
-                        >
-                          Input Soal
-                        </Link>
-                        <button
-                          onClick={() => openEdit(exam)}
-                          className="text-gray-600 hover:text-gray-900 font-medium text-xs border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-50"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(exam.id)}
-                          className="text-red-400 hover:text-red-600 text-xs"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                            ? "bg-green-100 text-green-700 border border-green-200"
+                            : "bg-gray-100 text-gray-600 border border-gray-200"
+                        }`}>
+                          {exam.isPublished ? "Published" : "Draft"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Link
+                            href={`/admin/exams/${exam.id}`}
+                            className="text-blue-600 hover:underline font-medium text-xs px-2 py-1 rounded hover:bg-blue-50"
+                          >
+                            Input Soal
+                          </Link>
+                          <button
+                            onClick={() => openEdit(exam)}
+                            className="text-gray-600 hover:text-gray-900 font-medium text-xs border border-gray-200 px-2.5 py-1 rounded-lg hover:bg-gray-50"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleTogglePublish(exam.id, exam.isPublished)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                              exam.isPublished
+                                ? "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+                                : "border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
+                            }`}
+                          >
+                            {exam.isPublished ? "Draftkan" : "Publish"}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(exam.id)}
+                            className="text-red-500 hover:text-red-700 text-xs px-2 py-1 rounded hover:bg-red-50 font-medium"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
-          )}
+        )}
 
         {!loading && exams.length === 0 && (
           <div className="text-center py-12 text-gray-400">
@@ -667,39 +765,39 @@ export default function AdminExamsPage() {
 
               {/* Akademik fields */}
               {form.examType === "AKADEMIK" && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Kategori Akademik
-                  </label>
-                  <select
-                    value={form.akademikCategory}
-                    onChange={(e) => setForm({ ...form, akademikCategory: e.target.value })}
-                    className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">— Pilih Kategori —</option>
-                    <option value="WAWASAN KEBANGSAAN">Wawasan Kebangsaan</option>
-                    <option value="Pengetahuan Umum">Pengetahuan Umum</option>
-                    <option value="Tes Potensi Akademik">Tes Potensi Akademik</option>
-                    <option value="Tes Kompetensi Keahlian">Tes Kompetensi Keahlian</option>
-                    <option value="Tes Pengetahuan Kepolisian">Tes Pengetahuan Kepolisian</option>
-                    <option value="Tes Penalaran Numerik">Tes Penalaran Numerik</option>
-                  </select>
-                </div>
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Kategori Akademik
+                    </label>
+                    <select
+                      value={form.akademikCategory}
+                      onChange={(e) => setForm({ ...form, akademikCategory: e.target.value })}
+                      className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">— Pilih Kategori —</option>
+                      <option value="WAWASAN KEBANGSAAN">Wawasan Kebangsaan</option>
+                      <option value="Pengetahuan Umum">Pengetahuan Umum</option>
+                      <option value="Tes Potensi Akademik">Tes Potensi Akademik</option>
+                      <option value="Tes Kompetensi Keahlian">Tes Kompetensi Keahlian</option>
+                      <option value="Tes Pengetahuan Kepolisian">Tes Pengetahuan Kepolisian</option>
+                      <option value="Tes Penalaran Numerik">Tes Penalaran Numerik</option>
+                    </select>
+                  </div>
 
-                <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-600">Jumlah Soal</span>
-                      <input
-                        type="number"
-                        min="1"
-                        value={form.akademikTotalSoal}
-                        onChange={(e) => setForm({ ...form, akademikTotalSoal: e.target.value })}
-                        className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span className="text-xs text-gray-400">soal</span>
-                    </div>
-              </>
-            )}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-600">Jumlah Soal</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={form.akademikTotalSoal}
+                      onChange={(e) => setForm({ ...form, akademikTotalSoal: e.target.value })}
+                      className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-xs text-gray-400">soal</span>
+                  </div>
+                </>
+              )}
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -754,7 +852,7 @@ export default function AdminExamsPage() {
                   className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               {/* Tipe Ujian */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Ujian</label>
@@ -771,23 +869,23 @@ export default function AdminExamsPage() {
               </div>
 
               {/* SKD fields - Pastikan menggunakan editForm */}
-                {editForm.examType === "SKD" && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sub-Kategori SKD
-                    </label>
-                    <select
-                      value={editForm.skdCategory} // Gunakan editForm
-                      onChange={(e) => setEditForm({ ...editForm, skdCategory: e.target.value })} // Gunakan setEditForm
-                      className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Gabungan (TWK + TIU + TKP)</option>
-                      <option value="TWK">TWK — Tes Wawasan Kebangsaan (30 soal)</option>
-                      <option value="TIU">TIU — Tes Intelegensia Umum (35 soal)</option>
-                      <option value="TKP">TKP — Tes Karakteristik Pribadi (45 soal)</option>
-                    </select>
-                  </div>
-                )}
+              {editForm.examType === "SKD" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Sub-Kategori SKD
+                  </label>
+                  <select
+                    value={editForm.skdCategory} // Gunakan editForm
+                    onChange={(e) => setEditForm({ ...editForm, skdCategory: e.target.value })} // Gunakan setEditForm
+                    className="w-full border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Gabungan (TWK + TIU + TKP)</option>
+                    <option value="TWK">TWK — Tes Wawasan Kebangsaan (30 soal)</option>
+                    <option value="TIU">TIU — Tes Intelegensia Umum (35 soal)</option>
+                    <option value="TKP">TKP — Tes Karakteristik Pribadi (45 soal)</option>
+                  </select>
+                </div>
+              )}
 
               {/* Psikotest fields */}
               {editForm.examType === "PSIKOTEST" && (
@@ -969,7 +1067,7 @@ export default function AdminExamsPage() {
                 </select>
               </div>
             </div>
-            
+
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setEditModal(false)}
@@ -988,6 +1086,8 @@ export default function AdminExamsPage() {
           </div>
         </div>
       )}
+
+      <CustomModal {...modalConfig} />
     </div>
   );
 }
