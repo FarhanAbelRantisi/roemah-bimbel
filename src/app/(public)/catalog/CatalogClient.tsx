@@ -517,18 +517,18 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
 
                 <div className="flex items-center gap-6 mb-5">
                   <div className="flex items-center gap-2">
-                    <IconClock className="w-5 h-5 text-gray-400 hidden md:block" />
+                    <IconClock className="w-4 h-4 md:w-5 md:h-5 text-slate-400 shrink-0" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">{exam.duration} mins</p>
-                      <p className="text-xs text-gray-400">Duration</p>
+                      <p className="font-semibold text-gray-900 text-xs sm:text-sm">{exam.duration} mins</p>
+                      <p className="text-[10px] sm:text-xs text-gray-400">Duration</p>
                     </div>
                   </div>
                   {exam.psikotestCategory !== "PAULI" && (
                     <div className="flex items-center gap-2">
-                      <IconMessageSquare className="w-5 h-5 text-gray-400 hidden md:block" />
+                      <IconMessageSquare className="w-4 h-4 md:w-5 md:h-5 text-slate-400 shrink-0" />
                       <div>
-                        <p className="font-semibold text-gray-900 text-sm">{exam._count.questions}</p>
-                        <p className="text-xs text-gray-400">Questions</p>
+                        <p className="font-semibold text-gray-900 text-xs sm:text-sm">{exam._count.questions}</p>
+                        <p className="text-[10px] sm:text-xs text-gray-400">Questions</p>
                       </div>
                     </div>
                   )}
@@ -543,7 +543,7 @@ export default function CatalogClient({ exams, finishedExamIds, scoreMap, userSe
                   </span>
                 ) : isPremiumLocked ? (
                   <span className="flex items-center justify-center gap-2 w-full bg-yellow-50 border border-yellow-200 text-yellow-600 text-sm font-semibold py-3 rounded-xl cursor-not-allowed">
-                    <IconLock className="w-5 h-5 text-yellow-600 hidden md:block" /> Khusus Member Premium
+                    <IconLock className="w-4 h-4 md:w-5 md:h-5 text-yellow-600 shrink-0" /> Khusus Member Premium
                   </span>
                 ) : (
                   <button
