@@ -119,8 +119,6 @@ export default function PauliExamView({
       setPosisiIndex(0);
       setAnswersMap({});
       kolomTimeLeftRef.current = signalIntervalSec;
-      setFlashMessage(`Garis! Pindah ke Kolom Berikutnya`);
-      setTimeout(() => setFlashMessage(null), 2500);
     }
     setIsSubmitting(false);
   }, [saveColumnResult, seed, signalIntervalSec, totalColumns]);

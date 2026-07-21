@@ -740,80 +740,95 @@ export default function AdminExamDetailPage() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/admin/exams"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 text-xs md:text-sm font-medium hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
-          >
-            <span>Kembali</span>
-          </Link>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded uppercase ${exam?.examType === "PSIKOTEST_TNI"
-                ? "bg-green-100 text-green-700 font-bold border border-green-200"
-                : "bg-blue-100 text-blue-700"
-                }`}>
-                {exam?.examType === "PSIKOTEST_TNI" ? "PSIKOTEST TNI" : exam?.examType?.replace(/_/g, " ")}
-              </span>
-              {(() => {
-                const subLabel = (() => {
-                  if (!exam) return null;
-                  const formatTitle = (str: string) => str.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
-                  if (exam.examType === "SKD") return exam.skdCategory || "Gabungan";
-                  if (exam.examType === "PSIKOTEST_TNI") {
-                    if (exam.psikotestCategory === "GABUNGAN_TNI") return "Gabungan TNI";
-                    if (exam.psikotestCategory === "PAULI") return "Pauli";
-                    return exam.psikotestCategory ? formatTitle(exam.psikotestCategory) : "Gabungan TNI";
-                  }
-                  if (exam.examType === "PSIKOTEST") {
-                    if (exam.psikotestCategory === "GABUNGAN") return "Gabungan";
-                    if (exam.psikotestCategory) return formatTitle(exam.psikotestCategory);
-                    if (exam.psikotestConfig) {
-                      try {
-                        const keys = Object.keys(JSON.parse(exam.psikotestConfig));
-                        if (keys.length > 1) return "Gabungan";
-                        if (keys.length === 1) return formatTitle(keys[0]);
-                      } catch { }
-                    }
-                    return "Kecerdasan";
-                  }
-                  if (exam.examType === "AKADEMIK") {
-                    return exam.akademikCategory ? exam.akademikCategory.replace(/_/g, " ") : "Akademik";
-                  }
-                  return null;
-                })();
+      {/* Top Navigation */}
+      <div className="mb-4">
+        <Link
+          href="/admin/exams"
+          className="inline-flex items-center gap-2 text-xs md:text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors group"
+        >
+          <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Kembali ke Kelola Ujian</span>
+        </Link>
+      </div>
 
-                if (!subLabel) return null;
-                return (
-                  <span className="bg-gray-100 text-gray-700 text-xs font-medium px-2 py-0.5 rounded">
-                    Sub: {subLabel}
-                  </span>
-                );
-              })()}
-            </div>
-            <h1 className="text-lg md:text-2xl font-bold text-gray-900">
-              {exam?.title || "..."}
-            </h1>
-            <p className="text-xs text-gray-500">Exam ID: {id}</p>
+      {/* Main Header Card */}
+      <div className="bg-white border border-gray-200/80 rounded-2xl p-5 md:p-6 mb-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+        <div className="space-y-2">
+          {/* Category & Status Badges */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${exam?.examType === "PSIKOTEST_TNI"
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+              : "bg-blue-50 text-blue-700 border border-blue-200"
+              }`}>
+              {exam?.examType === "PSIKOTEST_TNI" ? "PSIKOTEST TNI" : exam?.examType?.replace(/_/g, " ")}
+            </span>
+
+            {(() => {
+              const subLabel = (() => {
+                if (!exam) return null;
+                const formatTitle = (str: string) => str.split(/[\s_]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+                if (exam.examType === "SKD") return exam.skdCategory || "Gabungan";
+                if (exam.examType === "PSIKOTEST_TNI") {
+                  if (exam.psikotestCategory === "GABUNGAN_TNI") return "Gabungan TNI";
+                  if (exam.psikotestCategory === "PAULI") return "Pauli";
+                  return exam.psikotestCategory ? formatTitle(exam.psikotestCategory) : "Gabungan TNI";
+                }
+                if (exam.examType === "PSIKOTEST") {
+                  if (exam.psikotestCategory === "GABUNGAN") return "Gabungan";
+                  if (exam.psikotestCategory) return formatTitle(exam.psikotestCategory);
+                  if (exam.psikotestConfig) {
+                    try {
+                      const keys = Object.keys(JSON.parse(exam.psikotestConfig));
+                      if (keys.length > 1) return "Gabungan";
+                      if (keys.length === 1) return formatTitle(keys[0]);
+                    } catch { }
+                  }
+                  return "Kecerdasan";
+                }
+                if (exam.examType === "AKADEMIK") {
+                  return exam.akademikCategory ? exam.akademikCategory.replace(/_/g, " ") : "Akademik";
+                }
+                return null;
+              })();
+
+              if (!subLabel) return null;
+              return (
+                <span className="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-slate-200">
+                  Sub: {subLabel}
+                </span>
+              );
+            })()}
+
+            <span className="bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-1 rounded-full">
+              {exam?.duration} Menit
+            </span>
           </div>
+
+          {/* Title */}
+          <h1 className="text-xl md:text-2xl font-extrabold text-slate-900 leading-tight">
+            {exam?.title || "..."}
+          </h1>
+
+          <p className="text-xs text-slate-400 font-mono">ID: {id}</p>
         </div>
 
-        {/* ACTION BUTTON */}
+        {/* Action Buttons */}
         {exam?.psikotestCategory !== "PAULI" && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-gray-100">
             <button
               onClick={downloadTemplate}
-              className="flex-1 md:flex-none border border-gray-200 text-gray-600 text-xs md:text-sm px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 hover:bg-gray-50 transition-colors"
+              className="px-3.5 py-2.5 border border-gray-200 text-gray-700 text-xs md:text-sm font-semibold rounded-xl flex items-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
+              title="Download Template Excel"
             >
               <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
               <span>Template</span>
             </button>
 
-            <label className={`flex-1 md:flex-none border border-green-200 text-green-700 text-xs md:text-sm px-3 py-2 rounded-lg text-center cursor-pointer flex items-center justify-center gap-1.5 hover:bg-green-50 transition-colors ${importing ? "opacity-50 pointer-events-none" : ""}`}>
-              <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-              <span>{importing ? "Mengimport..." : "Import"}</span>
+            <label className={`px-3.5 py-2.5 border border-emerald-200 bg-emerald-50/50 text-emerald-700 text-xs md:text-sm font-semibold rounded-xl cursor-pointer flex items-center gap-2 hover:bg-emerald-100/60 transition-colors shadow-sm ${importing ? "opacity-50 pointer-events-none" : ""}`}>
+              <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+              <span>{importing ? "Mengimport..." : "Import Excel"}</span>
               <input
                 type="file"
                 accept=".xlsx,.xls,.csv"
@@ -824,9 +839,10 @@ export default function AdminExamDetailPage() {
 
             <button
               onClick={openCreate}
-              className="flex-1 md:flex-none bg-blue-600 text-white text-xs md:text-sm px-3 py-2 rounded-lg"
+              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm font-semibold rounded-xl flex items-center gap-2 transition-all shadow-md shadow-blue-500/20"
             >
-              + Soal
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+              <span>Tambah Soal</span>
             </button>
           </div>
         )}
