@@ -425,7 +425,7 @@ export default function AdminExamDetailPage() {
     let defaultSub = "";
 
     if (exam?.examType === "SKD") {
-      defaultCat = activeTab === "ALL" ? "TWK" : activeTab; 
+      defaultCat = activeTab; 
     } else {
       const subs = getSubCategories();
       defaultSub = (activeSubTab && activeSubTab !== "ALL") ? activeSubTab : (subs[0] || exam?.psikotestCategory || ""); 
@@ -531,7 +531,7 @@ export default function AdminExamDetailPage() {
   const isQuestionLimitReached = (): boolean => {
     if (editId) return false;
     if (exam?.examType === "SKD") {
-      const cat = form.category || (activeTab === "ALL" ? "TWK" : activeTab);
+      const cat = form.category || activeTab;
       const limits: Record<Category, number> = { TWK: 30, TIU: 35, TKP: 45 };
       return categoryCount(cat) >= (limits[cat] ?? 30);
     }
