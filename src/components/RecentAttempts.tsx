@@ -481,6 +481,9 @@ export default function RecentAttempts({ attempts }: { attempts: Attempt[] }) {
             </button>
             <PauliReportView attemptId={viewPauliId} />
           </div>
+        </div>
+      )}
+
       {/* Modal Confirm Delete Attempt */}
       {deleteConfirmId && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] px-4 animate-fade-in">
