@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import PauliReportView from "@/components/PauliReportView";
 
 type ExamType = "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
 
@@ -68,6 +69,7 @@ export default function RecentAttempts({ attempts }: { attempts: Attempt[] }) {
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [exportingExam, setExportingExam] = useState<string | null>(null);
+  const [viewPauliId, setViewPauliId] = useState<string | null>(null);
   const router = useRouter();
 
   const examGroups = groupByExam(attempts);
@@ -428,19 +430,46 @@ export default function RecentAttempts({ attempts }: { attempts: Attempt[] }) {
                   </div>
                 )}
 
-                {/* Finished at */}
-                <p className="text-xs text-gray-400 mt-2 text-right">
-                  {new Date(attempt.finishedAt).toLocaleString("id-ID", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
+                {/* Finished at & Pauli Detail Button */}
+                <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
+                  {attempt.exam.psikotestCategory === "PAULI" || attempt.exam.examType === "PSIKOTEST_TNI" ? (
+                    <button
+                      onClick={() => setViewPauliId(attempt.id)}
+                      className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1 hover:bg-indigo-100 transition-colors flex items-center gap-1"
+                    >
+                      📊 Lihat Laporan Pauli Lengkap
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                  <p className="text-xs text-gray-400">
+                    {new Date(attempt.finishedAt).toLocaleString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Modal Pauli Report */}
+      {viewPauliId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-4xl w-full p-6 relative max-h-[90vh] overflow-y-auto shadow-2xl">
+            <button
+              onClick={() => setViewPauliId(null)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center font-bold text-sm z-10"
+            >
+              ✕
+            </button>
+            <PauliReportView attemptId={viewPauliId} />
+          </div>
         </div>
       )}
     </div>

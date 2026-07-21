@@ -147,19 +147,85 @@ def start_session(conn: sqlite3.Connection, testee_ref: str, config_id: int,
     return cur.lastrowid
 
 
-def record_column_result(conn: sqlite3.Connection, session_id: int, kolom_index: int,
-                          jumlah_dikerjakan: int, jumlah_benar: int,
-                          waktu_mulai: str, waktu_selesai: str) -> None:
-    jumlah_salah = jumlah_dikerjakan - jumlah_benar
-    conn.execute(
-        """INSERT INTO column_results
-           (session_id, kolom_index, jumlah_dikerjakan, jumlah_benar,
-            jumlah_salah, waktu_mulai, waktu_selesai)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
-        (session_id, kolom_index, jumlah_dikerjakan, jumlah_benar,
-         jumlah_salah, waktu_mulai, waktu_selesai),
-    )
+class KolomTerkuncilError(Exception):
+    """Dilempar saat testee mencoba menjawab/mengoreksi kolom yang
+    intervalnya sudah lewat -- sesuai instruksi asli: begitu aba-aba
+    berbunyi dan kolom digaris, peserta tidak boleh kembali ke kolom
+    tersebut, hanya boleh lanjut ke kolom berikutnya."""
+    pass
+
+
+def _get_session_timing(conn: sqlite3.Connection, session_id: int) -> tuple[dt.datetime, int]:
+    row = conn.execute(
+        """SELECT s.started_at, c.signal_interval_sec
+           FROM test_sessions s JOIN test_configs c ON c.id = s.config_id
+           WHERE s.id = ?""",
+        (session_id,),
+    ).fetchone()
+    if row is None or row["started_at"] is None:
+        raise ValueError("Sesi belum dimulai (started_at kosong).")
+    started_at = dt.datetime.fromisoformat(row["started_at"])
+    return started_at, row["signal_interval_sec"]
+
+
+def is_kolom_locked(conn: sqlite3.Connection, session_id: int, kolom_index: int,
+                     now: Optional[dt.datetime] = None) -> bool:
+    """True jika waktu untuk kolom_index tersebut sudah lewat (terkunci)."""
+    started_at, interval = _get_session_timing(conn, session_id)
+    now = now or dt.datetime.now(dt.timezone.utc)
+    batas_kolom = started_at + dt.timedelta(seconds=interval * (kolom_index + 1))
+    return now > batas_kolom
+
+
+def submit_jawaban(conn: sqlite3.Connection, session_id: int, kolom_index: int,
+                    posisi_index: int, digit_a: int, digit_b: int,
+                    jawaban_testee: int, now: Optional[dt.datetime] = None) -> dict:
+    """Mencatat (atau mengoreksi) jawaban testee untuk satu posisi soal.
+
+    - Jika posisi ini belum pernah dijawab -> insert baru, jumlah_edit=0.
+    - Jika posisi ini sudah pernah dijawab & kolom belum terkunci ->
+      update jawaban_terakhir, jumlah_edit += 1 (ini yang tercatat
+      sebagai "dibetulkan", bukan "salah").
+    - Jika kolom sudah terkunci -> tolak dengan KolomTerkuncilError,
+      baik untuk jawaban baru maupun koreksi.
+    """
+    if is_kolom_locked(conn, session_id, kolom_index, now):
+        raise KolomTerkuncilError(
+            f"Kolom {kolom_index} sudah terkunci, tidak bisa dijawab/dikoreksi lagi."
+        )
+
+    now = now or dt.datetime.now(dt.timezone.utc)
+    benar = 1 if (digit_a + digit_b) % 10 == jawaban_testee else 0
+    now_iso = now.isoformat()
+
+    existing = conn.execute(
+        """SELECT jumlah_edit, waktu_submit_pertama FROM jawaban_detail
+           WHERE session_id = ? AND kolom_index = ? AND posisi_index = ?""",
+        (session_id, kolom_index, posisi_index),
+    ).fetchone()
+
+    if existing is None:
+        conn.execute(
+            """INSERT INTO jawaban_detail
+               (session_id, kolom_index, posisi_index, jawaban_terakhir, benar,
+                jumlah_edit, waktu_submit_pertama, waktu_submit_terakhir)
+               VALUES (?, ?, ?, ?, ?, 0, ?, ?)""",
+            (session_id, kolom_index, posisi_index, jawaban_testee, benar, now_iso, now_iso),
+        )
+        jumlah_edit_baru = 0
+    else:
+        jumlah_edit_baru = existing["jumlah_edit"] + 1
+        conn.execute(
+            """UPDATE jawaban_detail
+               SET jawaban_terakhir = ?, benar = ?, jumlah_edit = ?,
+                   waktu_submit_terakhir = ?
+               WHERE session_id = ? AND kolom_index = ? AND posisi_index = ?""",
+            (jawaban_testee, benar, jumlah_edit_baru, now_iso,
+             session_id, kolom_index, posisi_index),
+        )
+
     conn.commit()
+    return {"benar": bool(benar), "jumlah_edit": jumlah_edit_baru}
 
 
 # =========================================================
@@ -167,24 +233,39 @@ def record_column_result(conn: sqlite3.Connection, session_id: int, kolom_index:
 # =========================================================
 
 def finalize_session(conn: sqlite3.Connection, session_id: int) -> dict:
-    rows = conn.execute(
-        """SELECT kolom_index, jumlah_dikerjakan, jumlah_benar, jumlah_salah
-           FROM column_results WHERE session_id = ? ORDER BY kolom_index""",
+    # Agregasi per kolom (untuk grafik naik-turun & deviasi konsistensi)
+    per_kolom_rows = conn.execute(
+        """SELECT kolom_index, COUNT(*) AS jumlah_dikerjakan,
+                  SUM(benar) AS jumlah_benar
+           FROM jawaban_detail WHERE session_id = ?
+           GROUP BY kolom_index ORDER BY kolom_index""",
         (session_id,),
     ).fetchall()
 
-    if not rows:
-        raise ValueError("Sesi belum memiliki data kolom, tidak bisa dihitung.")
+    if not per_kolom_rows:
+        raise ValueError("Sesi belum memiliki data jawaban, tidak bisa dihitung.")
 
-    per_kolom = [r["jumlah_dikerjakan"] for r in rows]
+    per_kolom = [r["jumlah_dikerjakan"] for r in per_kolom_rows]
 
     jumlah_total = sum(per_kolom)
-    total_benar = sum(r["jumlah_benar"] for r in rows)
-    total_salah = sum(r["jumlah_salah"] for r in rows)
+    total_benar = sum(r["jumlah_benar"] for r in per_kolom_rows)
+    total_salah = jumlah_total - total_benar
     rasio_ketelitian = total_benar / jumlah_total if jumlah_total else 0.0
     median_per_kolom = statistics.median(per_kolom)
     puncak = max(per_kolom)
     bawah = min(per_kolom)
+
+    # jumlah_dibetulkan: berapa POSISI yang sempat dikoreksi minimal
+    # sekali sebelum kolom terkunci (jumlah_edit > 0), bukan total
+    # event edit-nya -- ini sinyal ketelitian/self-monitoring, dan
+    # sengaja dihitung terpisah dari total_salah (yang FINAL, setelah
+    # semua koreksi selesai).
+    dibetulkan_row = conn.execute(
+        """SELECT COUNT(*) AS n FROM jawaban_detail
+           WHERE session_id = ? AND jumlah_edit > 0""",
+        (session_id,),
+    ).fetchone()
+    jumlah_dibetulkan = dibetulkan_row["n"]
 
     # Deviasi konsistensi: rata-rata selisih absolut antar kolom berurutan.
     # Semakin kecil -> semakin konsisten (grafik landai).
@@ -196,11 +277,11 @@ def finalize_session(conn: sqlite3.Connection, session_id: int) -> dict:
 
     conn.execute(
         """INSERT OR REPLACE INTO session_scores
-           (session_id, jumlah_total, total_benar, total_salah,
+           (session_id, jumlah_total, total_benar, total_salah, jumlah_dibetulkan,
             rasio_ketelitian, median_per_kolom, puncak, bawah,
             deviasi_konsistensi)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (session_id, jumlah_total, total_benar, total_salah,
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (session_id, jumlah_total, total_benar, total_salah, jumlah_dibetulkan,
          rasio_ketelitian, median_per_kolom, puncak, bawah,
          deviasi_konsistensi),
     )
@@ -214,6 +295,7 @@ def finalize_session(conn: sqlite3.Connection, session_id: int) -> dict:
         "jumlah_total": jumlah_total,
         "total_benar": total_benar,
         "total_salah": total_salah,
+        "jumlah_dibetulkan": jumlah_dibetulkan,
         "rasio_ketelitian": round(rasio_ketelitian, 4),
         "median_per_kolom": median_per_kolom,
         "puncak": puncak,

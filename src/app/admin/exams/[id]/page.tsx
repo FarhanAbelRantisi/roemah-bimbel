@@ -635,7 +635,7 @@ export default function AdminExamDetailPage() {
 
     // Cek apakah setelah simpan soal ini sudah penuh
     const sub = form.subCategory || getSubCategories()[0];
-    const currentCount = subCategoryCount(sub) + 1;
+    const currentCount = subCategoryCount(sub);
     const limit = getLimit(sub);
 
     if (limit !== Infinity && currentCount >= limit) {

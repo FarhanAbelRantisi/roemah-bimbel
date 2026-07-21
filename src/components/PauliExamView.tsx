@@ -33,8 +33,7 @@ export default function PauliExamView({
   // State
   const [kolomIndex, setKolomIndex] = useState(0);
   const [posisiIndex, setPosisiIndex] = useState(0);
-  const [jumlahDikerjakan, setJumlahDikerjakan] = useState(0);
-  const [jumlahBenar, setJumlahBenar] = useState(0);
+  const [answersMap, setAnswersMap] = useState<Record<number, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
 
@@ -49,14 +48,12 @@ export default function PauliExamView({
 
   // Refs for current values in callbacks
   const kolomIndexRef = useRef(kolomIndex);
-  const jumlahDikerjakanRef = useRef(jumlahDikerjakan);
-  const jumlahBenarRef = useRef(jumlahBenar);
+  const answersMapRef = useRef(answersMap);
   const isSubmittingRef = useRef(isSubmitting);
   const onFinishRef = useRef(onFinish);
 
   useEffect(() => { kolomIndexRef.current = kolomIndex; }, [kolomIndex]);
-  useEffect(() => { jumlahDikerjakanRef.current = jumlahDikerjakan; }, [jumlahDikerjakan]);
-  useEffect(() => { jumlahBenarRef.current = jumlahBenar; }, [jumlahBenar]);
+  useEffect(() => { answersMapRef.current = answersMap; }, [answersMap]);
   useEffect(() => { isSubmittingRef.current = isSubmitting; }, [isSubmitting]);
   useEffect(() => { onFinishRef.current = onFinish; }, [onFinish]);
 
@@ -83,24 +80,33 @@ export default function PauliExamView({
     setIsSubmitting(true);
 
     const currentK = kolomIndexRef.current;
-    const currentD = jumlahDikerjakanRef.current;
-    const currentB = jumlahBenarRef.current;
+    const currentMap = answersMapRef.current;
 
-    await saveColumnResult(currentK, currentD, currentB);
+    const dikerjakan = Object.keys(currentMap).length;
+    let benar = 0;
+    for (const [pStr, val] of Object.entries(currentMap)) {
+      const p = Number(pStr);
+      const dA = digitAt(seed, currentK, p, 0, 9);
+      const dB = digitAt(seed, currentK, p + 1, 0, 9);
+      if ((dA + dB) % 10 === val) {
+        benar++;
+      }
+    }
+
+    await saveColumnResult(currentK, dikerjakan, benar);
 
     if (currentK + 1 >= totalColumns) {
       onFinishRef.current();
     } else {
       setKolomIndex(currentK + 1);
       setPosisiIndex(0);
-      setJumlahDikerjakan(0);
-      setJumlahBenar(0);
+      setAnswersMap({});
       kolomTimeLeftRef.current = signalIntervalSec;
       setFlashMessage(`Garis! Pindah ke Kolom Berikutnya`);
       setTimeout(() => setFlashMessage(null), 2500);
     }
     setIsSubmitting(false);
-  }, [saveColumnResult, signalIntervalSec, totalColumns]);
+  }, [saveColumnResult, seed, signalIntervalSec, totalColumns]);
 
   const nextColumnRef = useRef(nextColumn);
   useEffect(() => { nextColumnRef.current = nextColumn; }, [nextColumn]);
@@ -125,18 +131,23 @@ export default function PauliExamView({
     return () => clearInterval(timer);
   }, [signalIntervalSec]);
 
-  // Digits for display (show current position and next 8 pairs)
-  const currentDigitA = digitAt(seed, kolomIndex, posisiIndex, 0, 9);
-  const currentDigitB = digitAt(seed, kolomIndex, posisiIndex + 1, 0, 9);
-  const expectedAnswer = (currentDigitA + currentDigitB) % 10;
-
-  // Handle digit input
+  // Input Digit
   const handleDigitInput = useCallback((inputVal: number) => {
-    const isCorrect = inputVal === expectedAnswer;
-    setJumlahDikerjakan((prev) => prev + 1);
-    if (isCorrect) setJumlahBenar((prev) => prev + 1);
+    setAnswersMap((prev) => ({
+      ...prev,
+      [posisiIndex]: inputVal,
+    }));
     setPosisiIndex((prev) => prev + 1);
-  }, [expectedAnswer]);
+  }, [posisiIndex]);
+
+  // Navigasi Atas/Bawah
+  const handleMoveUp = useCallback(() => {
+    setPosisiIndex((prev) => Math.max(0, prev - 1));
+  }, []);
+
+  const handleMoveDown = useCallback(() => {
+    setPosisiIndex((prev) => prev + 1);
+  }, []);
 
   // Keydown listener
   useEffect(() => {
@@ -144,18 +155,27 @@ export default function PauliExamView({
       if (e.key >= "0" && e.key <= "9") {
         e.preventDefault();
         handleDigitInput(parseInt(e.key, 10));
+      } else if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
+        e.preventDefault();
+        handleMoveUp();
+      } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        handleMoveDown();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleDigitInput]);
+  }, [handleDigitInput, handleMoveUp, handleMoveDown]);
 
-  // Generate preview rows
-  const previewRows = Array.from({ length: 8 }, (_, i) => {
-    const idx = posisiIndex + i;
+  // Centered view rows: offset from -3 to +3 relative to posisiIndex
+  const offsets = [-3, -2, -1, 0, 1, 2, 3];
+  const centerRows = offsets.map((offset) => {
+    const idx = posisiIndex + offset;
+    if (idx < 0) return { offset, idx: -1, dA: 0, dB: 0, val: undefined };
     const dA = digitAt(seed, kolomIndex, idx, 0, 9);
     const dB = digitAt(seed, kolomIndex, idx + 1, 0, 9);
-    return { idx, dA, dB, target: (dA + dB) % 10 };
+    const val = answersMap[idx];
+    return { offset, idx, dA, dB, val };
   });
 
   return (
@@ -196,34 +216,47 @@ export default function PauliExamView({
           </p>
 
           <div className="w-full flex flex-col gap-2 my-2">
-            {previewRows.map((row, i) => (
-              <div
-                key={row.idx}
-                className={`flex items-center justify-between px-6 py-3 rounded-xl border transition-all ${
-                  i === 0
-                    ? "bg-indigo-50 border-indigo-300 ring-2 ring-indigo-500/20 scale-105 shadow-sm"
-                    : "bg-gray-50/50 border-gray-100 opacity-60"
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <span className="text-xs text-gray-400 font-mono w-6">#{row.idx + 1}</span>
-                  <span className={`text-2xl font-bold font-mono ${i === 0 ? "text-gray-900" : "text-gray-500"}`}>
-                    {row.dA} + {row.dB}
-                  </span>
+            {centerRows.map(({ offset, idx, dA, dB, val }) => {
+              if (idx < 0) {
+                return (
+                  <div key={`empty-${offset}`} className="h-[52px] border border-transparent" />
+                );
+              }
+              const isCurrent = offset === 0;
+
+              return (
+                <div
+                  key={idx}
+                  onClick={() => setPosisiIndex(idx)}
+                  className={`flex items-center justify-between px-6 py-3 rounded-xl border cursor-pointer transition-all ${
+                    isCurrent
+                      ? "bg-indigo-50 border-indigo-400 ring-2 ring-indigo-500/20 scale-105 shadow-sm"
+                      : "bg-gray-50/50 border-gray-100 opacity-60 hover:opacity-80"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <span className={`text-2xl font-bold font-mono ${isCurrent ? "text-gray-900" : "text-gray-500"}`}>
+                      {dA} + {dB}
+                    </span>
+                  </div>
+                  <div className="font-mono font-bold text-lg">
+                    {val !== undefined ? (
+                      <span className={`px-3 py-1 rounded-lg ${isCurrent ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-700"}`}>
+                        {val}
+                      </span>
+                    ) : isCurrent ? (
+                      <span className="px-3 py-1 bg-indigo-600 text-white rounded-lg animate-pulse">?</span>
+                    ) : (
+                      <span className="text-gray-300">...</span>
+                    )}
+                  </div>
                 </div>
-                <div className="font-mono font-bold text-lg">
-                  {i === 0 ? (
-                    <span className="px-3 py-1 bg-indigo-600 text-white rounded-lg animate-pulse">?</span>
-                  ) : (
-                    <span className="text-gray-300">...</span>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <p className="text-xs text-gray-400 mt-4 text-center">
-            Tekan angka <strong>0-9</strong> pada keyboard atau tombol layar di bawah
+            Gunakan tombol ⬆/⬇ atau panah keyboard untuk berpindah antar soal
           </p>
         </div>
 
@@ -243,14 +276,28 @@ export default function PauliExamView({
                 {num}
               </button>
             ))}
-            <div />
+
+            {/* Row 4: Up Button (Atas) | 0 | Down Button (Bawah) */}
+            <button
+              onClick={handleMoveUp}
+              title="Ke soal sebelumnya (Atas)"
+              className="py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 rounded-xl font-bold text-xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
+            >
+              ⬆
+            </button>
             <button
               onClick={() => handleDigitInput(0)}
               className="py-4 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 border border-gray-200 rounded-xl font-mono text-2xl font-bold text-gray-800 transition-all active:scale-95 shadow-sm"
             >
               0
             </button>
-            <div />
+            <button
+              onClick={handleMoveDown}
+              title="Ke soal berikutnya (Bawah)"
+              className="py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 rounded-xl font-bold text-xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
+            >
+              ⬇
+            </button>
           </div>
         </div>
       </main>

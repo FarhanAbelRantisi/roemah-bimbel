@@ -14,8 +14,9 @@ import datetime as dt
 
 from engine import (
     init_db, TestConfigInput, create_config, create_norm_group,
-    start_session, record_column_result, finalize_session,
+    start_session, submit_jawaban, finalize_session,
     recompute_norm_stats, classify_session, digit_at, generate_batch,
+    KolomTerkuncilError,
 )
 
 DB_FILE = "pauli.db"
@@ -53,17 +54,43 @@ assert ulang == batch_1, "Generator harus deterministik untuk posisi yang sama!"
 print("Reproducibility check: OK (posisi sama -> digit sama)")
 
 
-def simulate_session(testee_ref: str, rata2_kerja: int, variasi: int, tingkat_error: float):
-    """Simulasikan satu sesi testee mengerjakan seluruh kolom."""
+def simulate_session(testee_ref: str, rata2_kerja: int, variasi: int,
+                      tingkat_error: float, tingkat_koreksi: float = 0.5):
+    """Simulasikan satu sesi testee mengerjakan seluruh kolom, per posisi
+    soal (bukan agregat), termasuk simulasi koreksi jawaban sendiri
+    SEBELUM kolom terkunci."""
     session_id = start_session(conn, testee_ref, config_id, norm_group_id, seed=42)
-    now = dt.datetime.now(dt.timezone.utc)
+    started_at = dt.datetime.fromisoformat(
+        conn.execute("SELECT started_at FROM test_sessions WHERE id = ?",
+                      (session_id,)).fetchone()["started_at"]
+    )
+
     for k in range(cfg.jumlah_kolom):
-        jumlah = max(0, int(random.gauss(rata2_kerja, variasi)))
-        salah = int(jumlah * tingkat_error)
-        benar = jumlah - salah
-        waktu_mulai = (now + dt.timedelta(seconds=k * cfg.signal_interval_sec)).isoformat()
-        waktu_selesai = (now + dt.timedelta(seconds=(k + 1) * cfg.signal_interval_sec)).isoformat()
-        record_column_result(conn, session_id, k, jumlah, benar, waktu_mulai, waktu_selesai)
+        jumlah = max(1, int(random.gauss(rata2_kerja, variasi)))
+        # Waktu submit disimulasikan 1 detik setelah kolom dibuka --
+        # jauh sebelum batas kunci (signal_interval_sec), jadi valid.
+        waktu_kolom = started_at + dt.timedelta(seconds=k * cfg.signal_interval_sec + 1)
+
+        for pos in range(jumlah):
+            digit_a, digit_b = random.randint(0, 9), random.randint(0, 9)
+            hasil_benar = (digit_a + digit_b) % 10
+
+            # Testee kadang salah hitung dulu
+            if random.random() < tingkat_error:
+                jawaban_awal = (hasil_benar + random.randint(1, 9)) % 10
+            else:
+                jawaban_awal = hasil_benar
+
+            submit_jawaban(conn, session_id, k, pos, digit_a, digit_b,
+                            jawaban_awal, now=waktu_kolom)
+
+            # Kalau salah, testee kadang sadar & mengoreksi sebelum kolom
+            # terkunci -- ini yang tercatat sebagai "dibetulkan", BUKAN
+            # "salah final".
+            if jawaban_awal != hasil_benar and random.random() < tingkat_koreksi:
+                submit_jawaban(conn, session_id, k, pos, digit_a, digit_b,
+                                hasil_benar, now=waktu_kolom)
+
     return finalize_session(conn, session_id), session_id
 
 
@@ -96,5 +123,29 @@ klasifikasi = classify_session(conn, session_baru_id)
 print("\nKlasifikasi terhadap norma kelompok 'TNI':")
 for metric, hasil in klasifikasi.items():
     print(f"  {metric}: {hasil}")
+
+# --- 5. Uji kasus: kolom yang sudah terkunci tidak boleh dijawab/dikoreksi ---
+print("\n=== Uji Kolom Terkunci ===")
+session_id_test = start_session(conn, "T_TEST_LOCK", config_id, norm_group_id, seed=1)
+started_at_test = dt.datetime.fromisoformat(
+    conn.execute("SELECT started_at FROM test_sessions WHERE id = ?",
+                  (session_id_test,)).fetchone()["started_at"]
+)
+
+# Jawab kolom 0 tepat waktu -> harus berhasil
+submit_jawaban(conn, session_id_test, kolom_index=0, posisi_index=0,
+               digit_a=3, digit_b=4, jawaban_testee=7,
+               now=started_at_test + dt.timedelta(seconds=1))
+print("Submit tepat waktu ke kolom 0: berhasil")
+
+# Coba jawab/koreksi kolom 0 SETELAH batas waktunya lewat -> harus ditolak
+waktu_terlambat = started_at_test + dt.timedelta(seconds=cfg.signal_interval_sec + 5)
+try:
+    submit_jawaban(conn, session_id_test, kolom_index=0, posisi_index=1,
+                    digit_a=5, digit_b=5, jawaban_testee=0,
+                    now=waktu_terlambat)
+    print("SEHARUSNYA GAGAL -- ada bug, edit ke kolom terkunci malah diterima!")
+except KolomTerkuncilError as e:
+    print(f"Ditolak sesuai desain: {e}")
 
 conn.close()

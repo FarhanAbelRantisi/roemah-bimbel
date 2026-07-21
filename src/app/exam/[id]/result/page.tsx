@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import PauliReportView from "@/components/PauliReportView";
 
 const IconTrophy = () => (<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>);
 const IconFileText = ({ className = "w-9 h-9 text-blue-500" }: { className?: string }) => (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>);
@@ -55,24 +56,16 @@ export default function ResultPage() {
   if (result.exam.psikotestCategory === "PAULI") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md bg-white border border-gray-200 rounded-3xl p-8 text-center shadow-lg">
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-5 font-bold">
-            ✓
+        <div className="w-full max-w-3xl bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 text-center shadow-lg">
+          <PauliReportView attemptId={result.id} />
+          <div className="mt-8 pt-6 border-t border-gray-100 flex justify-center">
+            <Link
+              href="/catalog"
+              className="inline-block bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-md"
+            >
+              Kembali ke Katalog
+            </Link>
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Tes Selesai</h1>
-          <p className="text-gray-600 text-sm mb-6">
-            Tes telah selesai. Terima kasih atas partisipasi Anda.
-          </p>
-          <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-6 text-xs text-gray-500 text-left space-y-1">
-            <p><strong>Status:</strong> selesai</p>
-            <p><strong>Pesan:</strong> Tes telah selesai. Terima kasih atas partisipasi Anda.</p>
-          </div>
-          <Link
-            href="/catalog"
-            className="w-full inline-block bg-blue-600 text-white font-semibold py-3 rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-md"
-          >
-            Kembali ke Katalog
-          </Link>
         </div>
       </div>
     );
