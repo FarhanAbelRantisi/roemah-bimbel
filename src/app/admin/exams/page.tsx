@@ -9,6 +9,7 @@ interface Exam {
   isPremium: boolean;
   isPublished: boolean;
   examType: "SKD" | "PSIKOTEST" | "AKADEMIK" | "PSIKOTEST_TNI";
+  skdCategory?: string;
   psikotestCategory?: string;
   psikotestConfig?: string;
   akademikCategory?: string;
@@ -404,9 +405,10 @@ export default function AdminExamsPage() {
                         <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
                           exam.examType === "SKD" ? "bg-blue-50 text-blue-600" :
                           exam.examType === "PSIKOTEST" ? "bg-purple-50 text-purple-600" :
+                          exam.examType === "PSIKOTEST_TNI" ? "bg-indigo-50 text-indigo-600" :
                           "bg-orange-50 text-orange-600"
                         }`}>
-                          {exam.examType}
+                          {exam.examType === "PSIKOTEST_TNI" ? "PSIKOTEST TNI" : exam.examType}
                         </span>
                       </div>
                     </td>
