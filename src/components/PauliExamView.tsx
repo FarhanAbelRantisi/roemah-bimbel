@@ -15,7 +15,7 @@ const IconLock = ({ className = "w-16 h-16 text-white mb-4" }: { className?: str
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
 );
 
-const IconAlertTriangle = ({ className = "text-2xl shrink-0 text-amber-400" }: { className?: string }) => (
+const IconAlertTriangle = ({ className = "text-2xl shrink-0 text-yellow-500" }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
 );
 
@@ -44,7 +44,6 @@ export default function PauliExamView({
   const [answersMap, setAnswersMap] = useState<Record<number, number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
-  const [kolomTimeLeft, setKolomTimeLeft] = useState(signalIntervalSec);
 
   // Violations & Security
   const MAX_VIOLATIONS = 5;
@@ -120,9 +119,6 @@ export default function PauliExamView({
       setPosisiIndex(0);
       setAnswersMap({});
       kolomTimeLeftRef.current = signalIntervalSec;
-      setKolomTimeLeft(signalIntervalSec);
-      setFlashMessage(`Pindah ke Kolom ${currentK + 2}!`);
-      setTimeout(() => setFlashMessage(null), 2500);
     }
     setIsSubmitting(false);
   }, [saveColumnResult, seed, signalIntervalSec, totalColumns]);
@@ -130,16 +126,14 @@ export default function PauliExamView({
   const nextColumnRef = useRef(nextColumn);
   useEffect(() => { nextColumnRef.current = nextColumn; }, [nextColumn]);
 
-  // Background Timers
+  // Background Timers (silent execution)
   useEffect(() => {
     const timer = setInterval(() => {
       totalTimeLeftRef.current -= 1;
       kolomTimeLeftRef.current -= 1;
-      setKolomTimeLeft(kolomTimeLeftRef.current);
 
       if (kolomTimeLeftRef.current <= 0) {
         kolomTimeLeftRef.current = signalIntervalSec;
-        setKolomTimeLeft(signalIntervalSec);
         nextColumnRef.current();
       } else if (totalTimeLeftRef.current <= 0) {
         clearInterval(timer);
@@ -294,7 +288,7 @@ export default function PauliExamView({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleDigitInput, handleMoveUp, handleMoveDown]);
 
-  // Centered view digit cards
+  // Centered view rows: offset from -2 to +3 relative to posisiIndex
   const offsets = [-2, -1, 0, 1, 2, 3];
   const centerRows = offsets.map((offset) => {
     const idx = posisiIndex + offset;
@@ -302,125 +296,103 @@ export default function PauliExamView({
     return { offset, idx };
   });
 
-  const formatTimer = (sec: number) => {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
-  };
-
-  const currentAnsweredCount = Object.keys(answersMap).length;
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between font-sans selection:bg-none relative overflow-x-hidden">
-      {/* Background Subtle Ambient Mesh Glow */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[140px]" />
-        <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[120px]" />
-      </div>
-
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-between font-sans selection:bg-none relative">
       {/* Blur Overlay when window loses focus */}
       {isBlurred && (
-        <div className="fixed inset-0 z-[9997] backdrop-blur-xl bg-slate-950/80 flex flex-col items-center justify-center gap-4">
-          <div className="p-4 bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl flex flex-col items-center max-w-sm text-center">
-            <IconLock className="w-16 h-16 text-rose-500 mb-2 animate-bounce" />
-            <p className="text-white font-bold text-xl">Ujian Terkunci</p>
-            <p className="text-slate-400 text-sm mt-1">
-              Kembali ke tab halaman ini untuk melanjutkan pengerjaan.
-            </p>
-          </div>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9997,
+            backdropFilter: "blur(20px)",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            gap: "12px",
+          }}
+        >
+          <IconLock className="w-16 h-16 text-white mb-4" />
+          <p style={{ color: "white", fontWeight: "700", fontSize: "20px" }}>
+            Ujian Terkunci
+          </p>
+          <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px" }}>
+            Kembali ke halaman ini untuk melanjutkan ujian
+          </p>
         </div>
       )}
 
       {/* Warning Toast */}
       {showWarning && tabWarning < MAX_VIOLATIONS && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] animate-bounce">
-          <div className="bg-rose-950 border border-rose-600/60 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 max-w-md">
-            <IconAlertTriangle className="text-2xl shrink-0 text-amber-400" />
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] animate-bounce">
+          <div className="bg-red-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md">
+            <IconAlertTriangle className="text-2xl shrink-0 text-yellow-500" />
             <div>
-              <p className="font-bold text-sm text-rose-200">Pelanggaran Terdeteksi!</p>
-              <p className="text-xs text-rose-300/90 mt-0.5">{warningMsg}</p>
+              <p className="font-bold text-sm">Pelanggaran Terdeteksi!</p>
+              <p className="text-xs text-red-100 mt-0.5">{warningMsg}</p>
             </div>
-            <div className="ml-auto shrink-0 bg-rose-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+            <div className="ml-auto shrink-0 bg-red-500 rounded-full w-8 h-8 flex items-center justify-center font-bold">
               {MAX_VIOLATIONS - tabWarning}
             </div>
           </div>
         </div>
       )}
 
-      {/* Glassmorphic Header Bar */}
-      <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-8 py-3.5 flex flex-wrap items-center justify-between sticky top-0 z-50 shadow-lg shadow-black/20">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3.5 py-1.5 rounded-full font-semibold text-xs shadow-md shadow-blue-500/20">
-            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+      {/* Header Bar */}
+      <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex flex-wrap items-center justify-between sticky top-0 z-50 shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
             Tes Pauli
-          </div>
-          <div className="bg-slate-800/90 border border-slate-700/80 text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-full">
-            Kolom <span className="text-blue-400 font-bold">{kolomIndex + 1}</span> / {totalColumns}
-          </div>
+          </span>
         </div>
 
-        <div className="flex items-center gap-4">
-          {/* Sisa Waktu Kolom */}
-          <div className="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-3.5 py-1.5 rounded-xl">
-            <span className="text-xs text-slate-400 font-medium">Waktu Kolom:</span>
-            <span className={`font-mono font-bold text-sm ${kolomTimeLeft <= 15 ? "text-rose-400 animate-pulse" : "text-emerald-400"}`}>
-              {formatTimer(kolomTimeLeft)}
-            </span>
-          </div>
-
-          {/* Indikator Pelanggaran */}
+        <div className="flex flex-wrap items-center gap-3 md:gap-4 justify-end">
+          {/* Indikator pelanggaran */}
           {tabWarning > 0 && (
-            <div className="flex items-center gap-2 bg-rose-950/60 border border-rose-800/60 px-3 py-1.5 rounded-xl">
-              <span className="text-rose-400 text-xs font-semibold">Pelanggaran:</span>
+            <div className="flex items-center gap-1.5 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg">
+              <span className="text-red-500 text-xs font-semibold">Pelanggaran:</span>
               <div className="flex gap-1">
                 {Array.from({ length: MAX_VIOLATIONS }).map((_, i) => (
                   <div
                     key={i}
-                    className={`w-2 h-2 rounded-full ${i < tabWarning ? "bg-rose-500" : "bg-slate-700"}`}
+                    className={`w-2.5 h-2.5 rounded-full ${i < tabWarning ? "bg-red-500" : "bg-gray-200"}`}
                   />
                 ))}
               </div>
+              <span className="text-red-500 text-xs font-semibold">
+                {tabWarning}/{MAX_VIOLATIONS}
+              </span>
             </div>
           )}
 
-          <div className="hidden sm:block text-xs text-slate-400 border-l border-slate-800 pl-4">
-            Peserta: <span className="font-semibold text-slate-200">{candidateName}</span>
-          </div>
+          <span className="text-sm text-gray-500">
+            Candidate ID: <span className="font-semibold text-gray-800">{candidateName}</span>
+          </span>
         </div>
       </header>
 
-      {/* Flash Banner */}
+      {/* Flash Message Banner */}
       {flashMessage && (
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white py-2.5 text-center font-bold text-sm shadow-xl animate-bounce z-40">
+        <div className="bg-blue-600 text-white py-2.5 text-center font-bold text-sm shadow-md animate-bounce">
           ⚡ {flashMessage}
         </div>
       )}
 
-      {/* Main Layout Area */}
-      <main className="flex-1 max-w-5xl w-full mx-auto p-4 md:p-8 flex flex-col md:flex-row gap-8 items-center justify-center z-10">
-        
-        {/* Stream Workspace (Central Column Stream) */}
-        <div className="w-full max-w-sm bg-slate-900/70 backdrop-blur-xl border border-slate-800/90 rounded-3xl p-6 shadow-2xl shadow-black/40 flex flex-col items-center relative select-none">
-          
-          {/* Header Title */}
-          <div className="flex items-center justify-between w-full mb-6 pb-3 border-b border-slate-800/80">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Aliran Angka Vertikal
-            </span>
-            <span className="text-xs font-mono bg-blue-950/80 border border-blue-800/60 text-blue-400 px-2.5 py-0.5 rounded-md font-semibold">
-              Terjawab: {currentAnsweredCount}
-            </span>
-          </div>
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6 items-center justify-center">
+        {/* Working Column View */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-md w-full max-w-md flex flex-col items-center">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
+            Jumlahkan 2 Angka Berdampingan (Satuan Saja)
+          </p>
 
-          {/* Glowing Vertical Line Spine Guide */}
-          <div className="absolute top-20 bottom-16 left-12 w-0.5 bg-gradient-to-b from-blue-500/10 via-blue-500/40 to-blue-500/10 pointer-events-none" />
-
-          {/* Cards & Floating Badges */}
-          <div className="w-full flex flex-col gap-3 my-1 relative">
+          <div className="w-full flex flex-col gap-3 my-2 relative">
             {centerRows.map(({ offset, idx }) => {
               if (idx < 0) {
                 return (
-                  <div key={`empty-${offset}`} className="h-16 border border-transparent" />
+                  <div key={`empty-${offset}`} className="h-14 border border-transparent" />
                 );
               }
 
@@ -432,137 +404,102 @@ export default function PauliExamView({
               const isBadgeActive = idx === posisiIndex;
 
               return (
-                <div key={idx} className="relative group">
-                  {/* Digit Card */}
+                <div key={idx} className="relative">
+                  {/* Container Angka Individual */}
                   <div
                     onClick={() => setPosisiIndex(idx)}
-                    className={`h-16 w-full rounded-2xl border transition-all duration-200 px-8 flex items-center justify-between cursor-pointer ${
+                    className={`h-14 w-full rounded-xl border px-6 flex items-center justify-between transition-all cursor-pointer select-none ${
                       isActivePair
-                        ? "bg-slate-800/90 border-blue-500/80 shadow-[0_0_20px_rgba(59,130,246,0.15)] ring-2 ring-blue-500/20 scale-[1.02]"
-                        : "bg-slate-900/60 border-slate-800/90 hover:bg-slate-800/50 hover:border-slate-700 opacity-75 hover:opacity-100"
+                        ? "bg-blue-50/90 border-blue-400 ring-2 ring-blue-500/20 scale-102 shadow-sm opacity-100"
+                        : "bg-gray-50 border-gray-200 opacity-40 hover:opacity-70"
                     }`}
                   >
-                    <span
-                      className={`text-3xl font-mono transition-colors ${
-                        isActivePair
-                          ? "text-blue-400 font-black drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]"
-                          : "text-slate-300 font-bold"
-                      }`}
-                    >
+                    <span className={`text-2xl font-mono font-bold ${isActivePair ? "text-gray-900 font-extrabold" : "text-gray-500"}`}>
                       {digitVal}
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">
-                      #{idx + 1}
                     </span>
                   </div>
 
-                  {/* Inter-Node Answer Badge (Floating between Card i & Card i+1) */}
+                  {/* Kotak Jawaban Pas di Tengah Antara 2 Container Angka */}
                   <div
                     onClick={(e) => {
                       e.stopPropagation();
                       setPosisiIndex(idx);
                     }}
-                    className={`absolute right-6 -bottom-5 z-20 w-12 h-13 rounded-xl border flex items-center justify-center font-mono text-xl font-bold cursor-pointer transition-all duration-200 shadow-lg ${
+                    className={`absolute right-6 -bottom-5 z-20 min-w-[44px] h-10 px-3 rounded-lg border flex items-center justify-center font-mono font-bold text-lg cursor-pointer transition-all ${
                       isBadgeActive
-                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 border-white text-white ring-4 ring-blue-500/30 scale-110 shadow-blue-500/40"
+                        ? "bg-blue-600 text-white border-blue-700 ring-2 ring-blue-500/30 scale-110 shadow-md opacity-100"
                         : val !== undefined
-                        ? "bg-slate-800 border-blue-500/40 text-cyan-400 shadow-md"
-                        : "bg-slate-900/90 border-slate-800 text-slate-600 hover:border-slate-700"
+                        ? "bg-blue-100 text-blue-700 border-blue-300 opacity-50 hover:opacity-90"
+                        : "bg-gray-100 text-gray-300 border-gray-200 opacity-20"
                     }`}
                   >
                     {val !== undefined ? (
                       val
                     ) : isBadgeActive ? (
-                      <span className="text-white animate-pulse font-extrabold text-2xl">?</span>
-                    ) : (
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-700" />
-                    )}
+                      <span className="animate-pulse">?</span>
+                    ) : null}
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <p className="text-xs text-slate-500 mt-6 text-center">
-            Tekan <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 rounded font-mono text-[10px]">0-9</kbd> untuk menjawab & lanjut otomatis
+          <p className="text-xs text-gray-400 mt-5 text-center">
+            Gunakan tombol panah keyboard atau keypad untuk berpindah antar soal
           </p>
         </div>
 
-        {/* Side Panel: Keypad & Quick Controls */}
-        <div className="w-full max-w-sm bg-slate-900/80 backdrop-blur-xl border border-slate-800/90 rounded-3xl p-6 shadow-2xl shadow-black/40 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-5 pb-3 border-b border-slate-800">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Keypad Input
-              </span>
-              <span className="text-[11px] text-slate-500 font-medium">
-                Papan Angka
-              </span>
-            </div>
+        {/* On-screen Keypad */}
+        <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl p-6 shadow-md">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4 text-center">
+            Keypad Angka
+          </p>
 
-            {/* Grid Keypad 3x4 */}
-            <div className="grid grid-cols-3 gap-3">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                <button
-                  key={num}
-                  onClick={() => handleDigitInput(num)}
-                  className="py-4 bg-slate-800/80 hover:bg-blue-600/20 hover:border-blue-500/50 border border-slate-700/60 rounded-2xl font-mono text-2xl font-bold text-slate-100 transition-all active:scale-95 shadow-md flex items-center justify-center hover:text-blue-400"
-                >
-                  {num}
-                </button>
-              ))}
-
-              {/* Navigation Up */}
+          <div className="grid grid-cols-3 gap-3">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
               <button
-                onClick={handleMoveUp}
-                title="Ke soal sebelumnya (Atas)"
-                className="py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl text-slate-300 flex items-center justify-center transition-all active:scale-95 shadow-md hover:text-white"
+                key={num}
+                onClick={() => handleDigitInput(num)}
+                className="py-4 bg-gray-50 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 border border-gray-200 rounded-xl font-mono text-2xl font-bold text-gray-800 transition-all active:scale-95 shadow-sm"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 19V5"/>
-                  <path d="m5 12 7-7 7 7"/>
-                </svg>
+                {num}
               </button>
+            ))}
 
-              {/* Digit 0 */}
-              <button
-                onClick={() => handleDigitInput(0)}
-                className="py-4 bg-slate-800/80 hover:bg-blue-600/20 hover:border-blue-500/50 border border-slate-700/60 rounded-2xl font-mono text-2xl font-bold text-slate-100 transition-all active:scale-95 shadow-md flex items-center justify-center hover:text-blue-400"
-              >
-                0
-              </button>
-
-              {/* Navigation Down */}
-              <button
-                onClick={handleMoveDown}
-                title="Ke soal berikutnya (Bawah)"
-                className="py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl text-slate-300 flex items-center justify-center transition-all active:scale-95 shadow-md hover:text-white"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 5v14"/>
-                  <path d="m19 12-7 7-7-7"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Keyboard Shortcuts Hint */}
-          <div className="mt-6 pt-4 border-t border-slate-800/80 flex flex-col gap-2">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>Navigasi Soal:</span>
-              <div className="flex gap-1 font-mono text-[11px]">
-                <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">↑ W</kbd>
-                <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300">↓ S</kbd>
-              </div>
-            </div>
+            {/* Row 4: Up Button (Atas) | 0 | Down Button (Bawah) */}
+            <button
+              onClick={handleMoveUp}
+              title="Ke soal sebelumnya (Atas)"
+              className="py-4 bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 rounded-xl font-bold text-xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 19V5"/>
+                <path d="m5 12 7-7 7 7"/>
+              </svg>
+            </button>
+            <button
+              onClick={() => handleDigitInput(0)}
+              className="py-4 bg-gray-50 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 border border-gray-200 rounded-xl font-mono text-2xl font-bold text-gray-800 transition-all active:scale-95 shadow-sm"
+            >
+              0
+            </button>
+            <button
+              onClick={handleMoveDown}
+              title="Ke soal berikutnya (Bawah)"
+              className="py-4 bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 rounded-xl font-bold text-xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14"/>
+                <path d="m19 12-7 7-7-7"/>
+              </svg>
+            </button>
           </div>
         </div>
-
       </main>
 
-      {/* Footer */}
-      <footer className="bg-slate-900/60 border-t border-slate-800/60 py-3 text-center text-xs text-slate-500">
-        Roemah Bimbel — Tes Pauli Digital Simulation
+      {/* Footer Info */}
+      <footer className="bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-400">
+        Roemah Bimbel — Tes Pauli
       </footer>
     </div>
   );
