@@ -395,7 +395,7 @@ export default function PauliExamView({
             {centerRows.map(({ offset, idx, dA, dB, val }) => {
               if (idx < 0) {
                 return (
-                  <div key={`empty-${offset}`} className="h-[52px] border border-transparent" />
+                  <div key={`empty-${offset}`} className="h-[66px] border border-transparent" />
                 );
               }
               const isCurrent = offset === 0;
@@ -404,24 +404,28 @@ export default function PauliExamView({
                 <div
                   key={idx}
                   onClick={() => setPosisiIndex(idx)}
-                  className={`flex items-center justify-between px-6 py-3 rounded-xl border cursor-pointer transition-all ${
+                  className={`flex items-center justify-between px-6 py-2 rounded-xl border cursor-pointer transition-all ${
                     isCurrent
-                      ? "bg-blue-50 border-blue-400 ring-2 ring-blue-500/20 scale-105 shadow-sm"
+                      ? "bg-blue-50/90 border-blue-400 ring-2 ring-blue-500/20 scale-105 shadow-md"
                       : "bg-gray-50/50 border-gray-100 opacity-60 hover:opacity-80"
                   }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <span className={`text-2xl font-bold font-mono ${isCurrent ? "text-gray-900" : "text-gray-500"}`}>
-                      {dA} + {dB}
+                  <div className="flex flex-col items-center justify-center font-mono font-bold leading-tight select-none py-0.5">
+                    <span className={`text-xl ${isCurrent ? "text-gray-900 font-black" : "text-gray-600"}`}>
+                      {dA}
+                    </span>
+                    <div className={`w-6 border-t ${isCurrent ? "border-blue-300" : "border-gray-300"} my-0.5`} />
+                    <span className={`text-xl ${isCurrent ? "text-gray-900 font-black" : "text-gray-600"}`}>
+                      {dB}
                     </span>
                   </div>
                   <div className="font-mono font-bold text-lg">
                     {val !== undefined ? (
-                      <span className={`px-3 py-1 rounded-lg ${isCurrent ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700"}`}>
+                      <span className={`px-3.5 py-1.5 rounded-lg ${isCurrent ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700"}`}>
                         {val}
                       </span>
                     ) : isCurrent ? (
-                      <span className="px-3 py-1 bg-blue-600 text-white rounded-lg animate-pulse">?</span>
+                      <span className="px-3.5 py-1.5 bg-blue-600 text-white rounded-lg animate-pulse">?</span>
                     ) : (
                       <span className="text-gray-300">...</span>
                     )}
