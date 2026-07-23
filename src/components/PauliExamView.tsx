@@ -386,56 +386,68 @@ export default function PauliExamView({
       {/* Main Content Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6 items-center justify-center">
         {/* Working Column View */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-md w-full max-w-md flex flex-col items-center">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
-            Jumlahkan 2 Angka Berdampingan (Satuan Saja)
+        <div className="bg-[#dce0df] border border-gray-300 rounded-3xl p-6 shadow-lg w-full max-w-md flex flex-col items-center select-none">
+          <p className="text-xs font-bold text-gray-600 uppercase tracking-widest mb-4">
+            Jumlahkan 2 Angka Berurutan (Satuan Saja)
           </p>
 
-          <div className="w-full flex flex-col gap-2 my-2">
-            {centerRows.map(({ offset, idx, dA, dB, val }) => {
+          <div className="w-full flex flex-col gap-3 my-2 relative">
+            {centerRows.map(({ offset, idx }) => {
               if (idx < 0) {
                 return (
-                  <div key={`empty-${offset}`} className="h-[66px] border border-transparent" />
+                  <div key={`empty-${offset}`} className="h-16 border border-transparent" />
                 );
               }
-              const isCurrent = offset === 0;
+
+              const digitVal = digitAt(seed, kolomIndex, idx, 0, 9);
+              const val = answersMap[idx];
+              const isActiveTop = idx === posisiIndex;
+              const isActiveBottom = idx === posisiIndex + 1;
+              const isActivePair = isActiveTop || isActiveBottom;
+              const isBadgeActive = idx === posisiIndex;
 
               return (
-                <div
-                  key={idx}
-                  onClick={() => setPosisiIndex(idx)}
-                  className={`flex items-center justify-between px-6 py-2 rounded-xl border cursor-pointer transition-all ${
-                    isCurrent
-                      ? "bg-blue-50/90 border-blue-400 ring-2 ring-blue-500/20 scale-105 shadow-md"
-                      : "bg-gray-50/50 border-gray-100 opacity-60 hover:opacity-80"
-                  }`}
-                >
-                  <div className="flex flex-col items-center justify-center font-mono font-bold leading-tight select-none py-0.5">
-                    <span className={`text-xl ${isCurrent ? "text-gray-900 font-black" : "text-gray-600"}`}>
-                      {dA}
-                    </span>
-                    <div className={`w-6 border-t ${isCurrent ? "border-blue-300" : "border-gray-300"} my-0.5`} />
-                    <span className={`text-xl ${isCurrent ? "text-gray-900 font-black" : "text-gray-600"}`}>
-                      {dB}
+                <div key={idx} className="relative">
+                  {/* Digit Card */}
+                  <div
+                    onClick={() => setPosisiIndex(idx)}
+                    className={`h-16 w-full rounded-2xl border-2 px-8 flex items-center justify-between transition-all cursor-pointer ${
+                      isActivePair
+                        ? "bg-[#e8ebec] border-slate-900 shadow-sm ring-2 ring-blue-500/20"
+                        : "bg-[#dfe2e2]/80 border-slate-700/70 opacity-90 hover:opacity-100"
+                    }`}
+                  >
+                    <span className={`text-3xl font-mono font-extrabold ${isActivePair ? "text-blue-700" : "text-blue-600"}`}>
+                      {digitVal}
                     </span>
                   </div>
-                  <div className="font-mono font-bold text-lg">
+
+                  {/* Floating Answer Badge bridging this card & next card */}
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPosisiIndex(idx);
+                    }}
+                    className={`absolute right-6 -bottom-5 z-20 w-13 h-14 px-3 py-1 rounded-xl border-2 flex items-center justify-center font-mono text-2xl font-bold cursor-pointer transition-all ${
+                      isBadgeActive
+                        ? "bg-white border-slate-900 ring-4 ring-blue-500/30 scale-105 shadow-lg text-blue-700"
+                        : val !== undefined
+                        ? "bg-[#e8ebec] border-slate-800 text-blue-700 shadow-sm"
+                        : "bg-[#e8ebec]/60 border-slate-600/50 text-gray-400 opacity-40"
+                    }`}
+                  >
                     {val !== undefined ? (
-                      <span className={`px-3.5 py-1.5 rounded-lg ${isCurrent ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700"}`}>
-                        {val}
-                      </span>
-                    ) : isCurrent ? (
-                      <span className="px-3.5 py-1.5 bg-blue-600 text-white rounded-lg animate-pulse">?</span>
-                    ) : (
-                      <span className="text-gray-300">...</span>
-                    )}
+                      val
+                    ) : isBadgeActive ? (
+                      <span className="text-blue-600 animate-pulse font-black">?</span>
+                    ) : null}
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <p className="text-xs text-gray-400 mt-4 text-center">
+          <p className="text-xs text-gray-600 mt-5 text-center font-medium">
             Gunakan tombol panah keyboard atau keypad untuk berpindah antar soal
           </p>
         </div>
