@@ -1175,7 +1175,7 @@ export default function AdminExamDetailPage() {
                         }`}
                     >
                       <span className="font-bold text-slate-800">{opt}.</span>{" "}
-                      {q[`option${opt}` as keyof Question] as string}
+                      <span className="whitespace-pre-wrap">{q[`option${opt}` as keyof Question] as string}</span>
                       {q.category === "TKP" && (
                         <span className="ml-1 font-bold text-blue-600">
                           ({q[`score${opt}` as keyof Question]})

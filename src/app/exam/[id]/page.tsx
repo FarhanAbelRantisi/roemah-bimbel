@@ -899,7 +899,7 @@ export default function ExamPage() {
 
           {/* Question Content */}
           <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
-            <p className="text-gray-800 text-base leading-relaxed mb-4">
+            <p className="text-gray-800 text-base leading-relaxed mb-4 whitespace-pre-wrap">
               {currentQuestion.content}
             </p>
             {currentQuestion.imageUrl && (
@@ -956,7 +956,7 @@ export default function ExamPage() {
                     }`}>
                     {opt}
                   </span>
-                  <span className={`text-sm flex-1 ${isFirst ? "text-blue-700 font-medium" :
+                  <span className={`text-sm flex-1 whitespace-pre-wrap ${isFirst ? "text-blue-700 font-medium" :
                     isSecond ? "text-blue-700 font-medium" :
                       "text-gray-700"
                     }`}>

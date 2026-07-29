@@ -541,7 +541,7 @@ export default function HistoryDetailPage() {
                         }`}>
                         {opt}
                       </span>
-                      <span className="flex-1 leading-normal">{optText}</span>
+                      <span className="flex-1 leading-normal whitespace-pre-wrap">{optText}</span>
 
                       <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                         {isTKP && (
