@@ -17,6 +17,7 @@ export async function GET() {
         email: true,
         role: true,
         isPremium: true,
+        skdTrack: true,
         createdAt: true,
         _count: { select: { attempts: true } },
       },

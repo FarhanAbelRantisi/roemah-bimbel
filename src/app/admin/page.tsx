@@ -16,7 +16,7 @@ async function getStats() {
       where: { finishedAt: { not: null } },
       orderBy: { finishedAt: "desc" }, // Tampilkan yang terbaru di atas
       include: {
-        user: { select: { name: true, email: true } },
+        user: { select: { name: true, email: true, skdTrack: true } },
         exam: { 
           select: { 
             title: true,
@@ -77,7 +77,7 @@ export default async function AdminDashboard() {
     // Skor Akademik
     akademikScore: a.akademikScore,
     finishedAt: a.finishedAt!.toISOString(),
-    user: { name: a.user.name, email: a.user.email },
+    user: { name: a.user.name, email: a.user.email, skdTrack: a.user.skdTrack },
     exam: { 
       title: a.exam.title,
       examType: a.exam.examType,

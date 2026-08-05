@@ -7,6 +7,7 @@ interface User {
   email: string;
   role: "ADMIN" | "STUDENT";
   isPremium: boolean;
+  skdTrack: "CPNS" | "KEDINASAN" | null;
   createdAt: string;
   _count: { attempts: number };
 }
@@ -121,6 +122,7 @@ export default function AdminUsersPage() {
                   <th className="text-left px-6 py-3 text-gray-500 font-medium">Email</th>
                   <th className="text-left px-6 py-3 text-gray-500 font-medium">Role</th>
                   <th className="text-left px-6 py-3 text-gray-500 font-medium">Premium</th>
+                  <th className="text-left px-6 py-3 text-gray-500 font-medium">Jalur SKD</th>
                   <th className="text-left px-6 py-3 text-gray-500 font-medium">Ujian</th>
                   <th className="text-left px-6 py-3 text-gray-500 font-medium">Bergabung</th>
                   <th className="text-left px-6 py-3 text-gray-500 font-medium">Aksi</th>
@@ -161,6 +163,19 @@ export default function AdminUsersPage() {
                           : "bg-gray-100 text-gray-400"
                       }`}>
                         {user.isPremium ? "Premium" : "Free"}
+                      </span>
+                    </td>
+
+                    {/* Jalur SKD */}
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        user.skdTrack === "CPNS"
+                          ? "bg-blue-100 text-blue-700"
+                          : user.skdTrack === "KEDINASAN"
+                          ? "bg-teal-100 text-teal-700"
+                          : "bg-gray-100 text-gray-400"
+                      }`}>
+                        {user.skdTrack ?? "Belum"}
                       </span>
                     </td>
 

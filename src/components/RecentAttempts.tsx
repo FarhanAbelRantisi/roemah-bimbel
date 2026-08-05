@@ -17,7 +17,7 @@ interface Attempt {
   kepribadianScore: number;
   akademikScore: number;
   finishedAt: string;
-  user: { name: string; email: string };
+  user: { name: string; email: string; skdTrack: "CPNS" | "KEDINASAN" | null };
   exam: {
     title: string;
     examType: ExamType;
@@ -67,6 +67,7 @@ const IconExamList = () => <svg width="20" height="20" viewBox="0 0 24 24" fill=
 export default function RecentAttempts({ attempts }: { attempts: Attempt[] }) {
   const [selectedExam, setSelectedExam] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [skdFilter, setSkdFilter] = useState<"ALL" | "CPNS" | "KEDINASAN">("ALL");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [exportingExam, setExportingExam] = useState<string | null>(null);
   const [viewPauliId, setViewPauliId] = useState<string | null>(null);
@@ -81,8 +82,9 @@ export default function RecentAttempts({ attempts }: { attempts: Attempt[] }) {
   const filteredAttempts = selectedGroup
     ? selectedGroup.attempts.filter(
         (a) =>
-          a.user.name.toLowerCase().includes(search.toLowerCase()) ||
-          a.user.email.toLowerCase().includes(search.toLowerCase())
+          (a.user.name.toLowerCase().includes(search.toLowerCase()) ||
+            a.user.email.toLowerCase().includes(search.toLowerCase())) &&
+          (!isSkdGroup || skdFilter === "ALL" || a.user.skdTrack === skdFilter)
       )
     : [];
 
@@ -217,29 +219,59 @@ export default function RecentAttempts({ attempts }: { attempts: Attempt[] }) {
         </h2>
       </div>
 
-      {/* Search + Export */}
-      <div className="flex items-center gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Cari nama / email..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={() => handleExport(selectedExam)}
-          disabled={exportingExam === selectedExam}
-          className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors shrink-0"
-        >
-          {exportingExam === selectedExam ? (
-            <span>Mengekspor...</span>
-          ) : (
-            <>
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-              <span>Export Excel</span>
-            </>
-          )}
-        </button>
+      {/* Search + Export + SKD Filter */}
+      <div className="flex flex-col gap-2 mb-4">
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Cari nama / email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={() => handleExport(selectedExam)}
+            disabled={exportingExam === selectedExam}
+            className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors shrink-0"
+          >
+            {exportingExam === selectedExam ? (
+              <span>Mengekspor...</span>
+            ) : (
+              <>
+                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span>Export Excel</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Filter CPNS / Kedinasan — hanya tampil untuk grup SKD */}
+        {isSkdGroup && (
+          <div className="flex gap-2">
+            {(["ALL", "CPNS", "KEDINASAN"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setSkdFilter(f)}
+                className={`text-xs px-3 py-1.5 rounded-lg font-semibold border transition-colors ${
+                  skdFilter === f
+                    ? f === "ALL"
+                      ? "bg-gray-800 text-white border-gray-800"
+                      : f === "CPNS"
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-teal-600 text-white border-teal-600"
+                    : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                {f === "ALL" ? "Semua" : f}
+                <span className="ml-1.5 opacity-70 font-normal">
+                  ({f === "ALL"
+                    ? selectedGroup!.attempts.length
+                    : selectedGroup!.attempts.filter((a) => a.user.skdTrack === f).length})
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Stats bar */}
@@ -319,9 +351,23 @@ export default function RecentAttempts({ attempts }: { attempts: Attempt[] }) {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
-                      {attempt.user.name}
-                    </p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {attempt.user.name}
+                      </p>
+                      {/* Badge CPNS / Kedinasan */}
+                      {isSkdGroup && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                          attempt.user.skdTrack === "CPNS"
+                            ? "bg-blue-100 text-blue-700"
+                            : attempt.user.skdTrack === "KEDINASAN"
+                            ? "bg-teal-100 text-teal-700"
+                            : "bg-gray-100 text-gray-400"
+                        }`}>
+                          {attempt.user.skdTrack ?? "Belum Dipilih"}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-400 truncate">
                       {attempt.user.email}
                     </p>

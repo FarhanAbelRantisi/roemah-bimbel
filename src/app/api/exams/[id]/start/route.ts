@@ -23,7 +23,7 @@ export async function POST(
     // Ambil data exam
     const exam = await prisma.exam.findUnique({
       where: { id },
-      select: { isPremium: true, isPublished: true },
+      select: { isPremium: true, isPublished: true, examType: true },
     });
 
     if (!exam) {
@@ -34,19 +34,17 @@ export async function POST(
       return NextResponse.json({ error: "Ujian belum tersedia" }, { status: 403 });
     }
 
-    // Cek akses premium
-    if (exam.isPremium) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { isPremium: true },
-      });
+    // Cek akses premium + ambil skdTrack user
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { isPremium: true, skdTrack: true },
+    });
 
-      if (!user?.isPremium) {
-        return NextResponse.json(
-          { error: "PREMIUM_REQUIRED" },
-          { status: 403 }
-        );
-      }
+    if (exam.isPremium && !user?.isPremium) {
+      return NextResponse.json(
+        { error: "PREMIUM_REQUIRED" },
+        { status: 403 }
+      );
     }
 
     // Cek attempt yang sudah selesai
@@ -75,7 +73,11 @@ export async function POST(
     });
 
     if (existing) {
-      return NextResponse.json({ attemptId: existing.id });
+      return NextResponse.json({
+        attemptId: existing.id,
+        userSkdTrack: user?.skdTrack ?? null,
+        examType: exam.examType,
+      });
     }
 
     // Ambil semua soal
@@ -97,7 +99,11 @@ export async function POST(
       },
     });
 
-    return NextResponse.json({ attemptId: attempt.id });
+    return NextResponse.json({
+      attemptId: attempt.id,
+      userSkdTrack: user?.skdTrack ?? null,
+      examType: exam.examType,
+    });
   } catch (error) {
     console.error("Start exam error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

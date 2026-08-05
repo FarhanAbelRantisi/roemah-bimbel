@@ -32,6 +32,7 @@ export async function PATCH(
         email: true,
         role: true,
         isPremium: true,
+        skdTrack: true,
       },
     });
 

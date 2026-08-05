@@ -25,6 +25,11 @@ enum ExamType {
   PSIKOTEST_TNI
 }
 
+enum SkdTrack {
+  CPNS
+  KEDINASAN
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -36,6 +41,8 @@ model User {
   
   failedLoginAttempts Int       @default(0)
   lockedUntil         DateTime?
+  
+  skdTrack  SkdTrack?  // null = belum dipilih, muncul popup saat mulai ujian SKD
 
   attempts  ExamAttempt[]
 }

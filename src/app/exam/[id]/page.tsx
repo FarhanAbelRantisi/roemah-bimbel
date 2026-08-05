@@ -85,6 +85,8 @@ export default function ExamPage() {
   const violationCooldownRef = useRef(false);
   const [examType, setExamType] = useState<ExamType>("SKD");
   const [selected2Map, setSelected2Map] = useState<Record<string, string | null>>({});
+  const [showSkdTrackModal, setShowSkdTrackModal] = useState(false);
+  const [savingTrack, setSavingTrack] = useState(false);
 
   const shuffledAnswersRef = useRef<Answer[]>([]);
   const selected2MapRef = useRef<Record<string, string | null>>({});
@@ -139,6 +141,22 @@ export default function ExamPage() {
       executeFinish();
     }
   }, [attemptId, openFinishModal, executeFinish]);
+
+  const saveSkdTrack = useCallback(async (track: "CPNS" | "KEDINASAN") => {
+    setSavingTrack(true);
+    try {
+      await fetch("/api/users/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ skdTrack: track }),
+      });
+    } catch {
+      // Tidak memblokir ujian bila gagal — popup akan muncul lagi di next attempt SKD
+    } finally {
+      setSavingTrack(false);
+      setShowSkdTrackModal(false);
+    }
+  }, []);
 
   const triggerScreenshotViolation = useCallback(() => {
     navigator.clipboard?.writeText("").catch(() => { });
@@ -247,6 +265,11 @@ export default function ExamPage() {
           if (data.error === "PREMIUM_REQUIRED") router.push(`/catalog?premium=true`);
           else { alert(data.error); router.push("/catalog"); }
           return;
+        }
+
+        // Cek apakah perlu tampilkan popup CPNS/Kedinasan
+        if (data.examType === "SKD" && data.userSkdTrack === null) {
+          setShowSkdTrackModal(true);
         }
 
         const attemptRes = await fetch(`/api/attempts/${data.attemptId}`);
@@ -691,6 +714,59 @@ export default function ExamPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 exam-active" style={{ position: "relative" }}>
+
+      {/* ===== POPUP PILIH JALUR SKD (one-time) ===== */}
+      {showSkdTrackModal && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-[9999] px-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-gray-100 text-center animate-fade-in">
+            {/* Icon */}
+            <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-5 border border-blue-100">
+              <svg className="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Pilih Jalur Seleksi SKD</h2>
+            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+              Informasi ini digunakan untuk perangkingan peserta SKD. Hanya ditanyakan sekali dan tersimpan ke akun Anda.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                id="btn-track-cpns"
+                onClick={() => saveSkdTrack("CPNS")}
+                disabled={savingTrack}
+                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition-all group disabled:opacity-60"
+              >
+                <span className="text-3xl">🏛️</span>
+                <div className="text-left flex-1">
+                  <p className="text-sm font-bold text-blue-800 group-hover:text-blue-900">CPNS</p>
+                  <p className="text-xs text-blue-600 mt-0.5">Calon Pegawai Negeri Sipil</p>
+                </div>
+                <svg className="w-5 h-5 text-blue-400 group-hover:text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </button>
+
+              <button
+                id="btn-track-kedinasan"
+                onClick={() => saveSkdTrack("KEDINASAN")}
+                disabled={savingTrack}
+                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 border-teal-200 bg-teal-50 hover:bg-teal-100 hover:border-teal-400 transition-all group disabled:opacity-60"
+              >
+                <span className="text-3xl">🎓</span>
+                <div className="text-left flex-1">
+                  <p className="text-sm font-bold text-teal-800 group-hover:text-teal-900">Kedinasan</p>
+                  <p className="text-xs text-teal-600 mt-0.5">Sekolah Kedinasan / Ikatan Dinas</p>
+                </div>
+                <svg className="w-5 h-5 text-teal-400 group-hover:text-teal-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+
+            {savingTrack && (
+              <p className="text-xs text-gray-400 mt-4">Menyimpan pilihan...</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ===== BLUR OVERLAY SAAT WINDOW TIDAK FOKUS ===== */}
       {isBlurred && (
