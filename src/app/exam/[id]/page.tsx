@@ -87,6 +87,7 @@ export default function ExamPage() {
   const [selected2Map, setSelected2Map] = useState<Record<string, string | null>>({});
   const [showSkdTrackModal, setShowSkdTrackModal] = useState(false);
   const [savingTrack, setSavingTrack] = useState(false);
+  const [currentSkdTrack, setCurrentSkdTrack] = useState<"CPNS" | "KEDINASAN" | null>(null);
 
   const shuffledAnswersRef = useRef<Answer[]>([]);
   const selected2MapRef = useRef<Record<string, string | null>>({});
@@ -267,8 +268,9 @@ export default function ExamPage() {
           return;
         }
 
-        // Cek apakah perlu tampilkan popup CPNS/Kedinasan
-        if (data.examType === "SKD" && data.userSkdTrack === null) {
+        // Tampilkan popup CPNS/Kedinasan untuk setiap ujian SKD
+        if (data.examType === "SKD") {
+          setCurrentSkdTrack(data.userSkdTrack ?? null);
           setShowSkdTrackModal(true);
         }
 
@@ -728,36 +730,57 @@ export default function ExamPage() {
 
             <h2 className="text-xl font-bold text-gray-900 mb-2">Pilih Jalur Seleksi SKD</h2>
             <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-              Informasi ini digunakan untuk perangkingan peserta SKD. Hanya ditanyakan sekali dan tersimpan ke akun Anda.
+              Pilihan ini digunakan untuk perangkingan peserta SKD.
+              {currentSkdTrack && (
+                <span className="block mt-1 font-semibold text-gray-700">
+                  Jalur saat ini: {currentSkdTrack}
+                </span>
+              )}
             </p>
 
             <div className="flex flex-col gap-3">
-              <button
+                <button
                 id="btn-track-cpns"
                 onClick={() => saveSkdTrack("CPNS")}
                 disabled={savingTrack}
-                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition-all group disabled:opacity-60"
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 transition-all group disabled:opacity-60 ${
+                  currentSkdTrack === "CPNS"
+                    ? "border-blue-500 bg-blue-100 ring-2 ring-blue-300"
+                    : "border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-400"
+                }`}
               >
                 <span className="text-3xl">🏛️</span>
                 <div className="text-left flex-1">
                   <p className="text-sm font-bold text-blue-800 group-hover:text-blue-900">CPNS</p>
                   <p className="text-xs text-blue-600 mt-0.5">Calon Pegawai Negeri Sipil</p>
                 </div>
-                <svg className="w-5 h-5 text-blue-400 group-hover:text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+                {currentSkdTrack === "CPNS" ? (
+                  <svg className="w-5 h-5 text-blue-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                ) : (
+                  <svg className="w-5 h-5 text-blue-400 group-hover:text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+                )}
               </button>
 
-              <button
+                <button
                 id="btn-track-kedinasan"
                 onClick={() => saveSkdTrack("KEDINASAN")}
                 disabled={savingTrack}
-                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 border-teal-200 bg-teal-50 hover:bg-teal-100 hover:border-teal-400 transition-all group disabled:opacity-60"
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 transition-all group disabled:opacity-60 ${
+                  currentSkdTrack === "KEDINASAN"
+                    ? "border-teal-500 bg-teal-100 ring-2 ring-teal-300"
+                    : "border-teal-200 bg-teal-50 hover:bg-teal-100 hover:border-teal-400"
+                }`}
               >
                 <span className="text-3xl">🎓</span>
                 <div className="text-left flex-1">
                   <p className="text-sm font-bold text-teal-800 group-hover:text-teal-900">Kedinasan</p>
                   <p className="text-xs text-teal-600 mt-0.5">Sekolah Kedinasan / Ikatan Dinas</p>
                 </div>
-                <svg className="w-5 h-5 text-teal-400 group-hover:text-teal-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+                {currentSkdTrack === "KEDINASAN" ? (
+                  <svg className="w-5 h-5 text-teal-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                ) : (
+                  <svg className="w-5 h-5 text-teal-400 group-hover:text-teal-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+                )}
               </button>
             </div>
 
